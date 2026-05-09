@@ -1,0 +1,9 @@
+.git
+.gitignore
+.github
+node_modules
+vendor
+docker-compose.override.yml
+tools/ffmpeg
+tools/ffmpeg-release-essentials.zip
+desktop.ini

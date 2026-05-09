@@ -1,0 +1,11 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: matthias-genster-planer-web
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www/html
+    restart: unless-stopped
