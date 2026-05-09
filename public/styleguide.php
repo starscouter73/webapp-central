@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
 
-render_page('Styleguide', 'Designsystem', static function (): void {
+render_page('Design', 'Gestaltung', static function (): void {
     ?>
     <section class="card">
       <span class="card-label">Farben</span>
@@ -19,14 +19,14 @@ render_page('Styleguide', 'Designsystem', static function (): void {
       <article class="card">
         <span class="card-label">Buttons</span>
         <div class="button-row">
-          <a class="btn btn-primary" href="<?= app_h(app_url('index.php')) ?>">Primary</a>
-          <a class="btn btn-secondary" href="<?= app_h(app_url('workspace.php')) ?>">Secondary</a>
+          <a class="btn btn-primary" href="<?= app_h(app_url('index.php')) ?>">Start</a>
+          <a class="btn btn-secondary" href="<?= app_h(app_url('workspace.php')) ?>">Zentrale</a>
         </div>
       </article>
       <article class="card">
         <span class="card-label">Typografie</span>
-        <h3>Ueberschrift fuer neue Module</h3>
-        <p>Nutze diese Seite als visuelle Werkbank, bevor du konkrete Produktseiten aufsetzt.</p>
+        <h3>Webapp Zentrale als ruhige Webmarke</h3>
+        <p>Diese Seite dient als kleine visuelle Werkbank, bevor wir die eigentlichen Inhaltsseiten und Module gestalten.</p>
       </article>
     </section>
     <?php

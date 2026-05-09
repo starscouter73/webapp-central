@@ -13,16 +13,16 @@ if (!function_exists('render_page')) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= app_h($title) ?> | Clean Workspace</title>
+  <title><?= app_h($title) ?> | Webapp Zentrale</title>
   <link rel="stylesheet" href="<?= app_h(app_url('assets/app.css')) ?>">
 </head>
 <body>
   <div class="page-shell">
     <header class="site-header">
       <div class="brand-block">
-        <span class="brand-kicker">Neustart</span>
-        <h1>Clean Workspace</h1>
-        <p>Saubere lokale Basis fuer neue Seiten, neue Struktur und neue Gestaltung.</p>
+        <span class="brand-kicker">Zentrale Arbeitsflaeche</span>
+        <h1>Webapp Zentrale</h1>
+        <p>Lokale Webbasis fuer neue Seiten, klare Strukturen und einen ruhigen redaktionellen Auftritt.</p>
       </div>
       <nav class="site-nav" aria-label="Hauptnavigation">
         <?php foreach (app_pages() as $page): ?>

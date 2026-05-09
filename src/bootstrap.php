@@ -39,8 +39,8 @@ if (!function_exists('app_pages')) {
     {
         return [
             ['file' => 'index.php', 'label' => 'Start'],
-            ['file' => 'workspace.php', 'label' => 'Workspace'],
-            ['file' => 'styleguide.php', 'label' => 'Styleguide'],
+            ['file' => 'workspace.php', 'label' => 'Zentrale'],
+            ['file' => 'styleguide.php', 'label' => 'Design'],
         ];
     }
 }

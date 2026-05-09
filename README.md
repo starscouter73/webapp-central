@@ -1,6 +1,6 @@
-# Clean Workspace
+# Webapp Zentrale
 
-Sauberer Neustart fuer eine lokal gestaltbare PHP-Seite mit Docker-, Git- und GitHub-Basis.
+Sauberer Neustart fuer eine lokal gestaltbare PHP-Seite mit Docker-, Git- und GitHub-Basis unter einer neutraleren Arbeitsmarke.
 
 ## Struktur
 
@@ -31,4 +31,4 @@ Stoppen:
 
 ## Ziel
 
-Dieses Repo ist absichtlich leer und sauber genug, damit die Gestaltung jetzt direkt lokal weiterentwickelt werden kann, ohne Altcode des alten Planers.
+Dieses Repo ist absichtlich reduziert und sauber genug, damit die Gestaltung jetzt direkt lokal weiterentwickelt werden kann, ohne Altcode des alten Planers und ohne die alte Matthias-Marke in der Oberflaeche.

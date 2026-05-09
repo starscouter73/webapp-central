@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: clean-workspace-web
+    container_name: webapp-zentrale
     ports:
       - "8000:80"
     volumes:
