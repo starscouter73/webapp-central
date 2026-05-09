@@ -1,0 +1,107 @@
+:root {
+  --bg: #f4f1e8;
+  --panel: #fffaf0;
+  --line: #d7c7a6;
+  --ink: #23211d;
+  --muted: #6b665d;
+  --accent: #0f766e;
+  --accent-soft: #d8f1ed;
+  --shadow: 0 18px 48px rgba(35, 33, 29, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 24rem),
+    linear-gradient(180deg, #fbf8f2 0%, var(--bg) 100%);
+}
+
+.layout {
+  width: min(1100px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.hero,
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.hero {
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.hero h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1;
+}
+
+.hero p,
+.panel p,
+.panel li {
+  color: var(--muted);
+}
+
+.meta {
+  display: inline-flex;
+  margin-top: 1rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.panel {
+  padding: 1.25rem;
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+.nav-list,
+.roadmap-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-list li,
+.roadmap-list li {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(215, 199, 166, 0.6);
+}
+
+.nav-list li:last-child,
+.roadmap-list li:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 700px) {
+  .layout {
+    width: min(100% - 1rem, 1000px);
+  }
+
+  .hero,
+  .panel {
+    border-radius: 16px;
+  }
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webapp-zentrale</title>
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <section class="hero">
+        <h1>webapp-zentrale</h1>
+        <p>
+          Neue Hauptstruktur fuer Projekte, Webapps, Tools, Dokumentationen,
+          Aufgaben und technische Uebersichten.
+        </p>
+        <div class="meta">V1: Struktur vor Logik</div>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <h2>Navigation</h2>
+          <p>Die Kategorien fuer die Projektzentrale werden aus JSON geladen.</p>
+          <ul class="nav-list" data-nav-list></ul>
+        </article>
+
+        <article class="panel">
+          <h2>Roadmap</h2>
+          <ul class="roadmap-list">
+            <li>V1: Workspace-Struktur</li>
+            <li>V2: Dashboard-System</li>
+            <li>V3: JSON-Datenmodelle</li>
+            <li>V4: Projektverwaltung</li>
+            <li>V5: Suche und Filter</li>
+            <li>V6: Docker-Integration</li>
+            <li>V7: Netlify- und Cloud-Sync</li>
+            <li>V8: automatische Projektverwaltung</li>
+          </ul>
+        </article>
+
+        <article class="panel">
+          <h2>Leitlinien</h2>
+          <p>
+            Keine Datenbank in V1, keine unnötige Komplexitaet und klare
+            Trennung zwischen Inhalten, Daten und Modulen.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <script src="./assets/js/app.js"></script>
+  </body>
+ </html>

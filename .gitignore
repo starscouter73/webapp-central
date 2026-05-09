@@ -1,0 +1,29 @@
+# OS
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+
+# Archives and backups
+*.zip
+*.tar
+*.gz
+*.7z
+
+# Local environment
+.env
+.env.local
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Build output
+dist/
+build/

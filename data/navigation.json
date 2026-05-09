@@ -1,0 +1,20 @@
+{
+  "project": "webapp-zentrale",
+  "version": "v1",
+  "sections": [
+    "Dashboard",
+    "Projekte",
+    "Webapps",
+    "Docker-Projekte",
+    "Netlify-Projekte",
+    "Dokumentationen",
+    "Dev-Tools",
+    "Uploads",
+    "Analysen",
+    "Prompt-Sammlungen",
+    "Links und Referenzen",
+    "Aufgaben und Roadmaps",
+    "Backups und Archive",
+    "Systemstatus"
+  ]
+}
