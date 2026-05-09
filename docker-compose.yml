@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: matthias-genster-planer-web
+    container_name: clean-workspace-web
     ports:
       - "8000:80"
     volumes:
