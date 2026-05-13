@@ -331,7 +331,12 @@ a {
 .calendar-week-summary,
 .calendar-event-focus,
 .event-focus-heading,
-.event-focus-meta {
+.event-focus-meta,
+.calendar-overview-toolbar,
+.calendar-overview-list,
+.calendar-overview-metrics,
+.overview-item,
+.overview-item-heading {
   display: grid;
   gap: 12px;
 }
@@ -350,6 +355,16 @@ a {
   grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
   gap: 18px;
   align-items: start;
+}
+
+.calendar-overview-toolbar {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.calendar-overview-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 18px;
 }
 
 .calendar-subpanel {
@@ -555,6 +570,30 @@ a {
   background: rgba(255, 255, 255, 0.72);
 }
 
+.calendar-overview-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.overview-item {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.overview-item p,
+.overview-item-heading {
+  margin: 0;
+}
+
+.overview-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(47, 108, 98, 0.35);
+  background: rgba(47, 108, 98, 0.08);
+}
+
 .event-focus-heading h4,
 .event-focus-note {
   margin: 0;
@@ -621,7 +660,10 @@ a {
 
   .calendar-toolbar,
   .calendar-form-row,
-  .calendar-detail-layout {
+  .calendar-detail-layout,
+  .calendar-overview-toolbar,
+  .calendar-overview-metrics,
+  .calendar-overview-list {
     grid-template-columns: 1fr;
   }
 

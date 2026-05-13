@@ -103,6 +103,24 @@ render_page('Kalender', 'Termine', static function (): void {
           </article>
         </div>
       </article>
+
+      <article class="card calendar-overview-panel">
+        <div class="calendar-overview-toolbar">
+          <div>
+            <span class="card-label">Uebersicht</span>
+            <h3 id="overview-title">Anstehende Termine</h3>
+            <p id="overview-summary">Die naechsten Termine werden geladen.</p>
+          </div>
+          <div class="button-row">
+            <button class="btn btn-secondary" id="overview-print" type="button">Uebersicht drucken</button>
+            <button class="btn btn-ghost" id="day-print" type="button">Tag drucken</button>
+          </div>
+        </div>
+        <div class="calendar-overview-metrics" id="overview-metrics"></div>
+        <div class="calendar-overview-list" id="overview-list">
+          <p class="empty-state">Noch keine Termine vorhanden.</p>
+        </div>
+      </article>
     </section>
 
     <script>
@@ -125,6 +143,10 @@ render_page('Kalender', 'Termine', static function (): void {
         var selectedLabel = document.getElementById('selected-date-label');
         var selectedEvents = document.getElementById('selected-events');
         var selectedEventFocus = document.getElementById('selected-event-focus');
+        var overviewTitle = document.getElementById('overview-title');
+        var overviewSummary = document.getElementById('overview-summary');
+        var overviewMetrics = document.getElementById('overview-metrics');
+        var overviewList = document.getElementById('overview-list');
         var formLabel = document.getElementById('event-form-label');
         var formTitle = document.getElementById('event-form-title');
         var editIdInput = document.getElementById('event-edit-id');
@@ -192,6 +214,12 @@ render_page('Kalender', 'Termine', static function (): void {
         document.getElementById('voice-start').addEventListener('click', function () {
           startVoiceCapture();
         });
+        document.getElementById('overview-print').addEventListener('click', function () {
+          printAgendaOverview('all');
+        });
+        document.getElementById('day-print').addEventListener('click', function () {
+          printAgendaOverview('day');
+        });
 
         monthViewButton.addEventListener('click', function () {
           setActiveView('month');
@@ -204,6 +232,7 @@ render_page('Kalender', 'Termine', static function (): void {
         dateInput.value = selectedDate;
         renderCalendar();
         renderSelectedDay();
+        renderOverview();
 
         function loadEvents() {
           try {
@@ -451,6 +480,7 @@ render_page('Kalender', 'Termine', static function (): void {
           }
           renderCalendar();
           renderSelectedDay();
+          renderOverview();
           status.textContent = 'Termin geloescht.';
         }
 
@@ -498,6 +528,7 @@ render_page('Kalender', 'Termine', static function (): void {
           selectedEventId = payload.id;
           clearEditMode('');
           transcript.hidden = true;
+          renderOverview();
         }
 
         function loadEventIntoForm(eventItem) {
@@ -622,6 +653,91 @@ render_page('Kalender', 'Termine', static function (): void {
           selectedEventFocus.appendChild(note);
         }
 
+        function renderOverview() {
+          var sortedEvents = getSortedEvents(events);
+          var upcomingEvents = sortedEvents.filter(function (eventItem) {
+            return buildEventTimestamp(eventItem) >= startOfDayTimestamp(new Date());
+          });
+          var displayEvents = upcomingEvents.length ? upcomingEvents : sortedEvents;
+
+          overviewTitle.textContent = upcomingEvents.length ? 'Anstehende Termine' : 'Alle Termine';
+          overviewSummary.textContent = displayEvents.length
+            ? displayEvents.length + ' Termin' + (displayEvents.length === 1 ? '' : 'e') + ' in der Uebersicht.'
+            : 'Noch keine Termine vorhanden.';
+
+          renderOverviewMetrics(sortedEvents, upcomingEvents);
+          renderOverviewList(displayEvents);
+        }
+
+        function renderOverviewMetrics(sortedEvents, upcomingEvents) {
+          var nextEvent = upcomingEvents.length ? upcomingEvents[0] : null;
+          var cards = [
+            {
+              label: 'Gesamt',
+              value: String(sortedEvents.length)
+            },
+            {
+              label: 'Anstehend',
+              value: String(upcomingEvents.length)
+            },
+            {
+              label: 'Naechster Termin',
+              value: nextEvent ? formatEventStamp(nextEvent) : 'Keiner'
+            }
+          ];
+
+          overviewMetrics.innerHTML = '';
+
+          cards.forEach(function (card) {
+            var item = document.createElement('article');
+            var strong = document.createElement('strong');
+            var span = document.createElement('span');
+
+            item.className = 'metric-tile';
+            strong.textContent = card.value;
+            span.textContent = card.label;
+            item.appendChild(strong);
+            item.appendChild(span);
+            overviewMetrics.appendChild(item);
+          });
+        }
+
+        function renderOverviewList(displayEvents) {
+          overviewList.innerHTML = '';
+
+          if (!displayEvents.length) {
+            overviewList.innerHTML = '<p class="empty-state">Noch keine Termine vorhanden.</p>';
+            return;
+          }
+
+          displayEvents.slice(0, 24).forEach(function (eventItem) {
+            var article = document.createElement('article');
+            var heading = document.createElement('div');
+            var title = document.createElement('strong');
+            var meta = document.createElement('span');
+            var note = document.createElement('p');
+
+            article.className = 'overview-item';
+            heading.className = 'overview-item-heading';
+            title.textContent = eventItem.title;
+            meta.className = 'agenda-meta';
+            meta.textContent = formatEventStamp(eventItem);
+            note.textContent = eventItem.address || eventItem.note || 'Ohne weitere Details';
+
+            article.addEventListener('click', function () {
+              selectDate(eventItem.date);
+              selectedEventId = eventItem.id;
+              renderSelectedDay();
+            });
+
+            heading.appendChild(title);
+            heading.appendChild(meta);
+            article.appendChild(heading);
+            article.appendChild(note);
+            overviewList.appendChild(article);
+          });
+        }
+
         function setActiveView(nextView) {
           activeView = nextView === 'week' ? 'week' : 'month';
           renderCalendar();
@@ -648,6 +764,26 @@ render_page('Kalender', 'Termine', static function (): void {
           return dates;
         }
 
+        function getSortedEvents(collection) {
+          return collection.slice().sort(function (left, right) {
+            return buildEventTimestamp(left) - buildEventTimestamp(right);
+          });
+        }
+
+        function buildEventTimestamp(eventItem) {
+          var timeValue = eventItem.time || '23:59';
+          return new Date(eventItem.date + 'T' + timeValue + ':00').getTime();
+        }
+
+        function startOfDayTimestamp(date) {
+          return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+        }
+
+        function formatEventStamp(eventItem) {
+          var date = new Date(eventItem.date + 'T12:00:00');
+          return pad(date.getDate()) + '.' + pad(date.getMonth() + 1) + '.' + date.getFullYear() + ' | ' + (eventItem.time || 'Ohne Uhrzeit');
+        }
+
         function buildWeekLabel(weekDates) {
           var start = new Date(weekDates[0] + 'T12:00:00');
           var end = new Date(weekDates[6] + 'T12:00:00');
@@ -663,6 +799,55 @@ render_page('Kalender', 'Termine', static function (): void {
           var shifted = new Date(isoDate + 'T12:00:00');
           shifted.setDate(shifted.getDate() + days);
           return toIsoDate(shifted);
+        }
+
+        function printAgendaOverview(mode) {
+          var printableEvents = mode === 'day'
+            ? getEventsForDate(selectedDate).slice().sort(compareEvents)
+            : getSortedEvents(events);
+          var title = mode === 'day' ? 'Tagesansicht ' + selectedLabel.textContent : 'Terminuebersicht';
+          var summary = mode === 'day'
+            ? 'Ausdruck fuer den ausgewaehlten Tag.'
+            : 'Gesamte Terminliste aus Webapp Central.';
+          var popup = window.open('', '_blank', 'width=980,height=720');
+
+          if (!popup) {
+            status.textContent = 'Druckansicht konnte nicht geoeffnet werden. Bitte Popups erlauben.';
+            return;
+          }
+
+          popup.document.open();
+          popup.document.write(buildPrintDocument(title, summary, printableEvents));
+          popup.document.close();
+          popup.focus();
+          popup.print();
+        }
+
+        function buildPrintDocument(title, summary, printableEvents) {
+          var items = printableEvents.length ? printableEvents.map(function (eventItem) {
+            return '<article class="print-item">'
+              + '<h2>' + escapeHtml(eventItem.title) + '</h2>'
+              + '<p class="print-meta">' + escapeHtml(formatEventStamp(eventItem)) + '</p>'
+              + (eventItem.address ? '<p><strong>Adresse:</strong> ' + escapeHtml(eventItem.address) + '</p>' : '')
+              + '<p>' + escapeHtml(eventItem.note || 'Keine Notiz hinterlegt.') + '</p>'
+              + '</article>';
+          }).join('') : '<p>Keine Termine vorhanden.</p>';
+
+          return '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>' + escapeHtml(title) + '</title>'
+            + '<style>'
+            + 'body{font-family:Georgia,serif;margin:32px;color:#172126;}'
+            + 'h1{margin:0 0 8px;font-size:28px;}'
+            + '.print-summary{margin:0 0 24px;color:#5b676d;}'
+            + '.print-item{padding:16px 0;border-top:1px solid #d9d3ca;}'
+            + '.print-item:first-of-type{border-top:0;padding-top:0;}'
+            + '.print-item h2{margin:0 0 6px;font-size:20px;}'
+            + '.print-item p{margin:6px 0;}'
+            + '.print-meta{color:#5b676d;font-size:14px;}'
+            + '</style></head><body>'
+            + '<h1>' + escapeHtml(title) + '</h1>'
+            + '<p class="print-summary">' + escapeHtml(summary) + '</p>'
+            + items
+            + '</body></html>';
         }
 
         function buildMapUrl(addressValue) {
