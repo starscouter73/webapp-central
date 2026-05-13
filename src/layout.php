@@ -7,22 +7,23 @@ if (!function_exists('render_page')) {
     function render_page(string $title, string $eyebrow, callable $content): void
     {
         $currentPage = app_current_page();
+        $currentMeta = app_current_page_meta();
         ?>
 <!doctype html>
 <html lang="de">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= app_h($title) ?> | Webapp Zentrale</title>
+  <title><?= app_h($title) ?> | <?= app_h(app_site_title()) ?></title>
   <link rel="stylesheet" href="<?= app_h(app_url('assets/app.css')) ?>">
 </head>
 <body>
   <div class="page-shell">
     <header class="site-header">
       <div class="brand-block">
-        <span class="brand-kicker">Zentrale Arbeitsflaeche</span>
-        <h1>Webapp Zentrale</h1>
-        <p>Lokale Webbasis fuer neue Seiten, klare Strukturen und einen ruhigen redaktionellen Auftritt.</p>
+        <span class="brand-kicker"><?= app_h(app_site_name()) ?></span>
+        <h1><?= app_h(app_site_title()) ?></h1>
+        <p><?= app_h(app_tagline()) ?></p>
       </div>
       <nav class="site-nav" aria-label="Hauptnavigation">
         <?php foreach (app_pages() as $page): ?>
@@ -37,10 +38,26 @@ if (!function_exists('render_page')) {
       <section class="hero-panel">
         <span class="eyebrow"><?= app_h($eyebrow) ?></span>
         <h2><?= app_h($title) ?></h2>
+        <p class="hero-copy"><?= app_h((string)($currentMeta['description'] ?? '')) ?></p>
       </section>
 
       <?php $content(); ?>
     </main>
+
+    <footer class="site-footer">
+      <div class="footer-brand">
+        <span class="footer-mark">C</span>
+        <div class="footer-copy">
+          <strong><?= app_h(app_copyright_line()) ?></strong>
+          <p><?= app_h(app_site_title()) ?> fuer Medien, Struktur und zentrale Arbeitsablaeufe.</p>
+        </div>
+      </div>
+      <nav class="footer-nav" aria-label="Footer">
+        <?php foreach (app_footer_links() as $link): ?>
+          <a href="<?= app_h(app_url($link['file'])) ?>"><?= app_h($link['label']) ?></a>
+        <?php endforeach; ?>
+      </nav>
+    </footer>
   </div>
   <?php if (app_is_local()): ?>
     <script>
