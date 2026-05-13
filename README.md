@@ -19,6 +19,15 @@ docker/      Apache- und PHP-Konfiguration
 .github/     GitHub Actions
 ```
 
+## 🔀 Arbeitsquelle
+
+Dieses Repository auf GitHub ist die fuehrende Projektquelle.
+
+- lokal entwickeln und testen
+- Aenderungen per Git committen
+- GitHub fuer Historie, Review und Synchronisation verwenden
+- externe Beispiel-Repositories sind keine Arbeitsgrundlage fuer dieses Projekt
+
 ## 🚀 Lokaler Start
 
 Optional zuerst `.env.example` nach `.env` kopieren und bei Bedarf Port oder Branding anpassen.
