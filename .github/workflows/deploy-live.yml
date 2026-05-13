@@ -27,13 +27,13 @@ jobs:
             set -e
             mkdir -p "${{ secrets.DEPLOY_PATH }}"
             cd "${{ secrets.DEPLOY_PATH }}"
-            git config --global --add safe.directory "${{ secrets.DEPLOY_PATH }}"
+            git_safe="git -c safe.directory=${{ secrets.DEPLOY_PATH }}"
             if [ ! -d .git ]; then
-              git init
-              git remote add origin "https://github.com/${{ github.repository }}.git"
+              $git_safe init
+              $git_safe remote add origin "https://github.com/${{ github.repository }}.git"
             fi
-            git remote set-url origin "https://github.com/${{ github.repository }}.git"
-            git fetch --all --prune
-            git checkout -B main origin/main
-            git reset --hard origin/main
+            $git_safe remote set-url origin "https://github.com/${{ github.repository }}.git"
+            $git_safe fetch --all --prune
+            $git_safe checkout -B main origin/main
+            $git_safe reset --hard origin/main
             docker compose up -d --build
