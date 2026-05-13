@@ -325,6 +325,26 @@ a {
   margin-bottom: 18px;
 }
 
+.calendar-toolbar-actions,
+.calendar-view-toggle,
+.calendar-subpanel-stack,
+.calendar-week-summary,
+.calendar-event-focus,
+.event-focus-heading,
+.event-focus-meta {
+  display: grid;
+  gap: 12px;
+}
+
+.calendar-toolbar-actions {
+  justify-items: end;
+}
+
+.calendar-view-toggle {
+  grid-auto-flow: column;
+  justify-content: end;
+}
+
 .calendar-detail-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
@@ -381,6 +401,11 @@ a {
   border-color: rgba(184, 92, 56, 0.35);
 }
 
+.calendar-day-week {
+  min-height: 210px;
+  align-content: start;
+}
+
 .calendar-day.is-muted {
   opacity: 0.58;
 }
@@ -405,6 +430,19 @@ a {
   height: 8px;
   border-radius: 999px;
   background: var(--accent-2);
+}
+
+.calendar-week-summary {
+  margin-top: auto;
+}
+
+.calendar-week-summary span {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(23, 33, 38, 0.05);
+  color: var(--ink);
+  font-size: 0.86rem;
 }
 
 .calendar-form-row {
@@ -489,16 +527,45 @@ a {
   border: 1px solid var(--line);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
 .agenda-item p {
   margin: 0;
 }
 
+.agenda-item:hover,
+.agenda-item.is-active {
+  transform: translateY(-1px);
+  border-color: rgba(184, 92, 56, 0.4);
+  background: rgba(184, 92, 56, 0.08);
+}
+
 .agenda-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.calendar-event-focus {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.event-focus-heading h4,
+.event-focus-note {
+  margin: 0;
+}
+
+.event-focus-map {
+  width: 100%;
+  min-height: 220px;
+  border: 0;
+  border-radius: 18px;
+  background: rgba(23, 33, 38, 0.06);
 }
 
 .btn-small {
@@ -556,6 +623,15 @@ a {
   .calendar-form-row,
   .calendar-detail-layout {
     grid-template-columns: 1fr;
+  }
+
+  .calendar-toolbar-actions,
+  .calendar-view-toggle {
+    justify-items: stretch;
+  }
+
+  .calendar-view-toggle {
+    grid-auto-flow: row;
   }
 
   .calendar-day {

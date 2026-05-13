@@ -12,10 +12,16 @@ render_page('Kalender', 'Termine', static function (): void {
             <span class="card-label">Kalender</span>
             <h3 id="calendar-month">Monat wird geladen</h3>
           </div>
-          <div class="button-row">
+          <div class="calendar-toolbar-actions">
+            <div class="calendar-view-toggle" role="tablist" aria-label="Ansicht wechseln">
+              <button class="btn btn-secondary is-active" id="view-month" type="button">Monat</button>
+              <button class="btn btn-ghost" id="view-week" type="button">Woche</button>
+            </div>
+            <div class="button-row">
             <button class="btn btn-ghost" id="calendar-prev" type="button">Zurueck</button>
             <button class="btn btn-secondary" id="calendar-today" type="button">Heute</button>
             <button class="btn btn-ghost" id="calendar-next" type="button">Weiter</button>
+            </div>
           </div>
         </div>
         <div class="calendar-weekdays" aria-hidden="true">
@@ -33,8 +39,13 @@ render_page('Kalender', 'Termine', static function (): void {
           <article class="calendar-subpanel">
             <span class="card-label">Auswahl</span>
             <h3 id="selected-date-label">Keine Auswahl</h3>
-            <div class="calendar-agenda" id="selected-events">
-              <p class="empty-state">Waehle einen Tag im Kalender oder lege direkt einen neuen Termin an.</p>
+            <div class="calendar-subpanel-stack">
+              <div class="calendar-agenda" id="selected-events">
+                <p class="empty-state">Waehle einen Tag im Kalender oder lege direkt einen neuen Termin an.</p>
+              </div>
+              <div class="calendar-event-focus" id="selected-event-focus">
+                <p class="empty-state">Waehle in der Terminliste einen Eintrag fuer die Detailansicht.</p>
+              </div>
             </div>
           </article>
 
@@ -101,6 +112,8 @@ render_page('Kalender', 'Termine', static function (): void {
         var weekdayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
         var recognition = null;
         var editingEventId = '';
+        var activeView = 'month';
+        var selectedEventId = '';
         var events = loadEvents();
         var now = new Date();
         var selectedDate = toIsoDate(now);
@@ -111,6 +124,7 @@ render_page('Kalender', 'Termine', static function (): void {
         var grid = document.getElementById('calendar-grid');
         var selectedLabel = document.getElementById('selected-date-label');
         var selectedEvents = document.getElementById('selected-events');
+        var selectedEventFocus = document.getElementById('selected-event-focus');
         var formLabel = document.getElementById('event-form-label');
         var formTitle = document.getElementById('event-form-title');
         var editIdInput = document.getElementById('event-edit-id');
@@ -125,8 +139,15 @@ render_page('Kalender', 'Termine', static function (): void {
         var cancelButton = document.getElementById('event-cancel');
         var status = document.getElementById('voice-status');
         var transcript = document.getElementById('voice-transcript');
+        var monthViewButton = document.getElementById('view-month');
+        var weekViewButton = document.getElementById('view-week');
 
         document.getElementById('calendar-prev').addEventListener('click', function () {
+          if (activeView === 'week') {
+            selectDate(shiftIsoDate(selectedDate, -7));
+            return;
+          }
+
           viewMonth -= 1;
           if (viewMonth < 0) {
             viewMonth = 11;
@@ -136,6 +157,11 @@ render_page('Kalender', 'Termine', static function (): void {
         });
 
         document.getElementById('calendar-next').addEventListener('click', function () {
+          if (activeView === 'week') {
+            selectDate(shiftIsoDate(selectedDate, 7));
+            return;
+          }
+
           viewMonth += 1;
           if (viewMonth > 11) {
             viewMonth = 0;
@@ -167,6 +193,14 @@ render_page('Kalender', 'Termine', static function (): void {
           startVoiceCapture();
         });
 
+        monthViewButton.addEventListener('click', function () {
+          setActiveView('month');
+        });
+
+        weekViewButton.addEventListener('click', function () {
+          setActiveView('week');
+        });
+
         dateInput.value = selectedDate;
         renderCalendar();
         renderSelectedDay();
@@ -190,6 +224,13 @@ render_page('Kalender', 'Termine', static function (): void {
         }
 
         function renderCalendar() {
+          syncViewToggle();
+
+          if (activeView === 'week') {
+            renderWeekCalendar();
+            return;
+          }
+
           monthLabel.textContent = monthNames[viewMonth] + ' ' + viewYear;
           grid.innerHTML = '';
 
@@ -240,6 +281,51 @@ render_page('Kalender', 'Termine', static function (): void {
           }
         }
 
+        function renderWeekCalendar() {
+          var weekDates = getWeekDates(selectedDate);
+
+          monthLabel.textContent = buildWeekLabel(weekDates);
+          grid.innerHTML = '';
+
+          weekDates.forEach(function (isoDate) {
+            var cellDate = new Date(isoDate + 'T12:00:00');
+            var dayEvents = getEventsForDate(isoDate);
+            var button = document.createElement('button');
+            var dayLabel = document.createElement('strong');
+            var meta = document.createElement('span');
+            var summary = document.createElement('div');
+
+            button.type = 'button';
+            button.className = 'calendar-day calendar-day-week';
+            if (isoDate === selectedDate) {
+              button.className += ' is-selected';
+            }
+            if (isoDate === toIsoDate(new Date())) {
+              button.className += ' is-today';
+            }
+
+            dayLabel.textContent = weekdayNames[cellDate.getDay()].slice(0, 2) + ' ' + pad(cellDate.getDate()) + '.' + pad(cellDate.getMonth() + 1);
+            meta.textContent = dayEvents.length ? dayEvents.length + ' Termin' + (dayEvents.length === 1 ? '' : 'e') : 'frei';
+            summary.className = 'calendar-week-summary';
+
+            if (dayEvents.length) {
+              dayEvents.sort(compareEvents).slice(0, 3).forEach(function (eventItem) {
+                var item = document.createElement('span');
+                item.textContent = (eventItem.time || '--:--') + ' ' + eventItem.title;
+                summary.appendChild(item);
+              });
+            } else {
+              summary.innerHTML = '<span>Keine Eintraege</span>';
+            }
+
+            button.appendChild(dayLabel);
+            button.appendChild(meta);
+            button.appendChild(summary);
+            button.addEventListener('click', createDateHandler(isoDate));
+            grid.appendChild(button);
+          });
+        }
+
         function createDateHandler(isoDate) {
           return function () {
             selectDate(isoDate);
@@ -262,9 +348,12 @@ render_page('Kalender', 'Termine', static function (): void {
 
           selectedLabel.textContent = weekdayNames[date.getDay()] + ', ' + pad(date.getDate()) + '.' + pad(date.getMonth() + 1) + '.' + date.getFullYear();
           selectedEvents.innerHTML = '';
+          selectedEventFocus.innerHTML = '';
 
           if (!dayEvents.length) {
             selectedEvents.innerHTML = '<p class="empty-state">Fuer diesen Tag sind noch keine Termine gespeichert.</p>';
+            selectedEventFocus.innerHTML = '<p class="empty-state">Sobald Termine vorhanden sind, erscheint hier die Detailansicht.</p>';
+            selectedEventId = '';
             return;
           }
 
@@ -280,6 +369,9 @@ render_page('Kalender', 'Termine', static function (): void {
             var removeButton = document.createElement('button');
 
             article.className = 'agenda-item';
+            if (eventItem.id === selectedEventId) {
+              article.className += ' is-active';
+            }
             title.textContent = eventItem.title;
             meta.className = 'agenda-meta';
             meta.textContent = (eventItem.time || 'Ohne Uhrzeit') + ' | ' + eventItem.date;
@@ -325,6 +417,10 @@ render_page('Kalender', 'Termine', static function (): void {
             actions.appendChild(editButton);
             actions.appendChild(removeButton);
 
+            article.addEventListener('click', function () {
+              selectEvent(eventItem.id);
+            });
+
             article.appendChild(title);
             article.appendChild(meta);
             if (eventItem.address) {
@@ -334,6 +430,12 @@ render_page('Kalender', 'Termine', static function (): void {
             article.appendChild(actions);
             selectedEvents.appendChild(article);
           });
+
+          if (!findEventById(selectedEventId) || getEventDate(selectedEventId) !== selectedDate) {
+            selectedEventId = dayEvents[0].id;
+          }
+
+          renderEventFocus(findEventById(selectedEventId));
         }
 
         function removeEvent(eventId) {
@@ -341,6 +443,9 @@ render_page('Kalender', 'Termine', static function (): void {
             return eventItem.id !== eventId;
           });
           persistEvents();
+          if (selectedEventId === eventId) {
+            selectedEventId = '';
+          }
           if (editingEventId === eventId) {
             clearEditMode('');
           }
@@ -390,6 +495,7 @@ render_page('Kalender', 'Termine', static function (): void {
 
           persistEvents();
           selectDate(dateValue);
+          selectedEventId = payload.id;
           clearEditMode('');
           transcript.hidden = true;
         }
@@ -436,6 +542,127 @@ render_page('Kalender', 'Termine', static function (): void {
           return events.findIndex(function (candidate) {
             return candidate.id === eventId;
           });
+        }
+
+        function findEventById(eventId) {
+          var index = findEventIndex(eventId);
+          return index >= 0 ? events[index] : null;
+        }
+
+        function getEventDate(eventId) {
+          var eventItem = findEventById(eventId);
+          return eventItem ? eventItem.date : '';
+        }
+
+        function selectEvent(eventId) {
+          selectedEventId = eventId;
+          renderSelectedDay();
+        }
+
+        function renderEventFocus(eventItem) {
+          var mapBlock;
+          var mapLink;
+          var heading;
+          var meta;
+          var note;
+          var info;
+
+          selectedEventFocus.innerHTML = '';
+
+          if (!eventItem) {
+            selectedEventFocus.innerHTML = '<p class="empty-state">Waehle in der Terminliste einen Eintrag fuer die Detailansicht.</p>';
+            return;
+          }
+
+          heading = document.createElement('div');
+          heading.className = 'event-focus-heading';
+          heading.innerHTML = '<span class="card-label">Terminansicht</span><h4>' + escapeHtml(eventItem.title) + '</h4>';
+
+          meta = document.createElement('p');
+          meta.className = 'agenda-meta';
+          meta.textContent = (eventItem.time || 'Ohne Uhrzeit') + ' | ' + eventItem.date;
+
+          info = document.createElement('div');
+          info.className = 'event-focus-meta';
+          info.appendChild(meta);
+
+          if (eventItem.address) {
+            var address = document.createElement('p');
+            address.className = 'agenda-address';
+            address.textContent = eventItem.address;
+            info.appendChild(address);
+
+            mapBlock = document.createElement('iframe');
+            mapBlock.className = 'event-focus-map';
+            mapBlock.title = 'Kartenvorschau fuer ' + eventItem.title;
+            mapBlock.loading = 'lazy';
+            mapBlock.referrerPolicy = 'no-referrer-when-downgrade';
+            mapBlock.src = buildMapEmbedUrl(eventItem.address);
+
+            mapLink = document.createElement('a');
+            mapLink.className = 'btn btn-secondary btn-small';
+            mapLink.href = buildMapUrl(eventItem.address);
+            mapLink.target = '_blank';
+            mapLink.rel = 'noreferrer noopener';
+            mapLink.textContent = 'Route oeffnen';
+          }
+
+          note = document.createElement('p');
+          note.className = 'event-focus-note';
+          note.textContent = eventItem.note || 'Keine Notiz hinterlegt.';
+
+          selectedEventFocus.appendChild(heading);
+          selectedEventFocus.appendChild(info);
+          if (mapBlock) {
+            selectedEventFocus.appendChild(mapBlock);
+          }
+          if (mapLink) {
+            selectedEventFocus.appendChild(mapLink);
+          }
+          selectedEventFocus.appendChild(note);
+        }
+
+        function setActiveView(nextView) {
+          activeView = nextView === 'week' ? 'week' : 'month';
+          renderCalendar();
+        }
+
+        function syncViewToggle() {
+          monthViewButton.className = activeView === 'month' ? 'btn btn-secondary is-active' : 'btn btn-ghost';
+          weekViewButton.className = activeView === 'week' ? 'btn btn-secondary is-active' : 'btn btn-ghost';
+        }
+
+        function getWeekDates(isoDate) {
+          var selected = new Date(isoDate + 'T12:00:00');
+          var weekDay = (selected.getDay() + 6) % 7;
+          var monday = new Date(selected);
+          var dates = [];
+          var index;
+
+          monday.setDate(selected.getDate() - weekDay);
+
+          for (index = 0; index < 7; index += 1) {
+            dates.push(toIsoDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + index)));
+          }
+
+          return dates;
+        }
+
+        function buildWeekLabel(weekDates) {
+          var start = new Date(weekDates[0] + 'T12:00:00');
+          var end = new Date(weekDates[6] + 'T12:00:00');
+
+          if (start.getMonth() === end.getMonth()) {
+            return pad(start.getDate()) + '.-' + pad(end.getDate()) + '. ' + monthNames[start.getMonth()] + ' ' + start.getFullYear();
+          }
+
+          return pad(start.getDate()) + '.' + pad(start.getMonth() + 1) + '.-' + pad(end.getDate()) + '.' + pad(end.getMonth() + 1) + '. ' + end.getFullYear();
+        }
+
+        function shiftIsoDate(isoDate, days) {
+          var shifted = new Date(isoDate + 'T12:00:00');
+          shifted.setDate(shifted.getDate() + days);
+          return toIsoDate(shifted);
         }
 
         function buildMapUrl(addressValue) {
@@ -591,6 +818,15 @@ render_page('Kalender', 'Termine', static function (): void {
 
         function pad(value) {
           return String(value).padStart(2, '0');
+        }
+
+        function escapeHtml(value) {
+          return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
         }
       }());
     </script>
