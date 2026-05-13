@@ -16,7 +16,15 @@ Danke fuer das Interesse an `webapp-zentrale`.
 2. Struktur und Benennung sauber halten
 3. README oder `docs/` aktualisieren, wenn noetig
 4. Aenderung testen
-5. committen und Push/Pull-Request erstellen
+5. committen und nach GitHub pushen bzw. Pull-Request erstellen
+
+## Repo-Quelle
+
+Massgeblich ist dieses Repository selbst.
+
+- keine Inhalte aus fremden Beispiel-Repositories uebernehmen, wenn sie nicht bewusst referenziert wurden
+- kein Arbeiten gegen ein Cloud-Workspace als primaeren Quellstand
+- GitHub dient als zentrale Quelle fuer Historie, Review und Synchronisation
 
 ## Fokus in V1
 

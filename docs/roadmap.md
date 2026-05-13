@@ -28,7 +28,7 @@ Docker-Integration
 
 ### V7
 
-Netlify- und Cloud-Sync
+GitHub-Workflow und Deployment-Anbindung
 
 ### V8
 

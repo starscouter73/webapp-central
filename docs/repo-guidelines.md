@@ -19,6 +19,13 @@
 - keine persoenlichen Dokumente
 - keine unkontrollierten Build-Artefakte
 
+## Arbeitsquelle
+
+- gearbeitet wird lokal im Projektordner
+- versioniert wird ueber Git und GitHub
+- externe Demo- oder Beispiel-Repositories sind keine Arbeitsgrundlage fuer dieses Repo
+- Cloud-Hosting ist spaeter ein Auslieferungsziel, aber nicht die fuehrende Quelle des Projekts
+
 ## Community-Faehigkeit
 
 Spaetere Mitwirkung soll moeglich sein durch:

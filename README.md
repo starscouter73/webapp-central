@@ -22,6 +22,17 @@ Die `webapp-zentrale` soll als leichtgewichtige Hauptoberflaeche dienen fuer:
 
 Keine Datenbank in V1.
 
+## Arbeitsmodus
+
+Dieses Projekt wird standardmaessig lokal bearbeitet und ueber Git/GitHub versioniert.
+
+- lokal entwickeln und testen
+- Aenderungen per Commit sichern
+- GitHub als zentrales Repository verwenden
+- Cloud/Hosting spaeter nur fuer Deployment, nicht als primaerer Arbeitsort
+
+Ein fremdes Beispiel-Repository wie `mdn-interactive-examples` gehoert nicht zu diesem Projektkontext.
+
 ## Projektstruktur
 
 ```text
@@ -48,7 +59,7 @@ webapp-zentrale/
 2. Projekte
 3. Webapps
 4. Docker-Projekte
-5. Netlify-Projekte
+5. Hosting-Projekte
 6. Dokumentationen
 7. Dev-Tools
 8. Uploads
