@@ -55,6 +55,8 @@ Vorgesehener Ablauf:
 ## ⚙️ Wichtige Variablen
 
 ```env
+APP_IMAGE=local/webapp-central-web:latest
+APP_CONTAINER_NAME=webapp-central-web
 HOST_HTTP_BIND=127.0.0.1
 HOST_HTTP_PORT=8080
 APP_SITE_NAME=webapp-central.de
@@ -84,3 +86,18 @@ Kurz gesagt:
 - **lokal ruhig entwickeln**
 - **servernah vorbereiten**
 - **spaeter sauber unter `webapp-central.de` veroeffentlichen**
+
+## 🖥️ Server-Hinweis
+
+Fuer den Server kann der Containername per `.env` bewusst auf den bereits genutzten Reverse-Proxy-Namen gesetzt werden:
+
+```env
+APP_CONTAINER_NAME=webzentrale
+HOST_HTTP_BIND=127.0.0.1
+HOST_HTTP_PORT=8080
+APP_SITE_NAME=webapp-central.de
+APP_SITE_TITLE=Webapp Central
+APP_TAGLINE=Zentrale Arbeitsflaeche fuer Webprojekte, Inhalte und Entwicklung.
+```
+
+Damit kann Nginx Proxy Manager weiter auf denselben Upstream zeigen, auch wenn die App intern aus dem echten Repo deployed wird.

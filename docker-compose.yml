@@ -1,11 +1,11 @@
 services:
   web:
-    image: local/webapp-central-web:latest
+    image: "${APP_IMAGE:-local/webapp-central-web:latest}"
     pull_policy: never
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: webapp-central-web
+    container_name: "${APP_CONTAINER_NAME:-webapp-central-web}"
     ports:
       - "${HOST_HTTP_BIND:-127.0.0.1}:${HOST_HTTP_PORT:-8080}:80"
     volumes:
