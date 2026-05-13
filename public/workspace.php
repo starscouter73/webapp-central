@@ -8,9 +8,9 @@ render_page('Zentrale', 'Struktur', static function (): void {
     ?>
     <section class="grid two-up">
       <article class="card">
-        <span class="card-label">Docker</span>
-        <h3>Lokaler und servernaher Container</h3>
-        <p>Start lokal mit <code>dev-up.bat</code> oder direkt per <code>docker compose up -d</code>. Die Struktur arbeitet klar mit <code>public/</code> als Webroot.</p>
+        <span class="card-label">Arbeitsweg</span>
+        <h3>Direkt mit Codex und Live-Server</h3>
+        <p>Die App wird hier vor allem direkt im Repository gepflegt und anschließend unmittelbar auf dem Server aktualisiert. <code>public/</code> bleibt dabei der klare Webroot.</p>
       </article>
       <article class="card">
         <span class="card-label">Bereitstellung</span>
@@ -29,11 +29,11 @@ render_page('Zentrale', 'Struktur', static function (): void {
           <code>docker/</code>
           <code>.github/</code>
         </div>
-        <p>Damit laesst sich die neue Marke ohne Altlasten weiterentwickeln, egal ob daraus eine Startseite, ein Portal oder eine kleine Inhaltszentrale wird.</p>
+        <p>Damit lässt sich die neue Marke ohne Altlasten weiterentwickeln, egal ob daraus eine Startseite, ein Portal oder eine kleine Inhaltszentrale wird.</p>
       </article>
       <article class="card">
         <span class="card-label">Ablauf</span>
-        <h3>Lokaler Entwicklungsrhythmus</h3>
+        <h3>Praktischer Arbeitsrhythmus</h3>
         <ol class="simple-list ordered-list">
           <?php foreach ($steps as $step): ?>
             <li><?= app_h($step) ?></li>
@@ -54,16 +54,16 @@ render_page('Zentrale', 'Struktur', static function (): void {
     <section class="grid two-up">
       <article class="card">
         <span class="card-label">Zugriff</span>
-        <h3>Lokale und kuenftige Live-Ziele</h3>
+        <h3>Wichtige Live-Ziele</h3>
         <ul class="simple-list">
-          <li><code>http://127.0.0.1:8080/</code> als lokaler Docker-Test</li>
-          <li><code>http://45.133.9.232/</code> spaeter ueber den Reverse Proxy</li>
-          <li><code>https://webapp-central.de/</code> als Ziel fuer den Live-Betrieb nach DNS und TLS</li>
+          <li><code>https://webapp-central.de/</code> als sichtbarer Live-Stand</li>
+          <li><code>http://45.133.9.232/</code> als Server-Ziel hinter dem Reverse Proxy</li>
+          <li><code>/opt/webapps/webzentrale/</code> als aktueller App-Ordner auf dem Server</li>
         </ul>
       </article>
       <article class="card">
         <span class="card-label">Hinweis</span>
-        <h3>Domain und DNS liegen ausserhalb des Repos</h3>
+        <h3>Domain und DNS liegen außerhalb des Repos</h3>
         <p>Die App selbst bleibt host-neutral. Ob <code>webapp-central.de</code> erreichbar ist, entscheidet die DNS-Konfiguration beim Anbieter und der Reverse Proxy auf dem Server.</p>
       </article>
     </section>

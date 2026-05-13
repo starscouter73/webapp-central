@@ -39,6 +39,21 @@ if (!function_exists('app_env')) {
     }
 }
 
+if (!function_exists('app_normalize_umlauts')) {
+    function app_normalize_umlauts(string $value): string
+    {
+        return strtr($value, [
+            'Ae' => 'Ä',
+            'Oe' => 'Ö',
+            'Ue' => 'Ü',
+            'ae' => 'ä',
+            'oe' => 'ö',
+            'ue' => 'ü',
+            'fuer' => 'für',
+        ]);
+    }
+}
+
 if (!function_exists('app_site_title')) {
     function app_site_title(): string
     {
@@ -56,7 +71,9 @@ if (!function_exists('app_site_name')) {
 if (!function_exists('app_tagline')) {
     function app_tagline(): string
     {
-        return app_env('APP_TAGLINE', 'Zentrale Arbeitsflaeche fuer Webprojekte, Inhalte und Entwicklung.');
+        return app_normalize_umlauts(
+            app_env('APP_TAGLINE', 'Zentrale Arbeitsfläche für Webprojekte, Inhalte und Entwicklung.')
+        );
     }
 }
 
@@ -76,28 +93,28 @@ if (!function_exists('app_pages')) {
                 'label' => 'Startseite',
                 'title' => app_site_title(),
                 'eyebrow' => 'Startseite',
-                'description' => 'Uebersicht, Prioritaeten und direkte Einstiege in die zentrale Webflaeche.',
+                'description' => 'Übersicht, Prioritäten und direkte Einstiege in die zentrale Webfläche.',
             ],
             [
                 'file' => 'workspace.php',
                 'label' => 'Zentrale',
                 'title' => 'Zentrale',
                 'eyebrow' => 'Struktur',
-                'description' => 'Technische Basis, Arbeitslogik und der Weg von lokalem Stand zu Serverbetrieb.',
+                'description' => 'Technische Basis, Arbeitslogik und der direkte Weg vom Repository auf den Server.',
             ],
             [
                 'file' => 'modules.php',
                 'label' => 'Module',
                 'title' => 'Module',
                 'eyebrow' => 'Bausteine',
-                'description' => 'Funktionsbereiche, die als naechste Ausbaustufen bereitstehen.',
+                'description' => 'Funktionsbereiche, die als nächste Ausbaustufen bereitstehen.',
             ],
             [
-                'file' => 'styleguide.php',
-                'label' => 'Design',
-                'title' => 'Design',
-                'eyebrow' => 'Gestaltung',
-                'description' => 'Farben, Typografie und Komponenten fuer den neuen Auftritt.',
+                'file' => 'calendar.php',
+                'label' => 'Kalender',
+                'title' => 'Kalender',
+                'eyebrow' => 'Termine',
+                'description' => 'Kalenderansicht mit Spracheingabe für neue Termine direkt im Browser.',
             ],
         ];
     }
@@ -140,12 +157,12 @@ if (!function_exists('app_highlights')) {
             [
                 'label' => 'Basis',
                 'title' => 'Sauberer Ausgangspunkt',
-                'text' => 'Docker, PHP-Struktur und Repo-Basis sind so reduziert, dass die App lokal und auf dem Server kontrolliert wachsen kann.',
+                'text' => 'PHP-Struktur und Repo-Basis sind so reduziert, dass die App direkt und kontrolliert auf dem Server weiterentwickelt werden kann.',
             ],
             [
                 'label' => 'Aufgabe',
                 'title' => 'Zentrale statt Altprojekt',
-                'text' => 'Die Oberflaeche ist nicht mehr an den alten Planer gebunden und kann als eigenstaendige Marke fuer den kuenftigen Live-Auftritt weitergebaut werden.',
+                'text' => 'Die Oberfläche ist nicht mehr an den alten Planer gebunden und kann als eigenständige Marke für den künftigen Live-Auftritt weitergebaut werden.',
             ],
             [
                 'label' => 'Fokus',
@@ -163,26 +180,26 @@ if (!function_exists('app_modules')) {
             [
                 'name' => 'Startseite',
                 'status' => 'Aktiv',
-                'summary' => 'Einstieg mit Prioritaeten, Schnellzugriffen und Status der Arbeitsumgebung.',
+                'summary' => 'Einstieg mit Prioritäten, Schnellzugriffen und Status der Arbeitsumgebung.',
                 'href' => app_url('index.php'),
             ],
             [
                 'name' => 'Zentrale',
                 'status' => 'Aktiv',
-                'summary' => 'Arbeitslogik fuer Container, Repo-Struktur und den Weg in den Serverbetrieb.',
+                'summary' => 'Arbeitslogik für Repo-Struktur, Live-Stand und den direkten Weg in den Serverbetrieb.',
                 'href' => app_url('workspace.php'),
             ],
             [
                 'name' => 'Module',
                 'status' => 'Neu',
-                'summary' => 'Uebersicht der Funktionsbausteine, die als naechstes ausgebaut werden koennen.',
+                'summary' => 'Übersicht der Funktionsbausteine, die als nächstes ausgebaut werden können.',
                 'href' => app_url('modules.php'),
             ],
             [
-                'name' => 'Design',
-                'status' => 'Aktiv',
-                'summary' => 'Visuelle Regeln fuer Farben, Buttons, Flaechen und Ton der neuen Marke.',
-                'href' => app_url('styleguide.php'),
+                'name' => 'Kalender',
+                'status' => 'Neu',
+                'summary' => 'Monatskalender mit lokaler Terminliste und Voice-to-Text für neue Einträge.',
+                'href' => app_url('calendar.php'),
             ],
         ];
     }
@@ -192,10 +209,10 @@ if (!function_exists('app_workspace_steps')) {
     function app_workspace_steps(): array
     {
         return [
-            'Container lokal mit dev-up.bat oder servernah mit docker compose starten',
-            'Oberflaechen in public/ weiterentwickeln',
+            'Inhalte und Oberflächen direkt im Repository bearbeiten',
             'Gemeinsame Hilfslogik in src/ ausbauen',
-            'Aenderungen testen, per Git sichern und fuer den Server bereitstellen',
+            'Änderungen prüfen und direkt live auf den Server übernehmen',
+            'Den sichtbaren Stand auf webapp-central.de kontrollieren',
         ];
     }
 }

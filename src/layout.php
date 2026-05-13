@@ -21,8 +21,7 @@ if (!function_exists('render_page')) {
   <div class="page-shell">
     <header class="site-header">
       <div class="brand-block">
-        <span class="brand-kicker"><?= app_h(app_site_name()) ?></span>
-        <h1><?= app_h(app_site_title()) ?></h1>
+        <h1><a class="brand-link" href="<?= app_h(app_url('index.php')) ?>"><?= app_h(app_site_title()) ?></a></h1>
         <p><?= app_h(app_tagline()) ?></p>
       </div>
       <nav class="site-nav" aria-label="Hauptnavigation">
@@ -49,7 +48,7 @@ if (!function_exists('render_page')) {
         <span class="footer-mark">C</span>
         <div class="footer-copy">
           <strong><?= app_h(app_copyright_line()) ?></strong>
-          <p><?= app_h(app_site_title()) ?> fuer Medien, Struktur und zentrale Arbeitsablaeufe.</p>
+          <p><?= app_h(app_site_title()) ?> für Medien, Struktur und zentrale Arbeitsabläufe.</p>
         </div>
       </div>
       <nav class="footer-nav" aria-label="Footer">

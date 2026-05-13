@@ -1,67 +1,99 @@
 # Webapp Central
 
-> Zentrale PHP-Webapp fuer lokalen Docker-Start und spaeteren Rollout unter `webapp-central.de`.
+> Zentrale PHP-Webapp für den direkten Arbeitsweg mit Codex und Live-Server unter `webapp-central.de`.
 
-## ✦ Überblick
+## Überblick
 
-**Webapp Central** ist die reduzierte Ausgangsbasis fuer einen sauberen Webauftritt:
+**Webapp Central** ist die reduzierte Ausgangsbasis für einen klaren Webauftritt:
 
-- lokal entwickelbar mit Docker
-- vorbereitet fuer Reverse Proxy und Domainbetrieb
+- direkt im Repository pflegbar
+- direkt auf dem Server aktualisierbar
 - bewusst frei von alter Heimnetz- und Altprojekt-Logik
 
-## 🧱 Struktur
+## Struktur
 
 ```text
 public/      Webroot mit Seiten und Assets
 src/         Layout, Hilfsfunktionen, Seitendaten
-docker/      Apache- und PHP-Konfiguration
+docker/      bestehende Server-/Container-Konfiguration
 .github/     GitHub Actions
 ```
 
-## 🔀 Arbeitsquelle
+## Arbeitsquelle
 
-Dieses Repository auf GitHub ist die fuehrende Projektquelle.
+Dieses Repository auf GitHub ist die führende Projektquelle.
 
-- lokal entwickeln und testen
-- Aenderungen per Git committen
-- GitHub fuer Historie, Review und Synchronisation verwenden
-- externe Beispiel-Repositories sind keine Arbeitsgrundlage fuer dieses Projekt
+- Änderungen direkt hier mit Codex umsetzen
+- sichtbare Bereiche auf `webapp-central.de` prüfen
+- GitHub für Historie, Review und Synchronisation verwenden
+- externe Beispiel-Repositories sind keine Arbeitsgrundlage für dieses Projekt
 
-## 🚀 Lokaler Start
+## Direkter Arbeitsweg
 
-Optional zuerst `.env.example` nach `.env` kopieren und bei Bedarf Port oder Branding anpassen.
+Der praktische Standardweg ist:
 
-Start:
+1. Änderungen im Repository machen
+2. sichtbare Seiten im Browser prüfen
+3. den Stand direkt auf den Server übernehmen
+4. das Ergebnis live auf `webapp-central.de` kontrollieren
 
-```powershell
-.\dev-up.bat
+Der aktuelle Serverpfad ist:
+
+```text
+/opt/webapps/webzentrale/
 ```
 
-Danach erreichbar:
+Die sichtbare Website läuft hier:
 
-- `http://127.0.0.1:8080/`
-- `http://127.0.0.1:8080/styleguide.php`
-- `http://127.0.0.1:8080/workspace.php`
-
-Stoppen:
-
-```powershell
-.\dev-down.bat
+```text
+https://webapp-central.de/
 ```
 
-## 🌐 Server-Ziel
+## Live-Deploy direkt aus Codex
 
-Die Compose-Konfiguration ist so vorbereitet, dass die App lokal auf `127.0.0.1:8080` laeuft und spaeter hinter Nginx Proxy Manager unter `webapp-central.de` veroeffentlicht werden kann.
+Dieses Repository kann so genutzt werden, dass Änderungen hier in Codex gemacht und anschließend direkt live deployed werden, ohne dass lokal in VS Code gearbeitet werden muss.
 
-Vorgesehener Ablauf:
+Vorgesehener Weg:
 
-1. App lokal oder auf dem Server per Docker Compose starten
-2. Nginx Proxy Manager auf `http://127.0.0.1:8080` weiterleiten
-3. DNS fuer `webapp-central.de` auf den Server zeigen lassen
-4. TLS spaeter ueber Let's Encrypt im Proxy aktivieren
+1. Änderungen im Repo machen
+2. nach `main` pushen
+3. GitHub Actions verbindet sich per SSH mit dem Server
+4. der Server aktualisiert das Repo und führt `docker compose up -d --build` aus
 
-## ⚙️ Wichtige Variablen
+Der Workflow liegt hier:
+
+```text
+.github/workflows/deploy-live.yml
+```
+
+Dafür werden in GitHub folgende Repository-Secrets benötigt:
+
+```text
+DEPLOY_HOST
+DEPLOY_USER
+DEPLOY_SSH_KEY
+DEPLOY_PORT
+DEPLOY_PATH
+```
+
+Server-Voraussetzungen:
+
+1. Das Repository ist auf dem Server bereits unter `DEPLOY_PATH` geklont.
+2. `docker` und `docker compose` sind auf dem Server verfügbar.
+3. Der Deploy-Benutzer darf in diesem Ordner `git pull` und `docker compose up -d --build` ausführen.
+
+## Server-Ziel
+
+Die Website ist so vorbereitet, dass sie hinter Nginx Proxy Manager unter `webapp-central.de` läuft.
+
+Aktueller Rahmen:
+
+1. Reverse Proxy zeigt auf den laufenden App-Dienst
+2. DNS zeigt auf den Server
+3. die Inhalte werden aus `/opt/webapps/webzentrale/` gepflegt
+4. der sichtbare Stand wird direkt unter `https://webapp-central.de/` geprüft
+
+## Wichtige Variablen
 
 ```env
 APP_IMAGE=local/webapp-central-web:latest
@@ -70,43 +102,15 @@ HOST_HTTP_BIND=127.0.0.1
 HOST_HTTP_PORT=8080
 APP_SITE_NAME=webapp-central.de
 APP_SITE_TITLE=Webapp Central
-APP_TAGLINE=Zentrale Arbeitsflaeche fuer Webprojekte, Inhalte und Entwicklung.
+APP_TAGLINE=Zentrale Arbeitsfläche für Webprojekte, Inhalte und Entwicklung.
 ```
 
-## 🧪 Optionaler LAN-Helfer
+## Zielbild
 
-Falls du auf deinem Windows-Rechner einen lokalen Alias fuer den Browser willst:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup-lan.ps1
-```
-
-Das Skript:
-
-- ergaenzt einen Hosts-Eintrag fuer `webapp-central.test`
-- oeffnet die Windows-Firewall fuer eingehendes TCP auf Port `8080`
-
-## 🎯 Zielbild
-
-Dieses Repo ist absichtlich reduziert und sauber genug, damit die Gestaltung direkt weiterentwickelt und spaeter kontrolliert auf den Server uebernommen werden kann.
+Dieses Repo ist absichtlich reduziert und sauber genug, damit Inhalte, Sprache und Gestaltung direkt weiterentwickelt und kontrolliert live übernommen werden können.
 
 Kurz gesagt:
 
-- **lokal ruhig entwickeln**
-- **servernah vorbereiten**
-- **spaeter sauber unter `webapp-central.de` veroeffentlichen**
-
-## 🖥️ Server-Hinweis
-
-Fuer den Server kann der Containername per `.env` bewusst auf den bereits genutzten Reverse-Proxy-Namen gesetzt werden:
-
-```env
-APP_CONTAINER_NAME=webzentrale
-HOST_HTTP_BIND=127.0.0.1
-HOST_HTTP_PORT=8080
-APP_SITE_NAME=webapp-central.de
-APP_SITE_TITLE=Webapp Central
-APP_TAGLINE=Zentrale Arbeitsflaeche fuer Webprojekte, Inhalte und Entwicklung.
-```
-
-Damit kann Nginx Proxy Manager weiter auf denselben Upstream zeigen, auch wenn die App intern aus dem echten Repo deployed wird.
+- **direkt in Codex arbeiten**
+- **sichtbaren Live-Stand pflegen**
+- **schrittweise sauber weiterentwickeln**
