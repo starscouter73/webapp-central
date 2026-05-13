@@ -39,11 +39,12 @@ render_page('Kalender', 'Termine', static function (): void {
           </article>
 
           <article class="calendar-subpanel calendar-panel">
-            <span class="card-label">Neuer Termin</span>
-            <h3>Per Sprache oder manuell eintragen</h3>
+            <span class="card-label" id="event-form-label">Neuer Termin</span>
+            <h3 id="event-form-title">Per Sprache oder manuell eintragen</h3>
             <p>Sage zum Beispiel: "Morgen 14 Uhr Zahnarzt" oder "20.05. 09:30 Teammeeting". Danach kannst du den Eintrag direkt speichern.</p>
 
             <div class="calendar-form">
+              <input id="event-edit-id" name="edit-id" type="hidden" value="">
               <label class="field">
                 <span>Titel</span>
                 <input id="event-title" name="title" type="text" placeholder="Terminname">
@@ -59,12 +60,17 @@ render_page('Kalender', 'Termine', static function (): void {
                 </label>
               </div>
               <label class="field">
+                <span>Adresse</span>
+                <input id="event-address" name="address" type="text" placeholder="Ort oder Adresse fuer Karte">
+              </label>
+              <label class="field">
                 <span>Notiz</span>
                 <textarea id="event-note" name="note" rows="3" placeholder="Optionale Details"></textarea>
               </label>
               <div class="button-row">
                 <button class="btn btn-primary" id="voice-start" type="button">Voice to Text starten</button>
                 <button class="btn btn-secondary" id="event-save" type="button">Termin speichern</button>
+                <button class="btn btn-ghost" id="event-cancel" type="button" hidden>Bearbeitung beenden</button>
               </div>
               <p class="calendar-status" id="voice-status">Sprachmodus bereit. Die Funktion nutzt die Sprachschnittstelle deines Browsers.</p>
               <p class="calendar-transcript" id="voice-transcript" hidden></p>
@@ -72,7 +78,7 @@ render_page('Kalender', 'Termine', static function (): void {
 
             <div class="calendar-note">
               <strong>Hinweis</strong>
-              <p>Die Spracheingabe laeuft direkt im Browser. Termine bleiben aktuell lokal auf diesem Geraet gespeichert.</p>
+              <p>Die Spracheingabe laeuft direkt im Browser. Termine bleiben aktuell lokal auf diesem Geraet gespeichert. Adressen werden als direkter Karten-Link geoeffnet.</p>
             </div>
           </article>
         </div>
@@ -85,6 +91,7 @@ render_page('Kalender', 'Termine', static function (): void {
         var monthNames = ['Januar', 'Februar', 'Maerz', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
         var weekdayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
         var recognition = null;
+        var editingEventId = '';
         var events = loadEvents();
         var now = new Date();
         var selectedDate = toIsoDate(now);
@@ -95,10 +102,16 @@ render_page('Kalender', 'Termine', static function (): void {
         var grid = document.getElementById('calendar-grid');
         var selectedLabel = document.getElementById('selected-date-label');
         var selectedEvents = document.getElementById('selected-events');
+        var formLabel = document.getElementById('event-form-label');
+        var formTitle = document.getElementById('event-form-title');
+        var editIdInput = document.getElementById('event-edit-id');
         var titleInput = document.getElementById('event-title');
         var dateInput = document.getElementById('event-date');
         var timeInput = document.getElementById('event-time');
+        var addressInput = document.getElementById('event-address');
         var noteInput = document.getElementById('event-note');
+        var saveButton = document.getElementById('event-save');
+        var cancelButton = document.getElementById('event-cancel');
         var status = document.getElementById('voice-status');
         var transcript = document.getElementById('voice-transcript');
 
@@ -127,8 +140,12 @@ render_page('Kalender', 'Termine', static function (): void {
           selectDate(toIsoDate(today));
         });
 
-        document.getElementById('event-save').addEventListener('click', function () {
+        saveButton.addEventListener('click', function () {
           saveEventFromForm();
+        });
+
+        cancelButton.addEventListener('click', function () {
+          clearEditMode('Bearbeitung beendet.');
         });
 
         document.getElementById('voice-start').addEventListener('click', function () {
@@ -240,14 +257,42 @@ render_page('Kalender', 'Termine', static function (): void {
             var article = document.createElement('article');
             var title = document.createElement('strong');
             var meta = document.createElement('span');
+            var address = document.createElement('p');
             var note = document.createElement('p');
+            var actions = document.createElement('div');
+            var mapLink = document.createElement('a');
+            var editButton = document.createElement('button');
             var removeButton = document.createElement('button');
 
             article.className = 'agenda-item';
             title.textContent = eventItem.title;
             meta.className = 'agenda-meta';
             meta.textContent = (eventItem.time || 'Ohne Uhrzeit') + ' | ' + eventItem.date;
+
+            if (eventItem.address) {
+              address.className = 'agenda-address';
+              address.textContent = eventItem.address;
+            }
+
             note.textContent = eventItem.note || 'Keine Notiz';
+            actions.className = 'agenda-actions';
+
+            if (eventItem.address) {
+              mapLink.className = 'btn btn-secondary btn-small';
+              mapLink.href = buildMapUrl(eventItem.address);
+              mapLink.target = '_blank';
+              mapLink.rel = 'noreferrer noopener';
+              mapLink.textContent = 'Karte';
+              actions.appendChild(mapLink);
+            }
+
+            editButton.className = 'btn btn-ghost btn-small';
+            editButton.type = 'button';
+            editButton.textContent = 'Bearbeiten';
+            editButton.addEventListener('click', function () {
+              loadEventIntoForm(eventItem);
+            });
+
             removeButton.className = 'btn btn-ghost btn-small';
             removeButton.type = 'button';
             removeButton.textContent = 'Loeschen';
@@ -255,10 +300,16 @@ render_page('Kalender', 'Termine', static function (): void {
               removeEvent(eventItem.id);
             });
 
+            actions.appendChild(editButton);
+            actions.appendChild(removeButton);
+
             article.appendChild(title);
             article.appendChild(meta);
+            if (eventItem.address) {
+              article.appendChild(address);
+            }
             article.appendChild(note);
-            article.appendChild(removeButton);
+            article.appendChild(actions);
             selectedEvents.appendChild(article);
           });
         }
@@ -268,8 +319,12 @@ render_page('Kalender', 'Termine', static function (): void {
             return eventItem.id !== eventId;
           });
           persistEvents();
+          if (editingEventId === eventId) {
+            clearEditMode('');
+          }
           renderCalendar();
           renderSelectedDay();
+          status.textContent = 'Termin geloescht.';
         }
 
         function getEventsForDate(isoDate) {
@@ -286,28 +341,81 @@ render_page('Kalender', 'Termine', static function (): void {
           var title = titleInput.value.trim();
           var dateValue = dateInput.value;
           var timeValue = timeInput.value;
+          var addressValue = addressInput.value.trim();
           var noteValue = noteInput.value.trim();
+          var existingIndex = findEventIndex(editingEventId);
+          var payload = {
+            id: editingEventId || String(Date.now()) + '-' + Math.random().toString(16).slice(2),
+            title: title,
+            date: dateValue,
+            time: timeValue,
+            address: addressValue,
+            note: noteValue
+          };
 
           if (!title || !dateValue) {
             status.textContent = 'Bitte mindestens Titel und Datum fuer den Termin angeben.';
             return;
           }
 
-          events.push({
-            id: String(Date.now()) + '-' + Math.random().toString(16).slice(2),
-            title: title,
-            date: dateValue,
-            time: timeValue,
-            note: noteValue
-          });
+          if (existingIndex >= 0) {
+            events[existingIndex] = payload;
+            status.textContent = 'Termin aktualisiert.';
+          } else {
+            events.push(payload);
+            status.textContent = 'Termin gespeichert.';
+          }
 
           persistEvents();
           selectDate(dateValue);
+          clearEditMode('');
+          transcript.hidden = true;
+        }
+
+        function loadEventIntoForm(eventItem) {
+          editingEventId = eventItem.id;
+          editIdInput.value = eventItem.id;
+          titleInput.value = eventItem.title || '';
+          dateInput.value = eventItem.date || selectedDate;
+          timeInput.value = eventItem.time || '';
+          addressInput.value = eventItem.address || '';
+          noteInput.value = eventItem.note || '';
+          formLabel.textContent = 'Termin bearbeiten';
+          formTitle.textContent = 'Bestehenden Termin anpassen';
+          saveButton.textContent = 'Termin aktualisieren';
+          cancelButton.hidden = false;
+          status.textContent = 'Termin zur Bearbeitung geladen.';
+        }
+
+        function clearEditMode(message) {
+          editingEventId = '';
+          editIdInput.value = '';
           titleInput.value = '';
           timeInput.value = '';
+          addressInput.value = '';
           noteInput.value = '';
-          transcript.hidden = true;
-          status.textContent = 'Termin gespeichert.';
+          dateInput.value = selectedDate;
+          formLabel.textContent = 'Neuer Termin';
+          formTitle.textContent = 'Per Sprache oder manuell eintragen';
+          saveButton.textContent = 'Termin speichern';
+          cancelButton.hidden = true;
+          if (message) {
+            status.textContent = message;
+          }
+        }
+
+        function findEventIndex(eventId) {
+          if (!eventId) {
+            return -1;
+          }
+
+          return events.findIndex(function (candidate) {
+            return candidate.id === eventId;
+          });
+        }
+
+        function buildMapUrl(addressValue) {
+          return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addressValue);
         }
 
         function startVoiceCapture() {
@@ -420,10 +528,10 @@ render_page('Kalender', 'Termine', static function (): void {
           return text
             .toLowerCase()
             .replace(/[.,]/g, ' ')
-            .replace(/ä/g, 'ae')
-            .replace(/ö/g, 'oe')
-            .replace(/ü/g, 'ue')
-            .replace(/ß/g, 'ss');
+            .replace(/\u00e4/g, 'ae')
+            .replace(/\u00f6/g, 'oe')
+            .replace(/\u00fc/g, 'ue')
+            .replace(/\u00df/g, 'ss');
         }
 
         function shiftDate(baseDate, days) {

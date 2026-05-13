@@ -438,6 +438,7 @@ a {
 .calendar-status,
 .calendar-transcript,
 .agenda-meta,
+.agenda-address,
 .empty-state {
   color: var(--muted);
 }
@@ -470,6 +471,12 @@ a {
 
 .agenda-item p {
   margin: 0;
+}
+
+.agenda-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .btn-small {
