@@ -5,8 +5,8 @@ require_once dirname(__DIR__) . '/src/layout.php';
 
 render_page('Kalender', 'Termine', static function (): void {
     ?>
-    <section class="grid dashboard-grid calendar-shell">
-      <article class="card calendar-board">
+    <section class="calendar-page">
+      <article class="card calendar-board calendar-board-full">
         <div class="calendar-toolbar">
           <div>
             <span class="card-label">Kalender</span>
@@ -28,58 +28,54 @@ render_page('Kalender', 'Termine', static function (): void {
           <span>So</span>
         </div>
         <div class="calendar-grid" id="calendar-grid"></div>
-      </article>
 
-      <article class="card calendar-panel">
-        <span class="card-label">Neuer Termin</span>
-        <h3>Per Sprache oder manuell eintragen</h3>
-        <p>Sage zum Beispiel: "Morgen 14 Uhr Zahnarzt" oder "20.05. 09:30 Teammeeting". Danach kannst du den Eintrag direkt speichern.</p>
+        <div class="calendar-detail-layout">
+          <article class="calendar-subpanel">
+            <span class="card-label">Auswahl</span>
+            <h3 id="selected-date-label">Keine Auswahl</h3>
+            <div class="calendar-agenda" id="selected-events">
+              <p class="empty-state">Waehle einen Tag im Kalender oder lege direkt einen neuen Termin an.</p>
+            </div>
+          </article>
 
-        <div class="calendar-form">
-          <label class="field">
-            <span>Titel</span>
-            <input id="event-title" name="title" type="text" placeholder="Terminname">
-          </label>
-          <div class="calendar-form-row">
-            <label class="field">
-              <span>Datum</span>
-              <input id="event-date" name="date" type="date">
-            </label>
-            <label class="field">
-              <span>Uhrzeit</span>
-              <input id="event-time" name="time" type="time">
-            </label>
-          </div>
-          <label class="field">
-            <span>Notiz</span>
-            <textarea id="event-note" name="note" rows="3" placeholder="Optionale Details"></textarea>
-          </label>
-          <div class="button-row">
-            <button class="btn btn-primary" id="voice-start" type="button">Voice to Text starten</button>
-            <button class="btn btn-secondary" id="event-save" type="button">Termin speichern</button>
-          </div>
-          <p class="calendar-status" id="voice-status">Sprachmodus bereit. Die Funktion nutzt die Sprachschnittstelle deines Browsers.</p>
-          <p class="calendar-transcript" id="voice-transcript" hidden></p>
+          <article class="calendar-subpanel calendar-panel">
+            <span class="card-label">Neuer Termin</span>
+            <h3>Per Sprache oder manuell eintragen</h3>
+            <p>Sage zum Beispiel: "Morgen 14 Uhr Zahnarzt" oder "20.05. 09:30 Teammeeting". Danach kannst du den Eintrag direkt speichern.</p>
+
+            <div class="calendar-form">
+              <label class="field">
+                <span>Titel</span>
+                <input id="event-title" name="title" type="text" placeholder="Terminname">
+              </label>
+              <div class="calendar-form-row">
+                <label class="field">
+                  <span>Datum</span>
+                  <input id="event-date" name="date" type="date">
+                </label>
+                <label class="field">
+                  <span>Uhrzeit</span>
+                  <input id="event-time" name="time" type="time">
+                </label>
+              </div>
+              <label class="field">
+                <span>Notiz</span>
+                <textarea id="event-note" name="note" rows="3" placeholder="Optionale Details"></textarea>
+              </label>
+              <div class="button-row">
+                <button class="btn btn-primary" id="voice-start" type="button">Voice to Text starten</button>
+                <button class="btn btn-secondary" id="event-save" type="button">Termin speichern</button>
+              </div>
+              <p class="calendar-status" id="voice-status">Sprachmodus bereit. Die Funktion nutzt die Sprachschnittstelle deines Browsers.</p>
+              <p class="calendar-transcript" id="voice-transcript" hidden></p>
+            </div>
+
+            <div class="calendar-note">
+              <strong>Hinweis</strong>
+              <p>Die Spracheingabe laeuft direkt im Browser. Termine bleiben aktuell lokal auf diesem Geraet gespeichert.</p>
+            </div>
+          </article>
         </div>
-      </article>
-    </section>
-
-    <section class="grid split">
-      <article class="card">
-        <span class="card-label">Auswahl</span>
-        <h3 id="selected-date-label">Keine Auswahl</h3>
-        <div class="calendar-agenda" id="selected-events">
-          <p class="empty-state">Waehle einen Tag im Kalender oder lege direkt einen neuen Termin an.</p>
-        </div>
-      </article>
-      <article class="card">
-        <span class="card-label">Hinweis</span>
-        <h3>Wie die Spracheingabe arbeitet</h3>
-        <ul class="simple-list">
-          <li>Die Spracheingabe laeuft direkt im Browser ohne Server-Speicherung.</li>
-          <li>Termine werden aktuell lokal im Browser dieses Geraets gespeichert.</li>
-          <li>Datum und Uhrzeit werden aus einfachen deutschen Angaben automatisch erkannt.</li>
-        </ul>
       </article>
     </section>
 
