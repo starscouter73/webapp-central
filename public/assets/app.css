@@ -462,6 +462,28 @@ a {
   margin: 0;
 }
 
+.map-preview {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.map-preview iframe,
+.agenda-map-preview {
+  width: 100%;
+  min-height: 180px;
+  border: 0;
+  border-radius: 16px;
+  background: rgba(23, 33, 38, 0.06);
+}
+
+.agenda-map-preview {
+  min-height: 150px;
+}
+
 .agenda-item {
   padding: 18px;
   border: 1px solid var(--line);

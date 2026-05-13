@@ -63,6 +63,15 @@ render_page('Kalender', 'Termine', static function (): void {
                 <span>Adresse</span>
                 <input id="event-address" name="address" type="text" placeholder="Ort oder Adresse fuer Karte">
               </label>
+              <div class="map-preview" id="event-map-preview" hidden>
+                <strong>Kartenvorschau</strong>
+                <iframe
+                  id="event-map-frame"
+                  title="Kartenvorschau"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
               <label class="field">
                 <span>Notiz</span>
                 <textarea id="event-note" name="note" rows="3" placeholder="Optionale Details"></textarea>
@@ -109,6 +118,8 @@ render_page('Kalender', 'Termine', static function (): void {
         var dateInput = document.getElementById('event-date');
         var timeInput = document.getElementById('event-time');
         var addressInput = document.getElementById('event-address');
+        var mapPreview = document.getElementById('event-map-preview');
+        var mapFrame = document.getElementById('event-map-frame');
         var noteInput = document.getElementById('event-note');
         var saveButton = document.getElementById('event-save');
         var cancelButton = document.getElementById('event-cancel');
@@ -146,6 +157,10 @@ render_page('Kalender', 'Termine', static function (): void {
 
         cancelButton.addEventListener('click', function () {
           clearEditMode('Bearbeitung beendet.');
+        });
+
+        addressInput.addEventListener('input', function () {
+          renderFormMapPreview(addressInput.value);
         });
 
         document.getElementById('voice-start').addEventListener('click', function () {
@@ -278,12 +293,19 @@ render_page('Kalender', 'Termine', static function (): void {
             actions.className = 'agenda-actions';
 
             if (eventItem.address) {
+              var preview = document.createElement('iframe');
               mapLink.className = 'btn btn-secondary btn-small';
               mapLink.href = buildMapUrl(eventItem.address);
               mapLink.target = '_blank';
               mapLink.rel = 'noreferrer noopener';
               mapLink.textContent = 'Karte';
+              preview.className = 'agenda-map-preview';
+              preview.title = 'Kartenvorschau fuer ' + eventItem.title;
+              preview.loading = 'lazy';
+              preview.referrerPolicy = 'no-referrer-when-downgrade';
+              preview.src = buildMapEmbedUrl(eventItem.address);
               actions.appendChild(mapLink);
+              article.appendChild(preview);
             }
 
             editButton.className = 'btn btn-ghost btn-small';
@@ -379,6 +401,7 @@ render_page('Kalender', 'Termine', static function (): void {
           dateInput.value = eventItem.date || selectedDate;
           timeInput.value = eventItem.time || '';
           addressInput.value = eventItem.address || '';
+          renderFormMapPreview(eventItem.address || '');
           noteInput.value = eventItem.note || '';
           formLabel.textContent = 'Termin bearbeiten';
           formTitle.textContent = 'Bestehenden Termin anpassen';
@@ -393,6 +416,7 @@ render_page('Kalender', 'Termine', static function (): void {
           titleInput.value = '';
           timeInput.value = '';
           addressInput.value = '';
+          renderFormMapPreview('');
           noteInput.value = '';
           dateInput.value = selectedDate;
           formLabel.textContent = 'Neuer Termin';
@@ -416,6 +440,23 @@ render_page('Kalender', 'Termine', static function (): void {
 
         function buildMapUrl(addressValue) {
           return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addressValue);
+        }
+
+        function buildMapEmbedUrl(addressValue) {
+          return 'https://www.google.com/maps?q=' + encodeURIComponent(addressValue) + '&output=embed';
+        }
+
+        function renderFormMapPreview(addressValue) {
+          var trimmed = String(addressValue || '').trim();
+
+          if (!trimmed) {
+            mapPreview.hidden = true;
+            mapFrame.removeAttribute('src');
+            return;
+          }
+
+          mapFrame.src = buildMapEmbedUrl(trimmed);
+          mapPreview.hidden = false;
         }
 
         function startVoiceCapture() {
