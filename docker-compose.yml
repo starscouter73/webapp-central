@@ -1,11 +1,17 @@
 services:
   web:
+    image: local/webapp-central-web:latest
+    pull_policy: never
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: webapp-zentrale
+    container_name: webapp-central-web
     ports:
-      - "8000:80"
+      - "${HOST_HTTP_BIND:-127.0.0.1}:${HOST_HTTP_PORT:-8080}:80"
     volumes:
       - ./:/var/www/html
+    environment:
+      APP_SITE_NAME: "${APP_SITE_NAME:-webapp-central.de}"
+      APP_SITE_TITLE: "${APP_SITE_TITLE:-Webapp Central}"
+      APP_TAGLINE: "${APP_TAGLINE:-Zentrale Arbeitsflaeche fuer Webprojekte, Inhalte und Entwicklung.}"
     restart: unless-stopped
