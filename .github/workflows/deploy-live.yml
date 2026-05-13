@@ -27,6 +27,7 @@ jobs:
             set -e
             mkdir -p "${{ secrets.DEPLOY_PATH }}"
             cd "${{ secrets.DEPLOY_PATH }}"
+            git config --global --add safe.directory "${{ secrets.DEPLOY_PATH }}"
             if [ ! -d .git ]; then
               git init
               git remote add origin "https://github.com/${{ github.repository }}.git"
