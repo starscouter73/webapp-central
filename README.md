@@ -71,7 +71,7 @@ Dafür werden in GitHub folgende Repository-Secrets benötigt:
 ```text
 DEPLOY_HOST
 DEPLOY_USER
-DEPLOY_SSH_KEY
+DEPLOY_PASSWORD
 DEPLOY_PORT
 DEPLOY_PATH
 ```
