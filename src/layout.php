@@ -8,6 +8,12 @@ if (!function_exists('render_page')) {
     {
         $currentPage = app_current_page();
         $currentMeta = app_current_page_meta();
+
+        if (!headers_sent()) {
+            header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+        }
         ?>
 <!doctype html>
 <html lang="de">
@@ -15,7 +21,7 @@ if (!function_exists('render_page')) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= app_h($title) ?> | <?= app_h(app_site_title()) ?></title>
-  <link rel="stylesheet" href="<?= app_h(app_url('assets/app.css')) ?>">
+  <link rel="stylesheet" href="<?= app_h(app_asset_url('assets/app.css')) ?>">
 </head>
 <body>
   <div class="page-shell">
@@ -34,11 +40,13 @@ if (!function_exists('render_page')) {
     </header>
 
     <main class="content-shell">
-      <section class="hero-panel">
-        <span class="eyebrow"><?= app_h($eyebrow) ?></span>
-        <h2><?= app_h($title) ?></h2>
-        <p class="hero-copy"><?= app_h((string)($currentMeta['description'] ?? '')) ?></p>
-      </section>
+      <?php if ($currentPage !== 'calendar.php'): ?>
+        <section class="hero-panel">
+          <span class="eyebrow"><?= app_h($eyebrow) ?></span>
+          <h2><?= app_h($title) ?></h2>
+          <p class="hero-copy"><?= app_h((string)($currentMeta['description'] ?? '')) ?></p>
+        </section>
+      <?php endif; ?>
 
       <?php $content(); ?>
     </main>

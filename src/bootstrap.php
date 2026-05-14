@@ -84,6 +84,21 @@ if (!function_exists('app_url')) {
     }
 }
 
+if (!function_exists('app_asset_url')) {
+    function app_asset_url(string $path): string
+    {
+        $normalized = ltrim($path, '/');
+        $fullPath = app_root() . '/public/' . $normalized;
+        $url = app_url($normalized);
+
+        if (!is_file($fullPath)) {
+            return $url;
+        }
+
+        return $url . '?v=' . (string)(filemtime($fullPath) ?: time());
+    }
+}
+
 if (!function_exists('app_pages')) {
     function app_pages(): array
     {

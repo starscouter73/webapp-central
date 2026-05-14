@@ -9,7 +9,6 @@ render_page('Kalender', 'Termine', static function (): void {
       <article class="card calendar-board calendar-board-full">
         <div class="calendar-toolbar">
           <div>
-            <span class="card-label">Kalender</span>
             <h3 id="calendar-month">Monat wird geladen</h3>
           </div>
           <div class="calendar-toolbar-actions">
