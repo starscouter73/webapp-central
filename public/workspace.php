@@ -43,15 +43,6 @@ render_page('Zentrale', 'Struktur', static function (): void {
       </article>
     </section>
 
-    <section class="card">
-      <span class="card-label">Schnellzugriffe</span>
-      <h3>Wichtige Einstiege</h3>
-      <div class="button-row">
-        <a class="btn btn-primary" href="<?= app_h(app_url('index.php')) ?>">Startseite</a>
-        <a class="btn btn-secondary" href="<?= app_h(app_url('modules.php')) ?>">Module</a>
-      </div>
-    </section>
-
     <section class="grid two-up">
       <article class="card">
         <span class="card-label">Zugriff</span>
