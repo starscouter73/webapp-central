@@ -482,12 +482,23 @@ a {
 }
 
 .calendar-toolbar-actions {
-  justify-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  align-items: center;
+  gap: 12px;
 }
 
 .calendar-view-toggle {
-  grid-auto-flow: column;
+  display: flex;
+  flex-wrap: wrap;
   justify-content: end;
+  gap: 12px;
+}
+
+.calendar-toolbar-actions > .button-row {
+  justify-content: end;
+  margin: 0;
 }
 
 .calendar-detail-layout {
