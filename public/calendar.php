@@ -35,7 +35,7 @@ render_page('Kalender', 'Termine', static function (): void {
         <div class="calendar-grid" id="calendar-grid"></div>
 
         <div class="calendar-detail-layout">
-          <article class="calendar-subpanel">
+          <article class="calendar-subpanel" id="selected-panel">
             <span class="card-label">Auswahl</span>
             <h3 id="selected-date-label">Keine Auswahl</h3>
             <div class="calendar-subpanel-stack">
@@ -145,6 +145,7 @@ render_page('Kalender', 'Termine', static function (): void {
 
         var monthLabel = document.getElementById('calendar-month');
         var grid = document.getElementById('calendar-grid');
+        var selectedPanel = document.getElementById('selected-panel');
         var selectedLabel = document.getElementById('selected-date-label');
         var selectedEvents = document.getElementById('selected-events');
         var selectedEventFocus = document.getElementById('selected-event-focus');
@@ -395,11 +396,12 @@ render_page('Kalender', 'Termine', static function (): void {
           selectedEventFocus.innerHTML = '';
 
           if (!dayEvents.length) {
-            selectedEvents.innerHTML = '<p class="empty-state">Fuer diesen Tag sind noch keine Termine gespeichert.</p>';
-            selectedEventFocus.innerHTML = '<p class="empty-state">Sobald Termine vorhanden sind, erscheint hier die Detailansicht.</p>';
+            selectedPanel.hidden = true;
             selectedEventId = '';
             return;
           }
+
+          selectedPanel.hidden = false;
 
           dayEvents.sort(compareEvents).forEach(function (eventItem) {
             var article = document.createElement('article');
