@@ -398,7 +398,7 @@ a {
 
 .calendar-detail-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+  grid-template-columns: 1fr;
   gap: 18px;
   align-items: start;
 }
