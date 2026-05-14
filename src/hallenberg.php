@@ -100,7 +100,7 @@ if (!function_exists('app_hallenberg_future_products')) {
                     'mehr Eigenverbrauch in Abend- und Nachtstunden',
                     'saubere Einbindung in Monitoring und Energielogik',
                 ],
-                'media' => app_hallenberg_media_item('', '20260424_115402_Materiallagerung.jpg', 'Gelieferte Systemkomponenten fuer Speicher- und Energietechnik', true),
+                'media' => app_hallenberg_media_item('', 'battery-materiallagerung.webp', 'Gelieferte Systemkomponenten fuer Speicher- und Energietechnik', true),
             ],
             [
                 'id' => 'wallbox',
@@ -113,7 +113,7 @@ if (!function_exists('app_hallenberg_future_products')) {
                     'Vorbereitung fuer E-Mobilitaet am Objekt',
                     'spaetere Kopplung mit PV-Erzeugung und Speicher moeglich',
                 ],
-                'media' => app_hallenberg_media_item('', '20260418_103612_Materiallagerung_2.jpg', 'Materiallieferung fuer spaetere Energie- und Ladeinfrastruktur', true),
+                'media' => app_hallenberg_media_item('', 'wallbox-materiallagerung.webp', 'Materiallieferung fuer spaetere Energie- und Ladeinfrastruktur', true),
             ],
             [
                 'id' => 'monitoring',
@@ -126,7 +126,7 @@ if (!function_exists('app_hallenberg_future_products')) {
                     'LAN- und Technikraumthema bereits in der Baustelle abgestimmt',
                     'Grundlage fuer Monitoring, Analyse und spaetere Automatisierung',
                 ],
-                'media' => app_hallenberg_media_item('', '20260507_193559_kabel_anschluss.jpg', 'Anschlussbereich als Grundlage fuer Monitoring und Messkonzepte', true),
+                'media' => app_hallenberg_media_item('', 'monitoring-kabel-anschluss.webp', 'Anschlussbereich als Grundlage fuer Monitoring und Messkonzepte', true),
             ],
             [
                 'id' => 'heatpump',
@@ -139,10 +139,10 @@ if (!function_exists('app_hallenberg_future_products')) {
                     'Technikwege und Lastlogik wurden nicht nur kurzfristig gedacht',
                     'solide Grundlage fuer eine kuenftige Modernisierung der Heiztechnik',
                 ],
-                'media' => app_hallenberg_media_item('', '20260507_111930_kellerfenster_alt.jpg', 'Altes Kellerfenster von innen als Ausgangssituation', true),
+                'media' => app_hallenberg_media_item('', 'kellerfenster-alt-innen.webp', 'Altes Kellerfenster von innen als Ausgangssituation', true),
                 'media_gallery' => [
-                    app_hallenberg_media_item('', '20260507_111930_kellerfenster_alt.jpg', 'Altes Kellerfenster von innen als Ausgangssituation', true),
-                    app_hallenberg_media_item('', 'waermepumpe-kellerfenster-neu-innenansicht.png', 'Neues Kellerfenster in derselben Innenansicht als modernisierte Einbausituation', true),
+                    app_hallenberg_media_item('', 'kellerfenster-alt-innen.webp', 'Altes Kellerfenster von innen als Ausgangssituation', true),
+                    app_hallenberg_media_item('', 'kellerfenster-neu-innen.webp', 'Neues Kellerfenster in derselben Innenansicht als modernisierte Einbausituation', true),
                 ],
             ],
         ];
@@ -177,8 +177,8 @@ if (!function_exists('app_hallenberg_story')) {
                     'Vorher-/Nachher-Perspektive fuer Architektur und Energietechnik',
                 ],
                 'media' => [
-                    app_hallenberg_media_item('', '20260506_171535_KFZ_Montageteam_Photovoltaik.jpg', 'Straßenseite mit Fachwerkhaus, Geruest und Montageanlauf im Projektverlauf', true),
-                    app_hallenberg_media_item('', 'Hallenberg Photovoltaik Straßenseite.jpg', 'Dachkante und Straßenseite des Projekts im baulichen Kontext', true),
+                    app_hallenberg_media_item('', 'situation-montage-strassenseite.webp', 'Straßenseite mit Fachwerkhaus, Geruest und Montageanlauf im Projektverlauf', true),
+                    app_hallenberg_media_item('', 'situation-dachkante-strassenseite.webp', 'Dachkante und Straßenseite des Projekts im baulichen Kontext', true),
                 ],
             ],
             'engineering' => [
@@ -237,23 +237,23 @@ if (!function_exists('app_hallenberg_story')) {
                     'Platz fuer Wechselrichter, Speicher und spaetere Steuerung',
                 ],
                 'media' => [
-                    app_hallenberg_media_item('', '20260507_081501_Verkabelunghinterfallrohraußen.jpg', 'Verkabelung hinter dem Fallrohr an der Aussenfassade', true),
-                    app_hallenberg_media_item('', '20260507_111930_kellerfenster_alt.jpg', 'Kellerfenster im Bereich der geplanten Kabeldurchfuehrung', true),
-                    app_hallenberg_media_item('', '20260507_193455_kabeldurchgangkeller.jpg', 'Kabeldurchgang im Keller nach der Fassadenseite', true),
-                    app_hallenberg_media_item('', '20260507_193559_kabel_anschluss.jpg', 'Anschlussbild der weitergefuehrten Verkabelung im Technikbereich', true),
+                    app_hallenberg_media_item('', 'technik-fallrohr-verkabelung.webp', 'Verkabelung hinter dem Fallrohr an der Aussenfassade', true),
+                    app_hallenberg_media_item('', 'kellerfenster-alt-innen.webp', 'Kellerfenster im Bereich der geplanten Kabeldurchfuehrung', true),
+                    app_hallenberg_media_item('', 'technik-kabeldurchgang-keller.webp', 'Kabeldurchgang im Keller nach der Fassadenseite', true),
+                    app_hallenberg_media_item('', 'monitoring-kabel-anschluss.webp', 'Anschlussbild der weitergefuehrten Verkabelung im Technikbereich', true),
                 ],
             ],
             'scaffold' => [
                 'text' => 'Geruest und Zugangstechnik waren nicht nur Hilfsmittel, sondern integraler Teil der Bauabwicklung. Treppen, Podeste und Materialwege zeigen den Umfang des Projekts und die Vorbereitung auf sichere Dach- und Fassadenarbeit.',
                 'media' => [
-                    app_hallenberg_media_item('', '20260506_171300_gerüst.jpg', 'Geruestzugang mit Treppen, Podesten und Fassadenebenen', true),
-                    app_hallenberg_media_item('', '20260307_154754_Balkon_detailNah.jpg', 'Konstruktives Detail der Geruest- und Podestkonstruktion', true),
+                    app_hallenberg_media_item('', 'geruest-zugang-treppen.webp', 'Geruestzugang mit Treppen, Podesten und Fassadenebenen', true),
+                    app_hallenberg_media_item('', 'geruest-podest-detail.webp', 'Konstruktives Detail der Geruest- und Podestkonstruktion', true),
                 ],
             ],
             'timeline' => [
                 'media' => [
-                    app_hallenberg_media_item('', '20260507_082232_Materiallieferung_Lagerung.jpg', 'Materiallieferung und Lagerung vor der Montagephase', true),
-                    app_hallenberg_media_item('', '20260506_171300_gerüst.jpg', 'Geruestphase als vorbereiteter Zugang fuer die Bauarbeiten', true),
+                    app_hallenberg_media_item('', 'timeline-materiallieferung.webp', 'Materiallieferung und Lagerung vor der Montagephase', true),
+                    app_hallenberg_media_item('', 'geruest-zugang-treppen.webp', 'Geruestphase als vorbereiteter Zugang fuer die Bauarbeiten', true),
                     app_hallenberg_media_item('', '1Video Project 52026-05-09.mp4_snapshot_34.28.591.webp', 'Montagephase der PV-Anlage', true),
                     app_hallenberg_media_item('', '1Video Project 52026-05-09.mp4_snapshot_37.27.280.webp', 'Nahezu fertig integrierte Gesamtanlage', true),
                 ],

@@ -9,8 +9,9 @@ $sections = app_hallenberg_sections();
 $overviewCards = app_hallenberg_overview_cards();
 $timeline = app_hallenberg_timeline();
 $futureProducts = app_hallenberg_future_products();
+$initialFutureProduct = $futureProducts[0];
 
-render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $sections, $overviewCards, $timeline, $futureProducts): void {
+render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $sections, $overviewCards, $timeline, $futureProducts, $initialFutureProduct): void {
     ?>
     <section class="hallenberg-page">
       <section class="project-shell-header">
@@ -253,33 +254,26 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
           <?php endforeach; ?>
         </div>
         <div class="future-product-stage" aria-live="polite">
-          <?php foreach ($futureProducts as $index => $product): ?>
-            <article
-              class="future-product-detail<?= $index === 0 ? ' is-active' : '' ?>"
-              data-future-panel="<?= app_h($product['id']) ?>"
-              <?= $index === 0 ? '' : 'hidden' ?>
-            >
-              <div class="future-product-detail-copy">
-                <span class="card-label"><?= app_h($product['subtitle']) ?></span>
-                <h4><?= app_h($product['title']) ?></h4>
-                <p><?= app_h($product['text']) ?></p>
-                <ul class="simple-list hallenberg-list">
-                  <?php foreach ($product['facts'] as $fact): ?>
-                    <li><?= app_h($fact) ?></li>
-                  <?php endforeach; ?>
-                </ul>
-              </div>
-              <div class="future-product-media-stack">
-                <?php $mediaItems = $product['media_gallery'] ?? [$product['media']]; ?>
-                <?php foreach ($mediaItems as $mediaItem): ?>
-                  <figure class="premium-figure future-product-figure" data-lightbox-src="<?= app_h($mediaItem['src']) ?>" data-lightbox-alt="<?= app_h($mediaItem['alt']) ?>">
-                    <img src="<?= app_h($mediaItem['src']) ?>" alt="<?= app_h($mediaItem['alt']) ?>" loading="lazy">
-                    <figcaption><?= app_h($mediaItem['alt']) ?></figcaption>
-                  </figure>
+          <article class="future-product-detail is-active" id="future-product-detail">
+            <div class="future-product-detail-copy">
+              <span class="card-label" id="future-detail-label"><?= app_h($initialFutureProduct['subtitle']) ?></span>
+              <h4 id="future-detail-title"><?= app_h($initialFutureProduct['title']) ?></h4>
+              <p id="future-detail-text"><?= app_h($initialFutureProduct['text']) ?></p>
+              <ul class="simple-list hallenberg-list" id="future-detail-facts">
+                <?php foreach ($initialFutureProduct['facts'] as $fact): ?>
+                  <li><?= app_h($fact) ?></li>
                 <?php endforeach; ?>
-              </div>
-            </article>
-          <?php endforeach; ?>
+              </ul>
+            </div>
+            <div class="future-product-media-stack" id="future-detail-media">
+              <?php foreach (($initialFutureProduct['media_gallery'] ?? [$initialFutureProduct['media']]) as $mediaItem): ?>
+                <figure class="premium-figure future-product-figure" data-lightbox-src="<?= app_h($mediaItem['src']) ?>" data-lightbox-alt="<?= app_h($mediaItem['alt']) ?>">
+                  <img src="<?= app_h($mediaItem['src']) ?>" alt="<?= app_h($mediaItem['alt']) ?>" loading="lazy">
+                  <figcaption><?= app_h($mediaItem['alt']) ?></figcaption>
+                </figure>
+              <?php endforeach; ?>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -356,9 +350,63 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         });
 
         var futureCards = document.querySelectorAll('[data-future-target]');
-        var futurePanels = document.querySelectorAll('[data-future-panel]');
+        var futureDetailLabel = document.getElementById('future-detail-label');
+        var futureDetailTitle = document.getElementById('future-detail-title');
+        var futureDetailText = document.getElementById('future-detail-text');
+        var futureDetailFacts = document.getElementById('future-detail-facts');
+        var futureDetailMedia = document.getElementById('future-detail-media');
+        var futureData = <?= json_encode($futureProducts, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
 
-        if (futureCards.length && futurePanels.length) {
+        function bindFigure(figure) {
+          figure.addEventListener('click', function () {
+            openLightbox(figure.getAttribute('data-lightbox-src') || '', figure.getAttribute('data-lightbox-alt') || '');
+          });
+        }
+
+        function renderFutureProduct(product) {
+          if (!product || !futureDetailLabel || !futureDetailTitle || !futureDetailText || !futureDetailFacts || !futureDetailMedia) {
+            return;
+          }
+
+          futureDetailLabel.textContent = product.subtitle || '';
+          futureDetailTitle.textContent = product.title || '';
+          futureDetailText.textContent = product.text || '';
+          futureDetailFacts.innerHTML = '';
+
+          (product.facts || []).forEach(function (fact) {
+            var item = document.createElement('li');
+            item.textContent = fact;
+            futureDetailFacts.appendChild(item);
+          });
+
+          futureDetailMedia.innerHTML = '';
+
+          (product.media_gallery || [product.media]).forEach(function (mediaItem) {
+            if (!mediaItem || !mediaItem.src) {
+              return;
+            }
+
+            var figure = document.createElement('figure');
+            figure.className = 'premium-figure future-product-figure';
+            figure.setAttribute('data-lightbox-src', mediaItem.src);
+            figure.setAttribute('data-lightbox-alt', mediaItem.alt || '');
+
+            var imageElement = document.createElement('img');
+            imageElement.src = mediaItem.src;
+            imageElement.alt = mediaItem.alt || '';
+            imageElement.loading = 'lazy';
+
+            var captionElement = document.createElement('figcaption');
+            captionElement.textContent = mediaItem.alt || '';
+
+            figure.appendChild(imageElement);
+            figure.appendChild(captionElement);
+            bindFigure(figure);
+            futureDetailMedia.appendChild(figure);
+          });
+        }
+
+        if (futureCards.length && futureData.length) {
           futureCards.forEach(function (card) {
             card.addEventListener('click', function () {
               var target = card.getAttribute('data-future-target');
@@ -369,11 +417,9 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
                 item.setAttribute('aria-selected', active ? 'true' : 'false');
               });
 
-              futurePanels.forEach(function (panel) {
-                var active = panel.getAttribute('data-future-panel') === target;
-                panel.classList.toggle('is-active', active);
-                panel.hidden = !active;
-              });
+              renderFutureProduct(futureData.find(function (item) {
+                return item.id === target;
+              }) || null);
             });
           });
         }
