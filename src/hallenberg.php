@@ -173,8 +173,10 @@ if (!function_exists('app_hallenberg_story')) {
                     'Platz fuer Wechselrichter, Speicher und spaetere Steuerung',
                 ],
                 'media' => [
-                    app_hallenberg_media_item('', 'DJI_0110.webp', 'Fassadenseite und Montagebereich fuer den abgestimmten Kabelweg', true),
-                    app_hallenberg_media_item('', 'DJI_0113.webp', 'Geruest- und Fassadenansicht im Bereich der technischen Leitungsfuehrung', true),
+                    app_hallenberg_media_item('', '20260507_081501_Verkabelunghinterfallrohraußen.jpg', 'Verkabelung hinter dem Fallrohr an der Aussenfassade', true),
+                    app_hallenberg_media_item('', '20260507_111930_kellerfenster_alt.jpg', 'Kellerfenster im Bereich der geplanten Kabeldurchfuehrung', true),
+                    app_hallenberg_media_item('', '20260507_193455_kabeldurchgangkeller.jpg', 'Kabeldurchgang im Keller nach der Fassadenseite', true),
+                    app_hallenberg_media_item('', '20260507_193559_kabel_anschluss.jpg', 'Anschlussbild der weitergefuehrten Verkabelung im Technikbereich', true),
                 ],
             ],
             'scaffold' => [
