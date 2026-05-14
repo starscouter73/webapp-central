@@ -140,6 +140,13 @@ if (!function_exists('app_pages')) {
                 'nav' => false,
                 'nav_parent' => 'calendar.php',
             ],
+            [
+                'file' => 'hallenberg.php',
+                'label' => 'Hallenberg',
+                'title' => 'Hallenberg',
+                'eyebrow' => 'Referenzprojekt',
+                'description' => 'Premium-Projektseite fuer das Photovoltaik- und Modernisierungsprojekt Hallenberg.',
+            ],
         ];
     }
 }
@@ -234,6 +241,12 @@ if (!function_exists('app_modules')) {
                 'summary' => 'Monatskalender mit lokaler Terminliste und Voice-to-Text für neue Einträge.',
                 'href' => app_url('calendar.php'),
             ],
+            [
+                'name' => 'Hallenberg',
+                'status' => 'Neu',
+                'summary' => 'Premium-Projektseite fuer Photovoltaik, Montage, Medien und Smart-Energy-Architektur in Hallenberg.',
+                'href' => app_url('hallenberg.php'),
+            ],
         ];
     }
 }
@@ -280,6 +293,7 @@ if (!function_exists('app_project_resume_prompt_live')) {
         $featureGroups = [
             'Kalenderbasis' => ['Monatsansicht', 'Wochenansicht', 'Bearbeiten', 'Mapvorschau', 'Voice-to-Text'],
             'Terminlogik' => ['Suche', 'Druck', 'PDF-Export', 'Detailansicht'],
+            'Projektseiten' => ['Hallenberg-Showcase', 'Medienlogik', 'Drohnen-, Modul- und Techniksektionen'],
         ];
 
         $featureLines = [];
