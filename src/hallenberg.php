@@ -173,8 +173,8 @@ if (!function_exists('app_hallenberg_story')) {
                     'Vorher-/Nachher-Perspektive fuer Architektur und Energietechnik',
                 ],
                 'media' => [
-                    app_hallenberg_media_item('', 'DJI_0116.webp', 'Fachwerkhaus mit bereits sichtbarer PV-Anlage', true),
-                    app_hallenberg_media_item('', 'DJI_0111.webp', 'Fachwerkhaus und Dachflaeche in der Gesamtansicht', true),
+                    app_hallenberg_media_item('', '20260506_171535_KFZ_Montageteam_Photovoltaik.jpg', 'Straßenseite mit Fachwerkhaus, Geruest und Montageanlauf im Projektverlauf', true),
+                    app_hallenberg_media_item('', 'Hallenberg Photovoltaik Straßenseite.jpg', 'Dachkante und Straßenseite des Projekts im baulichen Kontext', true),
                 ],
             ],
             'engineering' => [
@@ -243,7 +243,7 @@ if (!function_exists('app_hallenberg_story')) {
                 'text' => 'Geruest und Zugangstechnik waren nicht nur Hilfsmittel, sondern integraler Teil der Bauabwicklung. Treppen, Podeste und Materialwege zeigen den Umfang des Projekts und die Vorbereitung auf sichere Dach- und Fassadenarbeit.',
                 'media' => [
                     app_hallenberg_media_item('', '20260506_171300_gerüst.jpg', 'Geruestzugang mit Treppen, Podesten und Fassadenebenen', true),
-                    app_hallenberg_media_item('', 'DJI_0115.webp', 'Geruest und Gebaeudefront im Projektzusammenhang', true),
+                    app_hallenberg_media_item('', '20260307_154754_Balkon_detailNah.jpg', 'Konstruktives Detail der Geruest- und Podestkonstruktion', true),
                 ],
             ],
             'timeline' => [
