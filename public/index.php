@@ -7,6 +7,7 @@ render_page(app_site_title(), 'Startseite', static function (): void {
     $modules = app_modules();
     $highlights = app_highlights();
     $statusCheckedAt = (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->format('d.m.Y H:i');
+    $infrastructureOverviewHtml = app_render_markdown(app_infrastructure_overview_markdown());
     ?>
     <section class="grid dashboard-grid">
       <article class="card feature-card">
@@ -49,7 +50,6 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       <article class="card prompt-card">
         <span class="card-label">Projektstatus</span>
         <h3>Status wie in einer klassischen Serverliste</h3>
-        <p>Hier erscheint nur der aktuell aktive Live-Status dieser Webapp. Den zentralen Neustart-Text findest du nur noch in der Zentrale.</p>
         <div class="status-icon-list">
           <article class="status-icon-item">
             <span class="status-icon is-online" aria-hidden="true"></span>
@@ -59,6 +59,9 @@ render_page(app_site_title(), 'Startseite', static function (): void {
               <p class="status-runtime">Geprueft am <?= app_h($statusCheckedAt) ?> Uhr auf webapp-central.de</p>
             </div>
           </article>
+        </div>
+        <div class="project-context-box markdown-overview">
+          <?= $infrastructureOverviewHtml ?>
         </div>
         <div class="button-row">
           <a class="btn btn-primary" href="<?= app_h(app_url('workspace.php')) ?>">Projektkontext in Zentrale</a>

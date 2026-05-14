@@ -304,6 +304,36 @@ a {
   font-size: 0.94rem;
 }
 
+.markdown-overview {
+  gap: 14px;
+}
+
+.markdown-overview h2,
+.markdown-overview h3,
+.markdown-overview h4,
+.markdown-overview p,
+.markdown-overview ul {
+  margin: 0;
+}
+
+.markdown-overview h2 {
+  font-size: 1.15rem;
+}
+
+.markdown-overview h3 {
+  font-size: 1rem;
+}
+
+.markdown-overview p,
+.markdown-overview li {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.markdown-overview ul {
+  padding-left: 20px;
+}
+
 .status-icon-list {
   grid-template-columns: 1fr;
 }

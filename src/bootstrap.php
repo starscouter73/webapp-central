@@ -247,6 +247,98 @@ if (!function_exists('app_project_resume_prompt')) {
     }
 }
 
+if (!function_exists('app_infrastructure_doc_path')) {
+    function app_infrastructure_doc_path(): string
+    {
+        return app_root() . '/DOKUMENTATION_INFRASTRUKTUR_ENTWICKLUNGSWEG.md';
+    }
+}
+
+if (!function_exists('app_infrastructure_overview_markdown')) {
+    function app_infrastructure_overview_markdown(): string
+    {
+        $path = app_infrastructure_doc_path();
+        if (!is_file($path)) {
+            return "## Infrastrukturuebersicht\n\n- Dokumentation wird vorbereitet.";
+        }
+
+        $content = (string)file_get_contents($path);
+        if ($content === '') {
+            return "## Infrastrukturuebersicht\n\n- Dokumentation ist aktuell leer.";
+        }
+
+        $parts = preg_split('/^\s*<details>/m', $content, 2);
+        $excerpt = trim((string)($parts[0] ?? ''));
+
+        return $excerpt !== '' ? $excerpt : "## Infrastrukturuebersicht\n\n- Keine Zusammenfassung verfuegbar.";
+    }
+}
+
+if (!function_exists('app_render_markdown')) {
+    function app_render_markdown(string $markdown): string
+    {
+        $lines = preg_split("/\r\n|\n|\r/", $markdown) ?: [];
+        $html = [];
+        $inList = false;
+        $inParagraph = false;
+
+        $closeParagraph = static function () use (&$html, &$inParagraph): void {
+            if ($inParagraph) {
+                $html[] = '</p>';
+                $inParagraph = false;
+            }
+        };
+
+        $closeList = static function () use (&$html, &$inList): void {
+            if ($inList) {
+                $html[] = '</ul>';
+                $inList = false;
+            }
+        };
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+
+            if ($trimmed === '') {
+                $closeParagraph();
+                $closeList();
+                continue;
+            }
+
+            if (preg_match('/^(#{1,3})\s+(.*)$/', $trimmed, $matches) === 1) {
+                $closeParagraph();
+                $closeList();
+                $level = strlen($matches[1]) + 1;
+                $level = min($level, 4);
+                $html[] = '<h' . $level . '>' . app_h($matches[2]) . '</h' . $level . '>';
+                continue;
+            }
+
+            if (preg_match('/^-+\s+(.*)$/', $trimmed, $matches) === 1) {
+                $closeParagraph();
+                if (!$inList) {
+                    $html[] = '<ul>';
+                    $inList = true;
+                }
+                $html[] = '<li>' . app_h($matches[1]) . '</li>';
+                continue;
+            }
+
+            $closeList();
+            if (!$inParagraph) {
+                $html[] = '<p>';
+                $inParagraph = true;
+            }
+            $html[] = app_h($trimmed) . ' ';
+        }
+
+        $closeParagraph();
+        $closeList();
+
+        return implode('', $html);
+    }
+}
+
 if (!function_exists('app_watch_signature')) {
     function app_watch_signature(): string
     {
