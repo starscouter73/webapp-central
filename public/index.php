@@ -6,6 +6,7 @@ require_once dirname(__DIR__) . '/src/layout.php';
 render_page(app_site_title(), 'Startseite', static function (): void {
     $modules = app_modules();
     $highlights = app_highlights();
+    $statusCheckedAt = (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->format('d.m.Y H:i');
     ?>
     <section class="grid dashboard-grid">
       <article class="card feature-card">
@@ -48,27 +49,14 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       <article class="card prompt-card">
         <span class="card-label">Projektstatus</span>
         <h3>Status wie in einer klassischen Serverliste</h3>
-        <p>Hier bleibt nur der eigentliche Status mit Ampel-Logik sichtbar. Darunter steht weiter der kopierbare Projekt-Prompt fuer den naechsten Chatstart.</p>
+        <p>Hier erscheint nur der aktuell aktive Live-Status dieser Webapp. Darunter steht weiter der kopierbare Projekt-Prompt fuer den naechsten Chatstart.</p>
         <div class="status-icon-list">
           <article class="status-icon-item">
             <span class="status-icon is-online" aria-hidden="true"></span>
             <div>
               <strong>Online</strong>
-              <p>Live-Stand ist erreichbar</p>
-            </div>
-          </article>
-          <article class="status-icon-item">
-            <span class="status-icon is-maintenance" aria-hidden="true"></span>
-            <div>
-              <strong>Wartung</strong>
-              <p>Aenderungen koennen direkt eingespielt werden</p>
-            </div>
-          </article>
-          <article class="status-icon-item">
-            <span class="status-icon is-offline" aria-hidden="true"></span>
-            <div>
-              <strong>Fallback</strong>
-              <p>Offline-Zustand ist als Reserve mitgedacht</p>
+              <p>Live-Stand ist erreichbar.</p>
+              <p class="status-runtime">Geprueft am <?= app_h($statusCheckedAt) ?> Uhr auf webapp-central.de</p>
             </div>
           </article>
         </div>
