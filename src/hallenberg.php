@@ -21,9 +21,10 @@ if (!function_exists('app_hallenberg_media_item')) {
     function app_hallenberg_media_item(string $category, string $file, string $alt, bool $fallback = false): array
     {
         $base = $fallback ? app_hallenberg_media_fallback_base() : app_hallenberg_media_base() . '/' . $category;
+        $path = str_replace('%2F', '/', rawurlencode(ltrim($file, '/')));
 
         return [
-            'src' => $base . '/' . ltrim($file, '/'),
+            'src' => $base . '/' . $path,
             'alt' => $alt,
             'category' => $category,
             'fallback' => $fallback,

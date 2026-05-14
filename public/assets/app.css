@@ -1294,6 +1294,37 @@ body.lightbox-open {
     column-count: 1;
   }
 
+  .hallenberg-sticky-nav {
+    position: static;
+    top: auto;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .hallenberg-sticky-nav a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .hallenberg-hero-card,
+  .hallenberg-section,
+  .hallenberg-finale {
+    padding: 22px;
+    border-radius: 28px;
+  }
+
+  .hallenberg-hero-copy h2 {
+    font-size: clamp(2rem, 9vw, 3.2rem);
+  }
+
+  .section-heading h3,
+  .section-copy h3,
+  .hallenberg-finale-copy h3 {
+    font-size: clamp(1.45rem, 7vw, 2.2rem);
+  }
+
   .page-shell {
     width: min(100% - 20px, 1180px);
     padding-top: 16px;
