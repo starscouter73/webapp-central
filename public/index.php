@@ -45,36 +45,69 @@ render_page(app_site_title(), 'Startseite', static function (): void {
     </section>
 
     <section class="grid split">
-      <article class="card live-status-card">
-        <span class="card-label">Live-Status</span>
-        <h3>Webprojekt direkt im Aufbau verfolgen</h3>
-        <p>Hier erscheint der aktuelle Entwicklungsstand der Webapp als kompakte Live-Vorschau mit direktem Einstieg in den sichtbaren Stand.</p>
-        <div class="live-status-preview">
-          <iframe
-            src="<?= app_h(app_url('calendar.php')) ?>"
-            title="Live-Vorschau der aktuellen Webapp"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-          ></iframe>
+      <article class="card prompt-card">
+        <span class="card-label">Projektstatus</span>
+        <h3>Ruhiger Statusblock statt Live-Vorschau</h3>
+        <p>Die Webapp wird hier nicht mehr live eingebettet. Stattdessen zeigt der Block eine kompakte Vorschau, den aktuellen Status und darunter einen direkt kopierbaren Prompt.</p>
+        <div class="status-preview-board" aria-hidden="true">
+          <div class="status-preview-top">
+            <span class="status-preview-dot is-online"></span>
+            <span class="status-preview-line status-preview-line-wide"></span>
+          </div>
+          <div class="status-preview-hero">
+            <strong>Webapp Central</strong>
+            <span>Zentrale Arbeitsflaeche fuer Webprojekte und Module</span>
+          </div>
+          <div class="status-preview-grid">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
         </div>
-        <div class="live-status-meta">
-          <div class="metric-tile">
-            <strong>Live</strong>
-            <span>Server aktiv</span>
-          </div>
-          <div class="metric-tile">
-            <strong>Kalender</strong>
-            <span>aktueller Fokus</span>
-          </div>
-          <div class="metric-tile">
-            <strong><?= count($modules) ?></strong>
-            <span>Module verlinkt</span>
-          </div>
+        <div class="status-icon-list">
+          <article class="status-icon-item">
+            <span class="status-icon is-online" aria-hidden="true">●</span>
+            <div>
+              <strong>Online</strong>
+              <p>Live-Stand ist erreichbar</p>
+            </div>
+          </article>
+          <article class="status-icon-item">
+            <span class="status-icon is-maintenance" aria-hidden="true">◐</span>
+            <div>
+              <strong>Wartung</strong>
+              <p>Aenderungen koennen direkt eingespielt werden</p>
+            </div>
+          </article>
+          <article class="status-icon-item">
+            <span class="status-icon is-offline" aria-hidden="true">○</span>
+            <div>
+              <strong>Fallback</strong>
+              <p>Offline-Zustand ist als Reserve mitgedacht</p>
+            </div>
+          </article>
+        </div>
+        <div class="project-context-box prompt-box">
+          <pre id="homepage-project-prompt"># Projekt: webapp-central.de
+
+- Ziel: Webapp Central als saubere Arbeits- und Projektzentrale weiterentwickeln
+- Aktueller Fokus: Kalender unter /calendar.php
+- Bereits live: Monatsansicht, Wochenansicht, Terminansicht, Bearbeiten, Mapvorschau, Druck, PDF-Export, Suche
+- Repo lokal: C:\Users\dorth\Documents\webapp-zentrale
+- Live-Server-Pfad: /opt/webapps/webzentrale/
+- Deploy aktuell: lokal aendern, commit/push, danach SSH-Sync auf den Server
+- Bitte direkt im bestehenden Projekt weiterarbeiten und den Live-Stand mitpruefen
+
+## Naechster sinnvoller Schritt
+- UI weiter vereinfachen und produktionsreif machen
+- Kalenderlogik spaeter von localStorage auf echte Server-Speicherung umstellen</pre>
         </div>
         <div class="button-row">
-          <a class="btn btn-primary" href="<?= app_h(app_url('calendar.php')) ?>">Live-Modul oeffnen</a>
+          <button class="btn btn-primary" id="copy-homepage-prompt" type="button">Prompt kopieren</button>
           <a class="btn btn-ghost" href="<?= app_h(app_url('workspace.php')) ?>">Projektkontext ansehen</a>
         </div>
+        <p class="calendar-status" id="copy-homepage-prompt-status">Bereit zum Kopieren.</p>
       </article>
       <article class="card">
         <span class="card-label">Direkte Wege</span>
@@ -88,5 +121,34 @@ render_page(app_site_title(), 'Startseite', static function (): void {
         </div>
       </article>
     </section>
+
+    <script>
+      (function () {
+        var copyButton = document.getElementById('copy-homepage-prompt');
+        var copyTarget = document.getElementById('homepage-project-prompt');
+        var copyStatus = document.getElementById('copy-homepage-prompt-status');
+
+        if (!copyButton || !copyTarget || !copyStatus) {
+          return;
+        }
+
+        copyButton.addEventListener('click', function () {
+          var text = copyTarget.textContent || '';
+
+          if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+            copyStatus.textContent = 'Clipboard-API im aktuellen Browser nicht verfuegbar.';
+            return;
+          }
+
+          navigator.clipboard.writeText(text)
+            .then(function () {
+              copyStatus.textContent = 'Prompt wurde kopiert.';
+            })
+            .catch(function () {
+              copyStatus.textContent = 'Kopieren ist fehlgeschlagen.';
+            });
+        });
+      }());
+    </script>
     <?php
 });
