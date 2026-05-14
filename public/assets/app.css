@@ -630,6 +630,7 @@ a {
 .calendar-transcript,
 .agenda-meta,
 .agenda-address,
+.agenda-note,
 .empty-state {
   color: var(--muted);
 }
@@ -676,7 +677,8 @@ a {
 }
 
 .agenda-item {
-  padding: 18px;
+  gap: 10px;
+  padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.72);
@@ -686,6 +688,33 @@ a {
 
 .agenda-item p {
   margin: 0;
+}
+
+.agenda-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.agenda-heading strong {
+  font-size: 1.1rem;
+  line-height: 1.15;
+}
+
+.agenda-meta {
+  font-size: 0.92rem;
+}
+
+.agenda-address,
+.agenda-note {
+  font-size: 0.94rem;
+  line-height: 1.35;
+}
+
+.agenda-note {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .agenda-item:hover,

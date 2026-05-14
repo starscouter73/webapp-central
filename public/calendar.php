@@ -403,12 +403,13 @@ render_page('Kalender', 'Termine', static function (): void {
 
           dayEvents.sort(compareEvents).forEach(function (eventItem) {
             var article = document.createElement('article');
+            var heading = document.createElement('div');
             var title = document.createElement('strong');
             var meta = document.createElement('span');
             var address = document.createElement('p');
             var note = document.createElement('p');
             var actions = document.createElement('div');
-            var mapLink = document.createElement('a');
+            var detailButton = document.createElement('button');
             var editButton = document.createElement('button');
             var removeButton = document.createElement('button');
 
@@ -416,6 +417,7 @@ render_page('Kalender', 'Termine', static function (): void {
             if (eventItem.id === selectedEventId) {
               article.className += ' is-active';
             }
+            heading.className = 'agenda-heading';
             title.textContent = eventItem.title;
             meta.className = 'agenda-meta';
             meta.textContent = (eventItem.time || 'Ohne Uhrzeit') + ' | ' + eventItem.date;
@@ -425,39 +427,34 @@ render_page('Kalender', 'Termine', static function (): void {
               address.textContent = eventItem.address;
             }
 
+            note.className = 'agenda-note';
             note.textContent = eventItem.note || 'Keine Notiz';
             actions.className = 'agenda-actions';
-
-            if (eventItem.address) {
-              var preview = document.createElement('iframe');
-              mapLink.className = 'btn btn-secondary btn-small';
-              mapLink.href = buildMapUrl(eventItem.address);
-              mapLink.target = '_blank';
-              mapLink.rel = 'noreferrer noopener';
-              mapLink.textContent = 'Karte';
-              preview.className = 'agenda-map-preview';
-              preview.title = 'Kartenvorschau fuer ' + eventItem.title;
-              preview.loading = 'lazy';
-              preview.referrerPolicy = 'no-referrer-when-downgrade';
-              preview.src = buildMapEmbedUrl(eventItem.address);
-              actions.appendChild(mapLink);
-              article.appendChild(preview);
-            }
+            detailButton.className = 'btn btn-secondary btn-small';
+            detailButton.type = 'button';
+            detailButton.textContent = 'Weiterlesen';
+            detailButton.addEventListener('click', function (clickEvent) {
+              clickEvent.stopPropagation();
+              selectEvent(eventItem.id);
+            });
 
             editButton.className = 'btn btn-ghost btn-small';
             editButton.type = 'button';
             editButton.textContent = 'Bearbeiten';
-            editButton.addEventListener('click', function () {
+            editButton.addEventListener('click', function (clickEvent) {
+              clickEvent.stopPropagation();
               loadEventIntoForm(eventItem);
             });
 
             removeButton.className = 'btn btn-ghost btn-small';
             removeButton.type = 'button';
             removeButton.textContent = 'Loeschen';
-            removeButton.addEventListener('click', function () {
+            removeButton.addEventListener('click', function (clickEvent) {
+              clickEvent.stopPropagation();
               removeEvent(eventItem.id);
             });
 
+            actions.appendChild(detailButton);
             actions.appendChild(editButton);
             actions.appendChild(removeButton);
 
@@ -465,8 +462,9 @@ render_page('Kalender', 'Termine', static function (): void {
               selectEvent(eventItem.id);
             });
 
-            article.appendChild(title);
-            article.appendChild(meta);
+            heading.appendChild(title);
+            heading.appendChild(meta);
+            article.appendChild(heading);
             if (eventItem.address) {
               article.appendChild(address);
             }
