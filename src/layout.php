@@ -46,10 +46,6 @@ if (!function_exists('render_page')) {
           <span>/</span>
           <span><?= app_h($title) ?></span>
         </nav>
-        <p class="page-intro-copy">
-          <strong><?= app_h($eyebrow) ?></strong>
-          <span><?= app_h((string)($currentMeta['description'] ?? '')) ?></span>
-        </p>
       </section>
 
       <?php $content(); ?>

@@ -136,8 +136,7 @@ a {
 }
 
 .page-intro,
-.page-breadcrumb,
-.page-intro-copy {
+.page-breadcrumb {
   display: grid;
   gap: 6px;
 }
@@ -160,19 +159,6 @@ a {
 
 .page-breadcrumb a {
   text-decoration: none;
-}
-
-.page-intro-copy {
-  gap: 4px;
-}
-
-.page-intro-copy strong {
-  font-size: 1rem;
-  letter-spacing: -0.02em;
-}
-
-.page-intro-copy span {
-  color: var(--muted);
 }
 
 .site-footer {
