@@ -85,6 +85,66 @@ if (!function_exists('app_hallenberg_timeline')) {
     }
 }
 
+if (!function_exists('app_hallenberg_future_products')) {
+    function app_hallenberg_future_products(): array
+    {
+        return [
+            [
+                'id' => 'battery',
+                'icon' => 'BAT',
+                'title' => 'Fox ESS Batterie',
+                'subtitle' => 'Erweiterung der Eigenverbrauchsstrategie',
+                'text' => 'Der geplante Speicher ergaenzt die Anlage um Lastverschiebung, spaetere Backup-Szenarien und eine deutlich staerkere Nutzung des selbst erzeugten Stroms im Alltag.',
+                'facts' => [
+                    'Fox ESS B4300-X5 als geplanter Speicherbaustein',
+                    'mehr Eigenverbrauch in Abend- und Nachtstunden',
+                    'saubere Einbindung in Monitoring und Energielogik',
+                ],
+                'media' => app_hallenberg_media_item('', '20260424_115402_Materiallagerung.jpg', 'Gelieferte Systemkomponenten fuer Speicher- und Energietechnik', true),
+            ],
+            [
+                'id' => 'wallbox',
+                'icon' => 'WB',
+                'title' => 'Wallbox',
+                'subtitle' => 'Ladepunkt fuer spaeteres PV-Ueberschussladen',
+                'text' => 'Die Ladeinfrastruktur ist als Teil der Gesamtarchitektur mitgedacht. Ziel ist ein Ladepunkt, der spaeter in Lastmanagement, Monitoring und moegliches Ueberschussladen eingebunden werden kann.',
+                'facts' => [
+                    'Enpal AC Charger Gen 2 in der Zielarchitektur',
+                    'Vorbereitung fuer E-Mobilitaet am Objekt',
+                    'spaetere Kopplung mit PV-Erzeugung und Speicher moeglich',
+                ],
+                'media' => app_hallenberg_media_item('', '20260418_103612_Materiallagerung_2.jpg', 'Materiallieferung fuer spaetere Energie- und Ladeinfrastruktur', true),
+            ],
+            [
+                'id' => 'monitoring',
+                'icon' => 'SM',
+                'title' => 'Smart Meter & Monitoring',
+                'subtitle' => 'Messung, Auswertung und Systemtransparenz',
+                'text' => 'Monitoring ist die Voraussetzung dafuer, Erzeugung, Verbrauch, Speicherladung und spaetere Verbraucher intelligent zusammenzufuehren. Genau deshalb wurden Kabelwege und Technikbereich frueh mitgedacht.',
+                'facts' => [
+                    'Smart-Meter-Anbindung fuer Anlagenlogik und Transparenz',
+                    'LAN- und Technikraumthema bereits in der Baustelle abgestimmt',
+                    'Grundlage fuer Monitoring, Analyse und spaetere Automatisierung',
+                ],
+                'media' => app_hallenberg_media_item('', '20260507_193559_kabel_anschluss.jpg', 'Anschlussbereich als Grundlage fuer Monitoring und Messkonzepte', true),
+            ],
+            [
+                'id' => 'heatpump',
+                'icon' => 'WP',
+                'title' => 'Waermepumpen-Vorbereitung',
+                'subtitle' => 'PV als Basis fuer spaetere Heizungsintegration',
+                'text' => 'Die Seite zeigt nicht nur den aktuellen PV-Ausbau, sondern bereits die Vorarbeit fuer ein spaeter gekoppeltes Energiesystem mit intelligenten Verbrauchern und einer moeglichen Waermepumpe.',
+                'facts' => [
+                    'Energiefluss spaeter auf weitere Verbraucher erweiterbar',
+                    'Technikwege und Lastlogik wurden nicht nur kurzfristig gedacht',
+                    'solide Grundlage fuer eine kuenftige Modernisierung der Heiztechnik',
+                ],
+                'media' => app_hallenberg_media_item('', '20260507_111930_kellerfenster_alt.jpg', 'Vorbemessener Bereich fuer Technikfuehrung und spaetere Systemerweiterungen', true),
+            ],
+        ];
+    }
+}
+
 if (!function_exists('app_hallenberg_story')) {
     function app_hallenberg_story(): array
     {
@@ -182,13 +242,14 @@ if (!function_exists('app_hallenberg_story')) {
             'scaffold' => [
                 'text' => 'Geruest und Zugangstechnik waren nicht nur Hilfsmittel, sondern integraler Teil der Bauabwicklung. Treppen, Podeste und Materialwege zeigen den Umfang des Projekts und die Vorbereitung auf sichere Dach- und Fassadenarbeit.',
                 'media' => [
-                    app_hallenberg_media_item('', 'DJI_0115.webp', 'Geruestzugang mit Treppen und Podesten', true),
-                    app_hallenberg_media_item('', 'DJI_0111.webp', 'Fachwerkhaus mit Geruest und PV-Anlage', true),
+                    app_hallenberg_media_item('', '20260506_171300_gerüst.jpg', 'Geruestzugang mit Treppen, Podesten und Fassadenebenen', true),
+                    app_hallenberg_media_item('', 'DJI_0115.webp', 'Geruest und Gebaeudefront im Projektzusammenhang', true),
                 ],
             ],
             'timeline' => [
                 'media' => [
-                    app_hallenberg_media_item('', '1Video Project 52026-05-09.mp4_snapshot_15.19.658.webp', 'Fruehe Projektphase mit vorbereiteter Unterkonstruktion', true),
+                    app_hallenberg_media_item('', '20260507_082232_Materiallieferung_Lagerung.jpg', 'Materiallieferung und Lagerung vor der Montagephase', true),
+                    app_hallenberg_media_item('', '20260506_171300_gerüst.jpg', 'Geruestphase als vorbereiteter Zugang fuer die Bauarbeiten', true),
                     app_hallenberg_media_item('', '1Video Project 52026-05-09.mp4_snapshot_34.28.591.webp', 'Montagephase der PV-Anlage', true),
                     app_hallenberg_media_item('', '1Video Project 52026-05-09.mp4_snapshot_37.27.280.webp', 'Nahezu fertig integrierte Gesamtanlage', true),
                 ],

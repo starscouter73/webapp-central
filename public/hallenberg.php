@@ -8,8 +8,9 @@ $story = app_hallenberg_story();
 $sections = app_hallenberg_sections();
 $overviewCards = app_hallenberg_overview_cards();
 $timeline = app_hallenberg_timeline();
+$futureProducts = app_hallenberg_future_products();
 
-render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $sections, $overviewCards, $timeline): void {
+render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $sections, $overviewCards, $timeline, $futureProducts): void {
     ?>
     <section class="hallenberg-page">
       <article class="hallenberg-hero-card">
@@ -226,10 +227,44 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
           <h3>Speicher, Wallbox, Monitoring und spaetere Waermepumpe</h3>
           <p><?= app_h($story['future']['text']) ?></p>
         </div>
-        <div class="grid two-up">
-          <?php foreach ($story['future']['bullets'] as $bullet): ?>
-            <article class="future-card">
-              <strong><?= app_h($bullet) ?></strong>
+        <div class="future-product-grid" role="tablist" aria-label="Smart-Energy-Produkte">
+          <?php foreach ($futureProducts as $index => $product): ?>
+            <button
+              class="future-product-card<?= $index === 0 ? ' is-active' : '' ?>"
+              type="button"
+              role="tab"
+              aria-selected="<?= $index === 0 ? 'true' : 'false' ?>"
+              data-future-target="<?= app_h($product['id']) ?>"
+            >
+              <span class="future-product-icon"><?= app_h($product['icon']) ?></span>
+              <span class="future-product-copy">
+                <strong><?= app_h($product['title']) ?></strong>
+                <span><?= app_h($product['subtitle']) ?></span>
+              </span>
+            </button>
+          <?php endforeach; ?>
+        </div>
+        <div class="future-product-stage">
+          <?php foreach ($futureProducts as $index => $product): ?>
+            <article
+              class="future-product-detail<?= $index === 0 ? ' is-active' : '' ?>"
+              data-future-panel="<?= app_h($product['id']) ?>"
+              <?= $index === 0 ? '' : 'hidden' ?>
+            >
+              <div class="future-product-detail-copy">
+                <span class="card-label"><?= app_h($product['subtitle']) ?></span>
+                <h4><?= app_h($product['title']) ?></h4>
+                <p><?= app_h($product['text']) ?></p>
+                <ul class="simple-list hallenberg-list">
+                  <?php foreach ($product['facts'] as $fact): ?>
+                    <li><?= app_h($fact) ?></li>
+                  <?php endforeach; ?>
+                </ul>
+              </div>
+              <figure class="premium-figure future-product-figure" data-lightbox-src="<?= app_h($product['media']['src']) ?>" data-lightbox-alt="<?= app_h($product['media']['alt']) ?>">
+                <img src="<?= app_h($product['media']['src']) ?>" alt="<?= app_h($product['media']['alt']) ?>" loading="lazy">
+                <figcaption><?= app_h($product['media']['alt']) ?></figcaption>
+              </figure>
             </article>
           <?php endforeach; ?>
         </div>
@@ -306,6 +341,29 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
             closeLightbox();
           }
         });
+
+        var futureCards = document.querySelectorAll('[data-future-target]');
+        var futurePanels = document.querySelectorAll('[data-future-panel]');
+
+        if (futureCards.length && futurePanels.length) {
+          futureCards.forEach(function (card) {
+            card.addEventListener('click', function () {
+              var target = card.getAttribute('data-future-target');
+
+              futureCards.forEach(function (item) {
+                var active = item === card;
+                item.classList.toggle('is-active', active);
+                item.setAttribute('aria-selected', active ? 'true' : 'false');
+              });
+
+              futurePanels.forEach(function (panel) {
+                var active = panel.getAttribute('data-future-panel') === target;
+                panel.classList.toggle('is-active', active);
+                panel.hidden = !active;
+              });
+            });
+          });
+        }
       }());
     </script>
     <?php

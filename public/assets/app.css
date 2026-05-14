@@ -860,6 +860,11 @@ a {
 .dual-visual-stage,
 .premium-figure,
 .overview-chip-card,
+.future-product-grid,
+.future-product-card,
+.future-product-stage,
+.future-product-detail,
+.future-product-detail-copy,
 .future-card,
 .timeline-step,
 .hallenberg-finale,
@@ -1166,6 +1171,89 @@ a {
   gap: 18px;
 }
 
+.future-product-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.future-product-card {
+  width: 100%;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f5f5f5;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.future-product-card:hover,
+.future-product-card.is-active {
+  transform: translateY(-1px);
+  border-color: rgba(255, 180, 0, 0.35);
+  background:
+    linear-gradient(140deg, rgba(255, 180, 0, 0.12), rgba(77, 163, 255, 0.08)),
+    rgba(255, 255, 255, 0.06);
+}
+
+.future-product-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 18px;
+  background: linear-gradient(140deg, rgba(255, 180, 0, 0.22), rgba(77, 163, 255, 0.2));
+  font: 700 0.85rem/1 Arial, sans-serif;
+}
+
+.future-product-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.future-product-copy strong {
+  color: #fff;
+  font-size: 1.02rem;
+}
+
+.future-product-copy span {
+  color: rgba(245, 245, 245, 0.68);
+  line-height: 1.45;
+}
+
+.future-product-stage {
+  margin-top: 6px;
+}
+
+.future-product-detail {
+  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.1fr);
+  align-items: stretch;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.future-product-detail h4 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.3rem, 2vw, 1.9rem);
+  letter-spacing: -0.03em;
+}
+
+.future-product-detail p {
+  margin: 0;
+}
+
+.future-product-detail.is-active {
+  display: grid;
+}
+
+.future-product-figure img {
+  min-height: 320px;
+}
+
 .future-card {
   min-height: 120px;
   align-content: center;
@@ -1276,6 +1364,8 @@ body.lightbox-open {
   .split-media,
   .hallenberg-finale,
   .hallenberg-overview-grid,
+  .future-product-grid,
+  .future-product-detail,
   .drone-showcase-grid,
   .timeline-gallery,
   .hallenberg-finale-media,
@@ -1297,6 +1387,10 @@ body.lightbox-open {
 
   .hallenberg-masonry {
     column-count: 1;
+  }
+
+  .future-product-figure img {
+    min-height: 240px;
   }
 
   .hallenberg-sticky-nav {
