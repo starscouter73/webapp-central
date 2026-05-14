@@ -47,41 +47,25 @@ render_page(app_site_title(), 'Startseite', static function (): void {
     <section class="grid split">
       <article class="card prompt-card">
         <span class="card-label">Projektstatus</span>
-        <h3>Ruhiger Statusblock statt Live-Vorschau</h3>
-        <p>Die Webapp wird hier nicht mehr live eingebettet. Stattdessen zeigt der Block eine kompakte Vorschau, den aktuellen Status und darunter einen direkt kopierbaren Prompt.</p>
-        <div class="status-preview-board" aria-hidden="true">
-          <div class="status-preview-top">
-            <span class="status-preview-dot is-online"></span>
-            <span class="status-preview-line status-preview-line-wide"></span>
-          </div>
-          <div class="status-preview-hero">
-            <strong>Webapp Central</strong>
-            <span>Zentrale Arbeitsflaeche fuer Webprojekte und Module</span>
-          </div>
-          <div class="status-preview-grid">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>
+        <h3>Status wie in einer klassischen Serverliste</h3>
+        <p>Hier bleibt nur der eigentliche Status mit Ampel-Logik sichtbar. Darunter steht weiter der kopierbare Projekt-Prompt fuer den naechsten Chatstart.</p>
         <div class="status-icon-list">
           <article class="status-icon-item">
-            <span class="status-icon is-online" aria-hidden="true">●</span>
+            <span class="status-icon is-online" aria-hidden="true"></span>
             <div>
               <strong>Online</strong>
               <p>Live-Stand ist erreichbar</p>
             </div>
           </article>
           <article class="status-icon-item">
-            <span class="status-icon is-maintenance" aria-hidden="true">◐</span>
+            <span class="status-icon is-maintenance" aria-hidden="true"></span>
             <div>
               <strong>Wartung</strong>
               <p>Aenderungen koennen direkt eingespielt werden</p>
             </div>
           </article>
           <article class="status-icon-item">
-            <span class="status-icon is-offline" aria-hidden="true">○</span>
+            <span class="status-icon is-offline" aria-hidden="true"></span>
             <div>
               <strong>Fallback</strong>
               <p>Offline-Zustand ist als Reserve mitgedacht</p>
