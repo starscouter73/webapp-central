@@ -1194,6 +1194,10 @@ a {
   background: rgba(4, 6, 10, 0.88);
 }
 
+.lightbox-shell[hidden] {
+  display: none;
+}
+
 .lightbox-image {
   max-width: min(1100px, 100%);
   max-height: 78vh;
