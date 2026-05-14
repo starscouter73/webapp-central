@@ -49,7 +49,7 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       <article class="card prompt-card">
         <span class="card-label">Projektstatus</span>
         <h3>Status wie in einer klassischen Serverliste</h3>
-        <p>Hier erscheint nur der aktuell aktive Live-Status dieser Webapp. Darunter steht weiter der kopierbare Projekt-Prompt fuer den naechsten Chatstart.</p>
+        <p>Hier erscheint nur der aktuell aktive Live-Status dieser Webapp. Den zentralen Neustart-Text findest du nur noch in der Zentrale.</p>
         <div class="status-icon-list">
           <article class="status-icon-item">
             <span class="status-icon is-online" aria-hidden="true"></span>
@@ -60,26 +60,9 @@ render_page(app_site_title(), 'Startseite', static function (): void {
             </div>
           </article>
         </div>
-        <div class="project-context-box prompt-box">
-          <pre id="homepage-project-prompt"># Projekt: webapp-central.de
-
-- Ziel: Webapp Central als saubere Arbeits- und Projektzentrale weiterentwickeln
-- Aktueller Fokus: Kalender unter /calendar.php
-- Bereits live: Monatsansicht, Wochenansicht, Terminansicht, Bearbeiten, Mapvorschau, Druck, PDF-Export, Suche
-- Repo lokal: C:\Users\dorth\Documents\webapp-zentrale
-- Live-Server-Pfad: /opt/webapps/webzentrale/
-- Deploy aktuell: lokal aendern, commit/push, danach SSH-Sync auf den Server
-- Bitte direkt im bestehenden Projekt weiterarbeiten und den Live-Stand mitpruefen
-
-## Naechster sinnvoller Schritt
-- UI weiter vereinfachen und produktionsreif machen
-- Kalenderlogik spaeter von localStorage auf echte Server-Speicherung umstellen</pre>
-        </div>
         <div class="button-row">
-          <button class="btn btn-primary" id="copy-homepage-prompt" type="button">Prompt kopieren</button>
-          <a class="btn btn-ghost" href="<?= app_h(app_url('workspace.php')) ?>">Projektkontext ansehen</a>
+          <a class="btn btn-primary" href="<?= app_h(app_url('workspace.php')) ?>">Projektkontext in Zentrale</a>
         </div>
-        <p class="calendar-status" id="copy-homepage-prompt-status">Bereit zum Kopieren.</p>
       </article>
       <article class="card">
         <span class="card-label">Direkte Wege</span>
@@ -93,34 +76,5 @@ render_page(app_site_title(), 'Startseite', static function (): void {
         </div>
       </article>
     </section>
-
-    <script>
-      (function () {
-        var copyButton = document.getElementById('copy-homepage-prompt');
-        var copyTarget = document.getElementById('homepage-project-prompt');
-        var copyStatus = document.getElementById('copy-homepage-prompt-status');
-
-        if (!copyButton || !copyTarget || !copyStatus) {
-          return;
-        }
-
-        copyButton.addEventListener('click', function () {
-          var text = copyTarget.textContent || '';
-
-          if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
-            copyStatus.textContent = 'Clipboard-API im aktuellen Browser nicht verfuegbar.';
-            return;
-          }
-
-          navigator.clipboard.writeText(text)
-            .then(function () {
-              copyStatus.textContent = 'Prompt wurde kopiert.';
-            })
-            .catch(function () {
-              copyStatus.textContent = 'Kopieren ist fehlgeschlagen.';
-            });
-        });
-      }());
-    </script>
     <?php
 });
