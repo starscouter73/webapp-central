@@ -112,10 +112,16 @@ render_page('Kalender', 'Termine', static function (): void {
             <p id="overview-summary">Die naechsten Termine werden geladen.</p>
           </div>
           <div class="button-row">
+            <button class="btn btn-secondary" id="overview-pdf" type="button">PDF exportieren</button>
+            <button class="btn btn-ghost" id="day-pdf" type="button">Tag als PDF</button>
             <button class="btn btn-secondary" id="overview-print" type="button">Uebersicht drucken</button>
             <button class="btn btn-ghost" id="day-print" type="button">Tag drucken</button>
           </div>
         </div>
+        <label class="field calendar-search-field">
+          <span>Termin-Suche</span>
+          <input id="overview-search" type="search" placeholder="Nach Titel, Adresse, Notiz oder Datum suchen">
+        </label>
         <div class="calendar-overview-metrics" id="overview-metrics"></div>
         <div class="calendar-overview-list" id="overview-list">
           <p class="empty-state">Noch keine Termine vorhanden.</p>
@@ -147,6 +153,7 @@ render_page('Kalender', 'Termine', static function (): void {
         var overviewSummary = document.getElementById('overview-summary');
         var overviewMetrics = document.getElementById('overview-metrics');
         var overviewList = document.getElementById('overview-list');
+        var overviewSearch = document.getElementById('overview-search');
         var formLabel = document.getElementById('event-form-label');
         var formTitle = document.getElementById('event-form-title');
         var editIdInput = document.getElementById('event-edit-id');
@@ -219,6 +226,15 @@ render_page('Kalender', 'Termine', static function (): void {
         });
         document.getElementById('day-print').addEventListener('click', function () {
           printAgendaOverview('day');
+        });
+        document.getElementById('overview-pdf').addEventListener('click', function () {
+          exportAgendaPdf('all');
+        });
+        document.getElementById('day-pdf').addEventListener('click', function () {
+          exportAgendaPdf('day');
+        });
+        overviewSearch.addEventListener('input', function () {
+          renderOverview();
         });
 
         monthViewButton.addEventListener('click', function () {
@@ -658,18 +674,26 @@ render_page('Kalender', 'Termine', static function (): void {
           var upcomingEvents = sortedEvents.filter(function (eventItem) {
             return buildEventTimestamp(eventItem) >= startOfDayTimestamp(new Date());
           });
+          var searchTerm = normalizeSearch(overviewSearch.value);
           var displayEvents = upcomingEvents.length ? upcomingEvents : sortedEvents;
+
+          if (searchTerm) {
+            displayEvents = displayEvents.filter(function (eventItem) {
+              return matchesSearch(eventItem, searchTerm);
+            });
+          }
 
           overviewTitle.textContent = upcomingEvents.length ? 'Anstehende Termine' : 'Alle Termine';
           overviewSummary.textContent = displayEvents.length
             ? displayEvents.length + ' Termin' + (displayEvents.length === 1 ? '' : 'e') + ' in der Uebersicht.'
-            : 'Noch keine Termine vorhanden.';
+            : 'Keine Termine fuer die aktuelle Suche gefunden.';
 
           renderOverviewMetrics(sortedEvents, upcomingEvents);
           renderOverviewList(displayEvents);
         }
 
         function renderOverviewMetrics(sortedEvents, upcomingEvents) {
+          var filteredEvents = getOverviewEventsForExport();
           var nextEvent = upcomingEvents.length ? upcomingEvents[0] : null;
           var cards = [
             {
@@ -683,6 +707,10 @@ render_page('Kalender', 'Termine', static function (): void {
             {
               label: 'Naechster Termin',
               value: nextEvent ? formatEventStamp(nextEvent) : 'Keiner'
+            },
+            {
+              label: 'Gefiltert',
+              value: String(filteredEvents.length)
             }
           ];
 
@@ -706,7 +734,7 @@ render_page('Kalender', 'Termine', static function (): void {
           overviewList.innerHTML = '';
 
           if (!displayEvents.length) {
-            overviewList.innerHTML = '<p class="empty-state">Noch keine Termine vorhanden.</p>';
+            overviewList.innerHTML = '<p class="empty-state">Noch keine passenden Termine vorhanden.</p>';
             return;
           }
 
@@ -770,6 +798,23 @@ render_page('Kalender', 'Termine', static function (): void {
           });
         }
 
+        function getOverviewEventsForExport() {
+          var sortedEvents = getSortedEvents(events);
+          var upcomingEvents = sortedEvents.filter(function (eventItem) {
+            return buildEventTimestamp(eventItem) >= startOfDayTimestamp(new Date());
+          });
+          var displayEvents = upcomingEvents.length ? upcomingEvents : sortedEvents;
+          var searchTerm = normalizeSearch(overviewSearch.value);
+
+          if (!searchTerm) {
+            return displayEvents;
+          }
+
+          return displayEvents.filter(function (eventItem) {
+            return matchesSearch(eventItem, searchTerm);
+          });
+        }
+
         function buildEventTimestamp(eventItem) {
           var timeValue = eventItem.time || '23:59';
           return new Date(eventItem.date + 'T' + timeValue + ':00').getTime();
@@ -804,7 +849,7 @@ render_page('Kalender', 'Termine', static function (): void {
         function printAgendaOverview(mode) {
           var printableEvents = mode === 'day'
             ? getEventsForDate(selectedDate).slice().sort(compareEvents)
-            : getSortedEvents(events);
+            : getOverviewEventsForExport();
           var title = mode === 'day' ? 'Tagesansicht ' + selectedLabel.textContent : 'Terminuebersicht';
           var summary = mode === 'day'
             ? 'Ausdruck fuer den ausgewaehlten Tag.'
@@ -848,6 +893,128 @@ render_page('Kalender', 'Termine', static function (): void {
             + '<p class="print-summary">' + escapeHtml(summary) + '</p>'
             + items
             + '</body></html>';
+        }
+
+        function exportAgendaPdf(mode) {
+          var pdfEvents = mode === 'day'
+            ? getEventsForDate(selectedDate).slice().sort(compareEvents)
+            : getOverviewEventsForExport();
+          var title = mode === 'day' ? 'Tagesansicht ' + selectedLabel.textContent : 'Terminuebersicht';
+          var fileName = mode === 'day'
+            ? 'termine-' + selectedDate + '.pdf'
+            : 'termine-uebersicht.pdf';
+          var pdfContent = buildPdfDocument(title, pdfEvents);
+          var pdfBytes = stringToByteArray(pdfContent);
+          var blob = new Blob([pdfBytes], { type: 'application/pdf' });
+          var link = document.createElement('a');
+
+          link.href = URL.createObjectURL(blob);
+          link.download = fileName;
+          link.click();
+
+          window.setTimeout(function () {
+            URL.revokeObjectURL(link.href);
+          }, 1000);
+
+          status.textContent = 'PDF wurde erstellt.';
+        }
+
+        function buildPdfDocument(title, pdfEvents) {
+          var lines = [title, ''];
+          var body = [];
+          var offsets = [];
+          var objects = [];
+          var pdf = '%PDF-1.4\n';
+          var index;
+          var xrefStart;
+
+          if (!pdfEvents.length) {
+            lines.push('Keine Termine vorhanden.');
+          } else {
+            pdfEvents.forEach(function (eventItem, eventIndex) {
+              lines.push((eventIndex + 1) + '. ' + eventItem.title);
+              lines.push('   ' + formatEventStamp(eventItem));
+              if (eventItem.address) {
+                lines.push('   Adresse: ' + eventItem.address);
+              }
+              lines.push('   ' + (eventItem.note || 'Keine Notiz hinterlegt.'));
+              lines.push('');
+            });
+          }
+
+          lines.forEach(function (line, lineIndex) {
+            var y = 800 - (lineIndex * 18);
+            if (y < 40) {
+              return;
+            }
+
+            body.push('BT /F1 ' + (lineIndex === 0 ? '18' : '11') + ' Tf 50 ' + y + ' Td (' + escapePdfText(line) + ') Tj ET');
+          });
+
+          objects.push('1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n');
+          objects.push('2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n');
+          objects.push('3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj\n');
+          objects.push('4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj\n');
+          objects.push('5 0 obj << /Length ' + body.join('\n').length + ' >> stream\n' + body.join('\n') + '\nendstream endobj\n');
+
+          for (index = 0; index < objects.length; index += 1) {
+            offsets.push(pdf.length);
+            pdf += objects[index];
+          }
+
+          xrefStart = pdf.length;
+          pdf += 'xref\n0 ' + (objects.length + 1) + '\n';
+          pdf += '0000000000 65535 f \n';
+          offsets.forEach(function (offset) {
+            pdf += String(offset).padStart(10, '0') + ' 00000 n \n';
+          });
+          pdf += 'trailer << /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\n';
+          pdf += 'startxref\n' + xrefStart + '\n%%EOF';
+
+          return pdf;
+        }
+
+        function stringToByteArray(value) {
+          var bytes = new Uint8Array(value.length);
+          var index;
+
+          for (index = 0; index < value.length; index += 1) {
+            bytes[index] = value.charCodeAt(index) & 255;
+          }
+
+          return bytes;
+        }
+
+        function escapePdfText(value) {
+          return sanitizePdfText(value)
+            .replace(/\\/g, '\\\\')
+            .replace(/\(/g, '\\(')
+            .replace(/\)/g, '\\)');
+        }
+
+        function sanitizePdfText(value) {
+          return String(value || '')
+            .replace(/\r/g, ' ')
+            .replace(/\n/g, ' ')
+            .replace(/[\u2013\u2014]/g, '-')
+            .replace(/\u20ac/g, 'EUR')
+            .replace(/[^\x20-\x7e\xa0-\xff]/g, '?');
+        }
+
+        function normalizeSearch(value) {
+          return normalizeText(String(value || '')).trim();
+        }
+
+        function matchesSearch(eventItem, searchTerm) {
+          var haystack = normalizeSearch([
+            eventItem.title,
+            eventItem.address,
+            eventItem.note,
+            eventItem.date,
+            formatEventStamp(eventItem)
+          ].join(' '));
+
+          return haystack.indexOf(searchTerm) !== -1;
         }
 
         function buildMapUrl(addressValue) {
