@@ -139,7 +139,11 @@ if (!function_exists('app_hallenberg_future_products')) {
                     'Technikwege und Lastlogik wurden nicht nur kurzfristig gedacht',
                     'solide Grundlage fuer eine kuenftige Modernisierung der Heiztechnik',
                 ],
-                'media' => app_hallenberg_media_item('', '20260507_111930_kellerfenster_alt.jpg', 'Vorbemessener Bereich fuer Technikfuehrung und spaetere Systemerweiterungen', true),
+                'media' => app_hallenberg_media_item('', '20260507_111930_kellerfenster_alt.jpg', 'Altes Kellerfenster von innen als Ausgangssituation', true),
+                'media_gallery' => [
+                    app_hallenberg_media_item('', '20260507_111930_kellerfenster_alt.jpg', 'Altes Kellerfenster von innen als Ausgangssituation', true),
+                    app_hallenberg_media_item('', 'waermepumpe-kellerfenster-neu-innenansicht.png', 'Neues Kellerfenster in derselben Innenansicht als modernisierte Einbausituation', true),
+                ],
             ],
         ];
     }

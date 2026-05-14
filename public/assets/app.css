@@ -865,6 +865,7 @@ a {
 .future-product-stage,
 .future-product-detail,
 .future-product-detail-copy,
+.future-product-media-stack,
 .future-card,
 .timeline-step,
 .hallenberg-finale,
@@ -1245,6 +1246,10 @@ a {
 
 .future-product-detail.is-active {
   display: grid;
+}
+
+.future-product-media-stack {
+  align-content: start;
 }
 
 .future-product-figure img {

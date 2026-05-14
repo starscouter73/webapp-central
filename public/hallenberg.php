@@ -261,10 +261,15 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
                   <?php endforeach; ?>
                 </ul>
               </div>
-              <figure class="premium-figure future-product-figure" data-lightbox-src="<?= app_h($product['media']['src']) ?>" data-lightbox-alt="<?= app_h($product['media']['alt']) ?>">
-                <img src="<?= app_h($product['media']['src']) ?>" alt="<?= app_h($product['media']['alt']) ?>" loading="lazy">
-                <figcaption><?= app_h($product['media']['alt']) ?></figcaption>
-              </figure>
+              <div class="future-product-media-stack">
+                <?php $mediaItems = $product['media_gallery'] ?? [$product['media']]; ?>
+                <?php foreach ($mediaItems as $mediaItem): ?>
+                  <figure class="premium-figure future-product-figure" data-lightbox-src="<?= app_h($mediaItem['src']) ?>" data-lightbox-alt="<?= app_h($mediaItem['alt']) ?>">
+                    <img src="<?= app_h($mediaItem['src']) ?>" alt="<?= app_h($mediaItem['alt']) ?>" loading="lazy">
+                    <figcaption><?= app_h($mediaItem['alt']) ?></figcaption>
+                  </figure>
+                <?php endforeach; ?>
+              </div>
             </article>
           <?php endforeach; ?>
         </div>
