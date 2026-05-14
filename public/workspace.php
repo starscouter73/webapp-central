@@ -6,17 +6,54 @@ require_once dirname(__DIR__) . '/src/layout.php';
 render_page('Zentrale', 'Struktur', static function (): void {
     $steps = app_workspace_steps();
     $resumePrompt = app_project_resume_prompt_live();
+    $projects = app_workspace_projects();
+    $tools = app_workspace_tools();
     ?>
     <section class="grid two-up">
       <article class="card">
-        <span class="card-label">Arbeitsweg</span>
-        <h3>Direkt mit Codex und Live-Server</h3>
-        <p>Die App wird hier vor allem direkt im Repository gepflegt und anschließend unmittelbar auf dem Server aktualisiert. <code>public/</code> bleibt dabei der klare Webroot.</p>
+        <span class="card-label">Zentrale</span>
+        <h3>Projektbereich statt Modulsammlung</h3>
+        <p>Hier laufen die aktiven Webprojekte zusammen. Einzelne Showcases wie Hallenberg sitzen unter der Zentrale und nicht mehr als gleichrangige Hauptnavigation.</p>
       </article>
       <article class="card">
-        <span class="card-label">Bereitstellung</span>
-        <h3>Pfad Richtung Live-Server</h3>
-        <p>Die App ist so vorbereitet, dass sie hinter Nginx Proxy Manager unter <code>webapp-central.de</code> laufen kann, sobald DNS und Domain aktiv sind.</p>
+        <span class="card-label">Arbeitslogik</span>
+        <h3>Repo, Live-Stand und Serverpfad bleiben direkt greifbar</h3>
+        <p>Die App wird weiter direkt im Repository gepflegt und anschliessend unmittelbar auf den Server synchronisiert. <code>public/</code> bleibt dabei der klare Webroot.</p>
+      </article>
+    </section>
+
+    <section class="grid split">
+      <article class="card">
+        <span class="card-label">Projekte</span>
+        <h3>Aktive Referenzen und Showcases</h3>
+        <div class="workspace-card-list">
+          <?php foreach ($projects as $project): ?>
+            <a class="workspace-link-card" href="<?= app_h($project['href']) ?>">
+              <div class="workspace-link-meta">
+                <span class="status-pill"><?= app_h($project['status']) ?></span>
+                <span><?= app_h($project['meta']) ?></span>
+              </div>
+              <strong><?= app_h($project['name']) ?></strong>
+              <p><?= app_h($project['summary']) ?></p>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      </article>
+      <article class="card">
+        <span class="card-label">Arbeitsbereiche</span>
+        <h3>Werkzeuge und Seiten unterhalb der Zentrale</h3>
+        <div class="workspace-card-list">
+          <?php foreach ($tools as $tool): ?>
+            <a class="workspace-link-card" href="<?= app_h($tool['href']) ?>">
+              <div class="workspace-link-meta">
+                <span class="status-pill"><?= app_h($tool['status']) ?></span>
+                <span><?= app_h($tool['meta']) ?></span>
+              </div>
+              <strong><?= app_h($tool['name']) ?></strong>
+              <p><?= app_h($tool['summary']) ?></p>
+            </a>
+          <?php endforeach; ?>
+        </div>
       </article>
     </section>
 
@@ -30,7 +67,7 @@ render_page('Zentrale', 'Struktur', static function (): void {
           <code>docker/</code>
           <code>.github/</code>
         </div>
-        <p>Damit lässt sich die neue Marke ohne Altlasten weiterentwickeln, egal ob daraus eine Startseite, ein Portal oder eine kleine Inhaltszentrale wird.</p>
+        <p>So bleibt die Plattform offen fuer weitere Projekte, ohne dass einzelne Showcases das Gesamtsystem zerfasern.</p>
       </article>
       <article class="card">
         <span class="card-label">Ablauf</span>
@@ -55,14 +92,14 @@ render_page('Zentrale', 'Struktur', static function (): void {
       </article>
       <article class="card">
         <span class="card-label">Hinweis</span>
-        <h3>Domain und DNS liegen außerhalb des Repos</h3>
+        <h3>Domain und DNS liegen ausserhalb des Repos</h3>
         <p>Die App selbst bleibt host-neutral. Ob <code>webapp-central.de</code> erreichbar ist, entscheidet die DNS-Konfiguration beim Anbieter und der Reverse Proxy auf dem Server.</p>
       </article>
     </section>
 
     <section class="card project-context-card">
       <span class="card-label">Projektkontext</span>
-      <h3>Kurztext für Neustart und Tester</h3>
+      <h3>Kurztext fuer Neustart und Tester</h3>
       <p>Wenn Codex oder der Browser neu startet, kannst du diesen Block direkt kopieren und wieder einfuegen. Der Text wird aus dem aktuellen Projektstand erzeugt und bleibt damit naeher am Live-Zustand.</p>
       <div class="project-context-box">
         <pre id="project-resume-text"><?= app_h($resumePrompt) ?></pre>
@@ -87,7 +124,7 @@ render_page('Zentrale', 'Struktur', static function (): void {
           var text = copyTarget.textContent || '';
 
           if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
-            copyStatus.textContent = 'Clipboard-API im aktuellen Browser nicht verfügbar.';
+            copyStatus.textContent = 'Clipboard-API im aktuellen Browser nicht verfuegbar.';
             return;
           }
 

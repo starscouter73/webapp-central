@@ -13,6 +13,14 @@ $futureProducts = app_hallenberg_future_products();
 render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $sections, $overviewCards, $timeline, $futureProducts): void {
     ?>
     <section class="hallenberg-page">
+      <section class="project-shell-header">
+        <a class="project-shell-back" href="<?= app_h(app_url('workspace.php')) ?>">Zurueck zur Zentrale</a>
+        <div class="project-shell-copy">
+          <span class="card-label">Projektshowcase</span>
+          <strong>Hallenberg</strong>
+        </div>
+      </section>
+
       <article class="hallenberg-hero-card">
         <div class="hallenberg-hero-media">
           <?php foreach ($story['hero']['media'] as $index => $media): ?>
@@ -244,7 +252,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
             </button>
           <?php endforeach; ?>
         </div>
-        <div class="future-product-stage">
+        <div class="future-product-stage" aria-live="polite">
           <?php foreach ($futureProducts as $index => $product): ?>
             <article
               class="future-product-detail<?= $index === 0 ? ' is-active' : '' ?>"
@@ -372,4 +380,11 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
       }());
     </script>
     <?php
-});
+}, [
+    'show_header' => false,
+    'show_breadcrumb' => false,
+    'show_footer' => false,
+    'body_class' => 'project-body',
+    'shell_class' => 'page-shell-standalone',
+    'content_shell_class' => 'content-shell-standalone',
+]);

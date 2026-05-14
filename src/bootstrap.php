@@ -123,6 +123,8 @@ if (!function_exists('app_pages')) {
                 'title' => 'Module',
                 'eyebrow' => 'Bausteine',
                 'description' => 'Funktionsbereiche, die als nächste Ausbaustufen bereitstehen.',
+                'nav' => false,
+                'nav_parent' => 'workspace.php',
             ],
             [
                 'file' => 'calendar.php',
@@ -146,6 +148,8 @@ if (!function_exists('app_pages')) {
                 'title' => 'Hallenberg',
                 'eyebrow' => 'Referenzprojekt',
                 'description' => 'Premium-Projektseite fuer das Photovoltaik- und Modernisierungsprojekt Hallenberg.',
+                'nav' => false,
+                'nav_parent' => 'workspace.php',
             ],
         ];
     }
@@ -246,6 +250,43 @@ if (!function_exists('app_modules')) {
                 'status' => 'Neu',
                 'summary' => 'Premium-Projektseite fuer Photovoltaik, Montage, Medien und Smart-Energy-Architektur in Hallenberg.',
                 'href' => app_url('hallenberg.php'),
+            ],
+        ];
+    }
+}
+
+if (!function_exists('app_workspace_projects')) {
+    function app_workspace_projects(): array
+    {
+        return [
+            [
+                'name' => 'Hallenberg',
+                'status' => 'Live',
+                'summary' => 'Premium-Projektseite fuer Photovoltaik, Montage, Medienlogik und Smart-Energy-Architektur.',
+                'href' => app_url('hallenberg.php'),
+                'meta' => 'Referenzprojekt',
+            ],
+        ];
+    }
+}
+
+if (!function_exists('app_workspace_tools')) {
+    function app_workspace_tools(): array
+    {
+        return [
+            [
+                'name' => 'Module',
+                'status' => 'Bereich',
+                'summary' => 'Funktionsbausteine, Seitenideen und nächste Ausbaustufen der Plattform.',
+                'href' => app_url('modules.php'),
+                'meta' => 'Werkzeuge',
+            ],
+            [
+                'name' => 'Kalender',
+                'status' => 'Live',
+                'summary' => 'Terminseite mit Monats- und Wochenansicht, Suche, Druck, PDF und Bearbeiten.',
+                'href' => app_url('calendar.php'),
+                'meta' => 'Arbeitsbereich',
             ],
         ];
     }
