@@ -10,8 +10,8 @@ render_page(app_site_title(), 'Startseite', static function (): void {
     <section class="grid dashboard-grid">
       <article class="card feature-card">
         <span class="card-label">Ausrichtung</span>
-        <h3>Klare Zentrale für den neuen Auftritt</h3>
-        <p>Die Seite arbeitet als eigenständige Webzentrale und ist auf den nächsten Schritt Richtung Server und Domainbetrieb vorbereitet.</p>
+        <h3>Klare Zentrale fuer den neuen Auftritt</h3>
+        <p>Die Seite arbeitet als eigenstaendige Webzentrale und ist auf den naechsten Schritt Richtung Server und Domainbetrieb vorbereitet.</p>
         <div class="metric-row">
           <div class="metric-tile">
             <strong><?= count($modules) ?></strong>
@@ -25,8 +25,8 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       </article>
       <article class="card feature-card accent-card">
         <span class="card-label">Direkt live</span>
-        <h3><?= app_h(app_site_title()) ?> läuft direkt hier</h3>
-        <p>Struktur, Text und Gestaltung lassen sich direkt hier mit Codex pflegen und anschließend sofort auf dem Server sichtbar machen.</p>
+        <h3><?= app_h(app_site_title()) ?> laeuft direkt hier</h3>
+        <p>Struktur, Text und Gestaltung lassen sich direkt hier mit Codex pflegen und anschliessend sofort auf dem Server sichtbar machen.</p>
         <div class="button-row">
           <a class="btn btn-primary" href="<?= app_h(app_url('workspace.php')) ?>">Zur Zentrale</a>
           <a class="btn btn-ghost" href="<?= app_h(app_url('modules.php')) ?>">Module ansehen</a>
@@ -45,10 +45,36 @@ render_page(app_site_title(), 'Startseite', static function (): void {
     </section>
 
     <section class="grid split">
-      <article class="card">
-        <span class="card-label">Nächster Schritt</span>
-        <h3>Hauptoberfläche für webapp-central.de entwickeln</h3>
-        <p>Diese Startseite ist die Basis für die Domain und den künftigen Live-Auftritt. Von hier aus können Navigation, Module und Sprache sauber ausgebaut werden.</p>
+      <article class="card live-status-card">
+        <span class="card-label">Live-Status</span>
+        <h3>Webprojekt direkt im Aufbau verfolgen</h3>
+        <p>Hier erscheint der aktuelle Entwicklungsstand der Webapp als kompakte Live-Vorschau mit direktem Einstieg in den sichtbaren Stand.</p>
+        <div class="live-status-preview">
+          <iframe
+            src="<?= app_h(app_url('calendar.php')) ?>"
+            title="Live-Vorschau der aktuellen Webapp"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+        <div class="live-status-meta">
+          <div class="metric-tile">
+            <strong>Live</strong>
+            <span>Server aktiv</span>
+          </div>
+          <div class="metric-tile">
+            <strong>Kalender</strong>
+            <span>aktueller Fokus</span>
+          </div>
+          <div class="metric-tile">
+            <strong><?= count($modules) ?></strong>
+            <span>Module verlinkt</span>
+          </div>
+        </div>
+        <div class="button-row">
+          <a class="btn btn-primary" href="<?= app_h(app_url('calendar.php')) ?>">Live-Modul oeffnen</a>
+          <a class="btn btn-ghost" href="<?= app_h(app_url('workspace.php')) ?>">Projektkontext ansehen</a>
+        </div>
       </article>
       <article class="card">
         <span class="card-label">Direkte Wege</span>
