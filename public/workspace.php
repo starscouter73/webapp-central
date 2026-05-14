@@ -5,6 +5,7 @@ require_once dirname(__DIR__) . '/src/layout.php';
 
 render_page('Zentrale', 'Struktur', static function (): void {
     $steps = app_workspace_steps();
+    $resumePrompt = app_project_resume_prompt();
     ?>
     <section class="grid two-up">
       <article class="card">
@@ -67,5 +68,47 @@ render_page('Zentrale', 'Struktur', static function (): void {
         <p>Die App selbst bleibt host-neutral. Ob <code>webapp-central.de</code> erreichbar ist, entscheidet die DNS-Konfiguration beim Anbieter und der Reverse Proxy auf dem Server.</p>
       </article>
     </section>
+
+    <section class="card project-context-card">
+      <span class="card-label">Projektkontext</span>
+      <h3>Kurztext für Neustart und Tester</h3>
+      <p>Wenn Codex oder der Browser neu startet, kannst du diesen Block direkt kopieren und wieder einfügen. So ist der letzte Arbeitsstand sofort wieder greifbar.</p>
+      <div class="project-context-box">
+        <pre id="project-resume-text"><?= app_h($resumePrompt) ?></pre>
+      </div>
+      <div class="button-row">
+        <button class="btn btn-primary" id="copy-project-context" type="button">Projekttext kopieren</button>
+      </div>
+      <p class="calendar-status" id="copy-project-context-status">Bereit zum Kopieren.</p>
+    </section>
+
+    <script>
+      (function () {
+        var copyButton = document.getElementById('copy-project-context');
+        var copyTarget = document.getElementById('project-resume-text');
+        var copyStatus = document.getElementById('copy-project-context-status');
+
+        if (!copyButton || !copyTarget || !copyStatus) {
+          return;
+        }
+
+        copyButton.addEventListener('click', function () {
+          var text = copyTarget.textContent || '';
+
+          if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+            copyStatus.textContent = 'Clipboard-API im aktuellen Browser nicht verfügbar.';
+            return;
+          }
+
+          navigator.clipboard.writeText(text)
+            .then(function () {
+              copyStatus.textContent = 'Projekttext wurde kopiert.';
+            })
+            .catch(function () {
+              copyStatus.textContent = 'Kopieren ist fehlgeschlagen.';
+            });
+        });
+      }());
+    </script>
     <?php
 });

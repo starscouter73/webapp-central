@@ -275,6 +275,27 @@ a {
   margin-top: 22px;
 }
 
+.project-context-card,
+.project-context-box {
+  display: grid;
+  gap: 12px;
+}
+
+.project-context-box {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(23, 33, 38, 0.05);
+}
+
+.project-context-box pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: 0.97rem/1.65 "Courier New", monospace;
+  color: var(--ink);
+}
+
 .metric-tile {
   display: grid;
   gap: 4px;

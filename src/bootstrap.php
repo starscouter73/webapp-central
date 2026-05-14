@@ -232,6 +232,21 @@ if (!function_exists('app_workspace_steps')) {
     }
 }
 
+if (!function_exists('app_project_resume_prompt')) {
+    function app_project_resume_prompt(): string
+    {
+        return implode("\n", [
+            'Wir arbeiten weiter an webapp-central.de.',
+            'Aktueller Fokus ist die Kalenderseite unter /calendar.php.',
+            'Der Kalender hat bereits Monats- und Wochenansicht, Terminansicht, Mapvorschau, Bearbeiten, Druck, PDF-Export und Suche.',
+            'Deploy passiert aktuell direkt aus dem lokalen Repo plus SSH-Sync auf den Server.',
+            'Lokales Repo: C:\\Users\\dorth\\Documents\\webapp-zentrale',
+            'Live-Ziel auf dem Server: /opt/webapps/webzentrale/',
+            'Bitte direkt im bestehenden Projekt weiterarbeiten und den Live-Stand nach Änderungen mitprüfen.',
+        ]);
+    }
+}
+
 if (!function_exists('app_watch_signature')) {
     function app_watch_signature(): string
     {
