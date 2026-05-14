@@ -40,13 +40,17 @@ if (!function_exists('render_page')) {
     </header>
 
     <main class="content-shell">
-      <?php if ($currentPage !== 'calendar.php'): ?>
-        <section class="hero-panel">
-          <span class="eyebrow"><?= app_h($eyebrow) ?></span>
-          <h2><?= app_h($title) ?></h2>
-          <p class="hero-copy"><?= app_h((string)($currentMeta['description'] ?? '')) ?></p>
-        </section>
-      <?php endif; ?>
+      <section class="page-intro" aria-label="Seitenkontext">
+        <nav class="page-breadcrumb" aria-label="Breadcrumb">
+          <a href="<?= app_h(app_url('index.php')) ?>"><?= app_h(app_site_title()) ?></a>
+          <span>/</span>
+          <span><?= app_h($title) ?></span>
+        </nav>
+        <p class="page-intro-copy">
+          <strong><?= app_h($eyebrow) ?></strong>
+          <span><?= app_h((string)($currentMeta['description'] ?? '')) ?></span>
+        </p>
+      </section>
 
       <?php $content(); ?>
     </main>
