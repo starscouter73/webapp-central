@@ -931,6 +931,7 @@ a {
   align-content: center;
   gap: 18px;
   padding: 10px 4px;
+  min-width: 0;
 }
 
 .hallenberg-hero-copy h2,
@@ -941,6 +942,10 @@ a {
   font-size: clamp(2rem, 4vw, 4.2rem);
   line-height: 0.96;
   letter-spacing: -0.04em;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .section-heading h3,
@@ -1316,7 +1321,8 @@ body.lightbox-open {
   }
 
   .hallenberg-hero-copy h2 {
-    font-size: clamp(2rem, 9vw, 3.2rem);
+    font-size: clamp(1.7rem, 8vw, 2.75rem);
+    line-height: 1.02;
   }
 
   .section-heading h3,
