@@ -1144,11 +1144,8 @@ a {
 
 .timeline-strip {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(220px, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
-  overflow-x: auto;
-  padding-bottom: 8px;
 }
 
 .timeline-step {
@@ -1164,7 +1161,7 @@ a {
 }
 
 .timeline-gallery {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .future-grid {
@@ -1366,6 +1363,7 @@ body.lightbox-open {
   .hallenberg-overview-grid,
   .future-product-grid,
   .future-product-detail,
+  .timeline-strip,
   .drone-showcase-grid,
   .timeline-gallery,
   .hallenberg-finale-media,
