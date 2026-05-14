@@ -146,11 +146,11 @@ if (!function_exists('app_hallenberg_story')) {
             'modules' => [
                 'text' => 'Die Modulmontage ist bewusst als cinematic Galerie gedacht: Full-Black-Oberflaechen, ruhige Linien, Spiegelungen und die geschlossene Gesamtwirkung auf dem Dach. Aus den Protokollen ist zusaetzlich dokumentiert, dass eine geaenderte Modulbelegung mit homogenerer Dachflaeche angestrebt wurde.',
                 'media' => [
-                    app_hallenberg_media_item('moduldetails', 'hallenberg-modul-fullblack-detail.webp', 'Full-Black-Module in Detailansicht'),
-                    app_hallenberg_media_item('moduldetails', 'hallenberg-modul-spiegelung.webp', 'Reflexionen auf den Moduloberflaechen'),
-                    app_hallenberg_media_item('moduldetails', 'hallenberg-modul-linienfuehrung.webp', 'Ruhige Linienfuehrung der Modulbelegung'),
-                    app_hallenberg_media_item('moduldetails', 'hallenberg-modul-kaminbereich.webp', 'Modulfeld im Bereich des Schornsteins'),
-                    app_hallenberg_media_item('moduldetails', 'hallenberg-modul-rahmendetail.webp', 'Rahmen- und Klemmsystem im Detail'),
+                    app_hallenberg_media_item('', '1Video Project 52026-05-09.mp4_snapshot_02.07.484.webp', 'Full-Black-Module in Detailansicht', true),
+                    app_hallenberg_media_item('', '1Video Project 52026-05-09.mp4_snapshot_05.58.977.webp', 'Reflexionen auf den Moduloberflaechen', true),
+                    app_hallenberg_media_item('', '1Video Project 52026-05-09.mp4_snapshot_03.36.481.webp', 'Ruhige Linienfuehrung der Modulbelegung', true),
+                    app_hallenberg_media_item('', '1Video Project 52026-05-09.mp4_snapshot_06.54.302.webp', 'Modulfeld im Bereich des Schornsteins', true),
+                    app_hallenberg_media_item('', '1Video Project 52026-05-09.mp4_snapshot_38.37.133.webp', 'Rahmen- und Klemmsystem im Detail', true),
                 ],
             ],
             'drone' => [
