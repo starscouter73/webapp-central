@@ -12,6 +12,7 @@ render_page('Kalender', 'Termine', static function (): void {
             <h3 id="calendar-month">Monat wird geladen</h3>
           </div>
           <div class="calendar-toolbar-actions">
+            <a class="btn btn-ghost" href="<?= app_h(app_url('calendar-overview.php')) ?>">Uebersicht</a>
             <div class="calendar-view-toggle" role="tablist" aria-label="Ansicht wechseln">
               <button class="btn btn-secondary is-active" id="view-month" type="button">Monat</button>
               <button class="btn btn-ghost" id="view-week" type="button">Woche</button>
@@ -42,7 +43,7 @@ render_page('Kalender', 'Termine', static function (): void {
               <div class="calendar-agenda" id="selected-events">
                 <p class="empty-state">Waehle einen Tag im Kalender oder lege direkt einen neuen Termin an.</p>
               </div>
-              <div class="calendar-event-focus" id="selected-event-focus">
+              <div class="calendar-event-focus" id="selected-event-focus" hidden>
                 <p class="empty-state">Waehle in der Terminliste einen Eintrag fuer die Detailansicht.</p>
               </div>
             </div>
@@ -103,29 +104,6 @@ render_page('Kalender', 'Termine', static function (): void {
         </div>
       </article>
 
-      <article class="card calendar-overview-panel">
-        <div class="calendar-overview-toolbar">
-          <div>
-            <span class="card-label">Uebersicht</span>
-            <h3 id="overview-title">Anstehende Termine</h3>
-            <p id="overview-summary">Die naechsten Termine werden geladen.</p>
-          </div>
-          <div class="button-row">
-            <button class="btn btn-secondary" id="overview-pdf" type="button">PDF exportieren</button>
-            <button class="btn btn-ghost" id="day-pdf" type="button">Tag als PDF</button>
-            <button class="btn btn-secondary" id="overview-print" type="button">Uebersicht drucken</button>
-            <button class="btn btn-ghost" id="day-print" type="button">Tag drucken</button>
-          </div>
-        </div>
-        <label class="field calendar-search-field">
-          <span>Termin-Suche</span>
-          <input id="overview-search" type="search" placeholder="Nach Titel, Adresse, Notiz oder Datum suchen">
-        </label>
-        <div class="calendar-overview-metrics" id="overview-metrics"></div>
-        <div class="calendar-overview-list" id="overview-list">
-          <p class="empty-state">Noch keine Termine vorhanden.</p>
-        </div>
-      </article>
     </section>
 
     <script>
@@ -133,13 +111,15 @@ render_page('Kalender', 'Termine', static function (): void {
         var storageKey = 'webapp-central-calendar-events';
         var monthNames = ['Januar', 'Februar', 'Maerz', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
         var weekdayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+        var query = new URLSearchParams(window.location.search);
         var recognition = null;
         var editingEventId = '';
         var activeView = 'month';
-        var selectedEventId = '';
+        var selectedEventId = query.get('event') || '';
+        var detailArmed = selectedEventId !== '';
         var events = loadEvents();
         var now = new Date();
-        var selectedDate = toIsoDate(now);
+        var selectedDate = query.get('date') || toIsoDate(now);
         var viewYear = now.getFullYear();
         var viewMonth = now.getMonth();
 
@@ -149,11 +129,6 @@ render_page('Kalender', 'Termine', static function (): void {
         var selectedLabel = document.getElementById('selected-date-label');
         var selectedEvents = document.getElementById('selected-events');
         var selectedEventFocus = document.getElementById('selected-event-focus');
-        var overviewTitle = document.getElementById('overview-title');
-        var overviewSummary = document.getElementById('overview-summary');
-        var overviewMetrics = document.getElementById('overview-metrics');
-        var overviewList = document.getElementById('overview-list');
-        var overviewSearch = document.getElementById('overview-search');
         var formLabel = document.getElementById('event-form-label');
         var formTitle = document.getElementById('event-form-title');
         var editIdInput = document.getElementById('event-edit-id');
@@ -221,22 +196,6 @@ render_page('Kalender', 'Termine', static function (): void {
         document.getElementById('voice-start').addEventListener('click', function () {
           startVoiceCapture();
         });
-        document.getElementById('overview-print').addEventListener('click', function () {
-          printAgendaOverview('all');
-        });
-        document.getElementById('day-print').addEventListener('click', function () {
-          printAgendaOverview('day');
-        });
-        document.getElementById('overview-pdf').addEventListener('click', function () {
-          exportAgendaPdf('all');
-        });
-        document.getElementById('day-pdf').addEventListener('click', function () {
-          exportAgendaPdf('day');
-        });
-        overviewSearch.addEventListener('input', function () {
-          renderOverview();
-        });
-
         monthViewButton.addEventListener('click', function () {
           setActiveView('month');
         });
@@ -248,7 +207,6 @@ render_page('Kalender', 'Termine', static function (): void {
         dateInput.value = selectedDate;
         renderCalendar();
         renderSelectedDay();
-        renderOverview();
 
         function loadEvents() {
           try {
@@ -379,6 +337,7 @@ render_page('Kalender', 'Termine', static function (): void {
 
         function selectDate(isoDate) {
           selectedDate = isoDate;
+          detailArmed = false;
           dateInput.value = isoDate;
           var selected = new Date(isoDate + 'T12:00:00');
           viewYear = selected.getFullYear();
@@ -405,6 +364,7 @@ render_page('Kalender', 'Termine', static function (): void {
 
           dayEvents.sort(compareEvents).forEach(function (eventItem) {
             var article = document.createElement('article');
+            var main = document.createElement('div');
             var heading = document.createElement('div');
             var title = document.createElement('strong');
             var meta = document.createElement('span');
@@ -414,11 +374,13 @@ render_page('Kalender', 'Termine', static function (): void {
             var detailButton = document.createElement('button');
             var editButton = document.createElement('button');
             var removeButton = document.createElement('button');
+            var inlineMap;
 
             article.className = 'agenda-item';
             if (eventItem.id === selectedEventId) {
               article.className += ' is-active';
             }
+            main.className = 'agenda-main';
             heading.className = 'agenda-heading';
             title.textContent = eventItem.title;
             meta.className = 'agenda-meta';
@@ -427,6 +389,13 @@ render_page('Kalender', 'Termine', static function (): void {
             if (eventItem.address) {
               address.className = 'agenda-address';
               address.textContent = eventItem.address;
+              inlineMap = document.createElement('iframe');
+              inlineMap.className = 'agenda-inline-map';
+              inlineMap.title = 'Minimap fuer ' + eventItem.title;
+              inlineMap.loading = 'lazy';
+              inlineMap.referrerPolicy = 'no-referrer-when-downgrade';
+              inlineMap.src = buildMapEmbedUrl(eventItem.address);
+              article.className += ' has-map';
             }
 
             note.className = 'agenda-note';
@@ -437,7 +406,10 @@ render_page('Kalender', 'Termine', static function (): void {
             detailButton.textContent = 'Weiterlesen';
             detailButton.addEventListener('click', function (clickEvent) {
               clickEvent.stopPropagation();
-              selectEvent(eventItem.id);
+              openEventFocus(eventItem.id);
+            });
+            detailButton.addEventListener('mouseenter', function () {
+              openEventFocus(eventItem.id);
             });
 
             editButton.className = 'btn btn-ghost btn-small';
@@ -460,18 +432,18 @@ render_page('Kalender', 'Termine', static function (): void {
             actions.appendChild(editButton);
             actions.appendChild(removeButton);
 
-            article.addEventListener('click', function () {
-              selectEvent(eventItem.id);
-            });
-
             heading.appendChild(title);
             heading.appendChild(meta);
-            article.appendChild(heading);
+            main.appendChild(heading);
             if (eventItem.address) {
-              article.appendChild(address);
+              main.appendChild(address);
             }
-            article.appendChild(note);
-            article.appendChild(actions);
+            main.appendChild(note);
+            main.appendChild(actions);
+            article.appendChild(main);
+            if (inlineMap) {
+              article.appendChild(inlineMap);
+            }
             selectedEvents.appendChild(article);
           });
 
@@ -479,6 +451,13 @@ render_page('Kalender', 'Termine', static function (): void {
             selectedEventId = dayEvents[0].id;
           }
 
+          if (!detailArmed) {
+            selectedEventFocus.hidden = true;
+            selectedEventFocus.innerHTML = '';
+            return;
+          }
+
+          selectedEventFocus.hidden = false;
           renderEventFocus(findEventById(selectedEventId));
         }
 
@@ -495,7 +474,6 @@ render_page('Kalender', 'Termine', static function (): void {
           }
           renderCalendar();
           renderSelectedDay();
-          renderOverview();
           status.textContent = 'Termin geloescht.';
         }
 
@@ -543,7 +521,7 @@ render_page('Kalender', 'Termine', static function (): void {
           selectedEventId = payload.id;
           clearEditMode('');
           transcript.hidden = true;
-          renderOverview();
+          detailArmed = true;
         }
 
         function loadEventIntoForm(eventItem) {
@@ -602,6 +580,15 @@ render_page('Kalender', 'Termine', static function (): void {
 
         function selectEvent(eventId) {
           selectedEventId = eventId;
+          detailArmed = true;
+          renderSelectedDay();
+        }
+
+        function openEventFocus(eventId) {
+          selectedEventId = eventId;
+          detailArmed = true;
+          selectedEventFocus.hidden = false;
+          renderEventFocus(findEventById(eventId));
           renderSelectedDay();
         }
 

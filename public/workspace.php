@@ -5,7 +5,7 @@ require_once dirname(__DIR__) . '/src/layout.php';
 
 render_page('Zentrale', 'Struktur', static function (): void {
     $steps = app_workspace_steps();
-    $resumePrompt = app_project_resume_prompt();
+    $resumePrompt = app_project_resume_prompt_live();
     ?>
     <section class="grid two-up">
       <article class="card">
@@ -63,7 +63,7 @@ render_page('Zentrale', 'Struktur', static function (): void {
     <section class="card project-context-card">
       <span class="card-label">Projektkontext</span>
       <h3>Kurztext für Neustart und Tester</h3>
-      <p>Wenn Codex oder der Browser neu startet, kannst du diesen Block direkt kopieren und wieder einfügen. So ist der letzte Arbeitsstand sofort wieder greifbar.</p>
+      <p>Wenn Codex oder der Browser neu startet, kannst du diesen Block direkt kopieren und wieder einfuegen. Der Text wird aus dem aktuellen Projektstand erzeugt und bleibt damit naeher am Live-Zustand.</p>
       <div class="project-context-box">
         <pre id="project-resume-text"><?= app_h($resumePrompt) ?></pre>
       </div>

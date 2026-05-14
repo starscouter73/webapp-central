@@ -131,7 +131,25 @@ if (!function_exists('app_pages')) {
                 'eyebrow' => 'Termine',
                 'description' => 'Kalenderansicht mit Spracheingabe für neue Termine direkt im Browser.',
             ],
+            [
+                'file' => 'calendar-overview.php',
+                'label' => 'Uebersicht',
+                'title' => 'Terminuebersicht',
+                'eyebrow' => 'Termine',
+                'description' => 'Eigene Uebersichtsseite fuer anstehende Termine, Suche, Druck und PDF-Export.',
+                'nav' => false,
+                'nav_parent' => 'calendar.php',
+            ],
         ];
+    }
+}
+
+if (!function_exists('app_nav_pages')) {
+    function app_nav_pages(): array
+    {
+        return array_values(array_filter(app_pages(), static function (array $page): bool {
+            return (bool)($page['nav'] ?? true);
+        }));
     }
 }
 
@@ -244,6 +262,48 @@ if (!function_exists('app_project_resume_prompt')) {
             'Live-Ziel auf dem Server: /opt/webapps/webzentrale/',
             'Bitte direkt im bestehenden Projekt weiterarbeiten und den Live-Stand nach Änderungen mitprüfen.',
         ]);
+    }
+}
+
+if (!function_exists('app_project_resume_prompt_live')) {
+    function app_project_resume_prompt_live(): string
+    {
+        $visibleModules = array_map(static function (array $page): string {
+            return (string)$page['label'];
+        }, app_nav_pages());
+
+        $focusTargets = ['/calendar.php'];
+        if (is_file(app_root() . '/public/calendar-overview.php')) {
+            $focusTargets[] = '/calendar-overview.php';
+        }
+
+        $featureGroups = [
+            'Kalenderbasis' => ['Monatsansicht', 'Wochenansicht', 'Bearbeiten', 'Mapvorschau', 'Voice-to-Text'],
+            'Terminlogik' => ['Suche', 'Druck', 'PDF-Export', 'Detailansicht'],
+        ];
+
+        $featureLines = [];
+        foreach ($featureGroups as $label => $features) {
+            $featureLines[] = '- ' . $label . ': ' . implode(', ', $features);
+        }
+
+        $extraLines = [];
+        if (is_file(app_infrastructure_doc_path())) {
+            $extraLines[] = '- Doku vorhanden: /DOKUMENTATION_INFRASTRUKTUR_ENTWICKLUNGSWEG.md';
+        }
+
+        return implode("\n", array_merge([
+            'Wir arbeiten weiter an webapp-central.de.',
+            'Stand dieses Projekttexts: ' . date('d.m.Y H:i') . ' Uhr.',
+            'Sichtbare Hauptbereiche: ' . implode(', ', $visibleModules) . '.',
+            'Aktueller Fokus: ' . implode(' und ', $focusTargets) . '.',
+            'Aktueller Funktionsstand:',
+        ], $featureLines, $extraLines, [
+            'Deploy passiert aktuell ueber Commit/Push plus direkten SSH-Sync auf den Server.',
+            'Lokales Repo: C:\\Users\\dorth\\Documents\\webapp-zentrale',
+            'Live-Ziel auf dem Server: /opt/webapps/webzentrale/',
+            'Bitte direkt im bestehenden Projekt weiterarbeiten und den Live-Stand nach Aenderungen mitpruefen.',
+        ]));
     }
 }
 

@@ -703,8 +703,19 @@ a {
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
+.agenda-item.has-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 28%);
+  align-items: stretch;
+}
+
 .agenda-item p {
   margin: 0;
+}
+
+.agenda-main {
+  display: grid;
+  gap: 10px;
 }
 
 .agenda-heading {
@@ -739,6 +750,14 @@ a {
   transform: translateY(-1px);
   border-color: rgba(184, 92, 56, 0.4);
   background: rgba(184, 92, 56, 0.08);
+}
+
+.agenda-inline-map {
+  width: 100%;
+  min-height: 160px;
+  border: 0;
+  border-radius: 18px;
+  background: rgba(23, 33, 38, 0.06);
 }
 
 .agenda-actions {
@@ -862,6 +881,10 @@ a {
 
   .calendar-day {
     min-height: auto;
+  }
+
+  .agenda-item.has-map {
+    grid-template-columns: 1fr;
   }
 
   .site-footer {

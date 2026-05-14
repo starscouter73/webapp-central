@@ -8,6 +8,7 @@ if (!function_exists('render_page')) {
     {
         $currentPage = app_current_page();
         $currentMeta = app_current_page_meta();
+        $currentNavParent = (string)($currentMeta['nav_parent'] ?? $currentPage);
 
         if (!headers_sent()) {
             header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -31,8 +32,8 @@ if (!function_exists('render_page')) {
         <p><?= app_h(app_tagline()) ?></p>
       </div>
       <nav class="site-nav" aria-label="Hauptnavigation">
-        <?php foreach (app_pages() as $page): ?>
-          <a class="<?= $currentPage === $page['file'] ? 'is-active' : '' ?>" href="<?= app_h(app_url($page['file'])) ?>">
+        <?php foreach (app_nav_pages() as $page): ?>
+          <a class="<?= $currentNavParent === $page['file'] ? 'is-active' : '' ?>" href="<?= app_h(app_url($page['file'])) ?>">
             <?= app_h($page['label']) ?>
           </a>
         <?php endforeach; ?>
