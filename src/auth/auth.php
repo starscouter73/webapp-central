@@ -12,6 +12,36 @@ if (!function_exists('auth_normalize_email')) {
     }
 }
 
+if (!function_exists('auth_is_admin_email')) {
+    function auth_is_admin_email(string $email): bool
+    {
+        $normalized = auth_normalize_email($email);
+        $admins = ['dorth.mark@gmail.com'];
+        $extra = trim((string)app_env('APP_AUTH_ADMIN_EMAILS', ''));
+        if ($extra !== '') {
+            foreach (explode(',', $extra) as $entry) {
+                $candidate = auth_normalize_email($entry);
+                if ($candidate !== '') {
+                    $admins[] = $candidate;
+                }
+            }
+        }
+
+        return in_array($normalized, $admins, true);
+    }
+}
+
+if (!function_exists('auth_resolve_role')) {
+    function auth_resolve_role(string $email, string $storedRole): string
+    {
+        if (auth_is_admin_email($email)) {
+            return 'admin';
+        }
+
+        return $storedRole !== '' ? $storedRole : 'user';
+    }
+}
+
 if (!function_exists('auth_validate_registration')) {
     function auth_validate_registration(string $email, string $password, string $confirmPassword): array
     {
@@ -83,7 +113,7 @@ if (!function_exists('auth_attempt_login')) {
         auth_session_set('auth_user', [
             'id' => (int)($user['id'] ?? 0),
             'email' => (string)($user['email'] ?? $normalizedEmail),
-            'role' => (string)($user['role'] ?? 'user'),
+            'role' => auth_resolve_role((string)($user['email'] ?? $normalizedEmail), (string)($user['role'] ?? 'user')),
         ]);
         return true;
     }
@@ -93,7 +123,30 @@ if (!function_exists('auth_current_user')) {
     function auth_current_user(): ?array
     {
         $user = auth_session_get('auth_user');
-        return is_array($user) ? $user : null;
+        if (!is_array($user)) {
+            return null;
+        }
+
+        $email = auth_normalize_email((string)($user['email'] ?? ''));
+        if ($email === '') {
+            return null;
+        }
+
+        $fresh = auth_user_find_by_email($email);
+        if (is_array($fresh)) {
+            $resolvedRole = auth_resolve_role($email, (string)($fresh['role'] ?? 'user'));
+            $resolved = [
+                'id' => (int)($fresh['id'] ?? 0),
+                'email' => (string)($fresh['email'] ?? $email),
+                'role' => $resolvedRole,
+            ];
+            auth_session_set('auth_user', $resolved);
+            return $resolved;
+        }
+
+        $user['role'] = auth_resolve_role($email, (string)($user['role'] ?? 'user'));
+        auth_session_set('auth_user', $user);
+        return $user;
     }
 }
 
@@ -144,3 +197,43 @@ if (!function_exists('auth_require_login')) {
     }
 }
 
+if (!function_exists('auth_change_password')) {
+    function auth_change_password(string $email, string $currentPassword, string $newPassword, string $confirmPassword): array
+    {
+        $errors = [];
+        $normalizedEmail = auth_normalize_email($email);
+        $user = auth_user_find_by_email($normalizedEmail);
+
+        if (!is_array($user)) {
+            return ['ok' => false, 'errors' => ['Benutzerkonto nicht gefunden.']];
+        }
+
+        $hash = (string)($user['password_hash'] ?? '');
+        if ($hash === '' || !password_verify($currentPassword, $hash)) {
+            $errors[] = 'Aktuelles Passwort ist nicht korrekt.';
+        }
+
+        if (strlen($newPassword) < 8) {
+            $errors[] = 'Das neue Passwort muss mindestens 8 Zeichen lang sein.';
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            $errors[] = 'Neues Passwort und Bestaetigung stimmen nicht ueberein.';
+        }
+
+        if ($errors !== []) {
+            return ['ok' => false, 'errors' => $errors];
+        }
+
+        $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        if (!is_string($newHash) || $newHash === '') {
+            return ['ok' => false, 'errors' => ['Passwort konnte nicht gespeichert werden.']];
+        }
+
+        if (!auth_user_update_password($normalizedEmail, $newHash)) {
+            return ['ok' => false, 'errors' => ['Passwort konnte nicht gespeichert werden.']];
+        }
+
+        return ['ok' => true, 'errors' => []];
+    }
+}

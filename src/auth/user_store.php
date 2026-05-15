@@ -211,3 +211,73 @@ if (!function_exists('auth_user_create')) {
         return true;
     }
 }
+
+if (!function_exists('auth_user_update_password')) {
+    function auth_user_update_password(string $email, string $passwordHash): bool
+    {
+        if (auth_store_kind() === 'sqlite') {
+            $pdo = auth_sqlite();
+            $stmt = $pdo->prepare('UPDATE users SET password_hash = :password_hash WHERE email = :email');
+            $stmt->execute([
+                'password_hash' => $passwordHash,
+                'email' => $email,
+            ]);
+            return $stmt->rowCount() > 0;
+        }
+
+        $users = auth_json_read();
+        $updated = false;
+        foreach ($users as &$user) {
+            if (!is_array($user)) {
+                continue;
+            }
+            if (strtolower((string)($user['email'] ?? '')) === strtolower($email)) {
+                $user['password_hash'] = $passwordHash;
+                $updated = true;
+                break;
+            }
+        }
+        unset($user);
+
+        if ($updated) {
+            auth_json_write($users);
+        }
+
+        return $updated;
+    }
+}
+
+if (!function_exists('auth_user_set_role')) {
+    function auth_user_set_role(string $email, string $role): bool
+    {
+        if (auth_store_kind() === 'sqlite') {
+            $pdo = auth_sqlite();
+            $stmt = $pdo->prepare('UPDATE users SET role = :role WHERE email = :email');
+            $stmt->execute([
+                'role' => $role,
+                'email' => $email,
+            ]);
+            return $stmt->rowCount() > 0;
+        }
+
+        $users = auth_json_read();
+        $updated = false;
+        foreach ($users as &$user) {
+            if (!is_array($user)) {
+                continue;
+            }
+            if (strtolower((string)($user['email'] ?? '')) === strtolower($email)) {
+                $user['role'] = $role;
+                $updated = true;
+                break;
+            }
+        }
+        unset($user);
+
+        if ($updated) {
+            auth_json_write($users);
+        }
+
+        return $updated;
+    }
+}

@@ -367,6 +367,16 @@ if (!function_exists('app_pages')) {
                 'description' => 'Geschuetzter Benutzerbereich fuer persoenliche und projektbezogene Inhalte.',
                 'nav' => false,
             ],
+            [
+                'file' => 'account-file.php',
+                'label' => 'Dokument',
+                'title' => 'Dokument',
+                'eyebrow' => 'Benutzerbereich',
+                'description' => 'Geschuetzte Dokumentausgabe aus dem Benutzerbereich.',
+                'nav' => false,
+                'show_header' => false,
+                'show_footer' => false,
+            ],
         ];
     }
 }

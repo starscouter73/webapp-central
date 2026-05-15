@@ -382,6 +382,15 @@ a {
   color: rgba(245, 245, 245, 0.72);
 }
 
+.auth-form label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+  font: 600 0.92rem/1.3 Arial, sans-serif;
+}
+
 .auth-form input {
   width: 100%;
   min-height: 44px;
@@ -426,12 +435,41 @@ a {
   color: #ddffef;
 }
 
+.auth-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .account-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .account-card h3 {
   font-size: clamp(1.15rem, 1.5vw, 1.45rem);
+}
+
+.account-doc-list {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.account-doc-item {
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.account-doc-item strong,
+.account-doc-item span {
+  display: block;
+}
+
+.account-doc-item span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  margin-top: 3px;
 }
 
 @media (max-width: 960px) {
