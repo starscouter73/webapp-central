@@ -8,3 +8,5 @@ vendor/
 *.log
 php_errors.log
 .env
+src/server_ssh.png
+src/ssh_server_zugang.txt
