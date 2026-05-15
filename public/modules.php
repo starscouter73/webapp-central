@@ -28,7 +28,7 @@ render_page('Module', 'Bausteine', static function (): void {
             <span>Details per Weiterlesen</span>
           </div>
         </div>
-        <div class="hero-note-card">
+        <div class="hero-note-card is-contrast">
           <span class="card-label">Modulbild</span>
           <strong>Module muessen auf den ersten Blick unterscheidbar und merkfaehig sein.</strong>
           <p>Darum liegt der Fokus auf Rolle, Kurzprofil und einem kontrollierten Tiefeneinstieg statt auf gleichfoermigen Karten.</p>

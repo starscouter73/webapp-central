@@ -83,7 +83,7 @@ render_page(app_site_title(), 'Startseite', static function (): void {
             <span>Details nur bei Bedarf</span>
           </div>
         </div>
-        <div class="hero-note-card">
+        <div class="hero-note-card is-contrast">
           <span class="card-label">Heute im Fokus</span>
           <strong>Die Zentrale soll wie ein kuratierter Einstieg wirken, nicht wie eine reine Linkliste.</strong>
           <p>Darum stehen Uebersicht, Lesefluss und visuelle Ruhe ueber technischer Dichte im ersten Screen.</p>
@@ -93,6 +93,19 @@ render_page(app_site_title(), 'Startseite', static function (): void {
         <a class="btn btn-primary" href="<?= app_h(app_url('workspace.php')) ?>">Zur Zentrale</a>
         <a class="btn btn-ghost" href="<?= app_h(app_url('modules.php')) ?>">Kategorien ansehen</a>
       </div>
+    </section>
+
+    <section class="grid split showcase-band">
+      <article class="card showcase-panel">
+        <span class="card-label">Featured View</span>
+        <h3>Ein Startpunkt, der eher nach Portfolio als nach Werkzeugkasten aussieht</h3>
+        <p>Die Oberflaeche soll Projekte nicht nur verlinken, sondern sie kuratiert inszenieren. Deshalb bekommt der Einstieg mehr Spannung, klarere Schwerpunkte und bewusst gesetzte Kontrastflaechen.</p>
+      </article>
+      <article class="card showcase-stat-panel">
+        <span class="card-label">Signal</span>
+        <strong>Orientierung, Rhythmus, Kontrast.</strong>
+        <p>Diese drei Elemente tragen den neuen Einstieg.</p>
+      </article>
     </section>
 
     <section class="grid three-up">
@@ -132,7 +145,7 @@ render_page(app_site_title(), 'Startseite', static function (): void {
           <?php endforeach; ?>
         </div>
       </article>
-      <article class="card prompt-card">
+      <article class="card prompt-card showcase-panel soft-dark">
         <span class="card-label">Projektstatus</span>
         <h3>Live-Informationen erst kompakt, dann im Detail</h3>
         <div class="status-icon-list">

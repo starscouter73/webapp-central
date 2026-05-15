@@ -427,6 +427,17 @@ a {
   background: rgba(255, 255, 255, 0.64);
 }
 
+.hero-note-card.is-contrast,
+.showcase-panel,
+.showcase-stat-panel,
+.soft-dark {
+  background:
+    linear-gradient(145deg, rgba(33, 43, 37, 0.96), rgba(49, 65, 56, 0.92));
+  color: #f8f5ee;
+  border-color: rgba(185, 146, 86, 0.18);
+  box-shadow: 0 22px 48px rgba(35, 49, 43, 0.2);
+}
+
 .hero-point strong,
 .hero-note-card strong {
   font-size: 1rem;
@@ -437,9 +448,70 @@ a {
   color: var(--muted);
 }
 
+.hero-note-card.is-contrast .card-label,
+.showcase-panel .card-label,
+.showcase-stat-panel .card-label,
+.soft-dark .card-label {
+  background: rgba(215, 192, 149, 0.14);
+  color: #e0c897;
+}
+
+.hero-note-card.is-contrast p,
+.showcase-panel p,
+.showcase-stat-panel p,
+.soft-dark p,
+.soft-dark .status-runtime,
+.soft-dark .status-icon-item p {
+  color: rgba(248, 245, 238, 0.74);
+}
+
+.showcase-band {
+  align-items: stretch;
+}
+
+.showcase-panel,
+.showcase-stat-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.showcase-panel::before,
+.showcase-stat-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(215, 192, 149, 0.14), transparent 24%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04), transparent 42%);
+  pointer-events: none;
+}
+
+.showcase-panel > *,
+.showcase-stat-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.showcase-panel h3 {
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.showcase-stat-panel {
+  align-content: center;
+}
+
+.showcase-stat-panel strong {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
 .category-card {
   align-content: start;
   gap: 16px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .category-card-topline {
@@ -458,6 +530,12 @@ a {
   color: var(--accent-2);
   font: 700 0.82rem/1 Arial, sans-serif;
   letter-spacing: 0.08em;
+}
+
+.category-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(185, 146, 86, 0.22);
+  box-shadow: 0 20px 42px rgba(98, 88, 68, 0.12);
 }
 
 .readmore-card {

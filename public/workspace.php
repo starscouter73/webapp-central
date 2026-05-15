@@ -31,7 +31,7 @@ render_page('Zentrale', 'Struktur', static function (): void {
             <span>Repo zu Live-Stand</span>
           </div>
         </div>
-        <div class="hero-note-card">
+        <div class="hero-note-card is-contrast">
           <span class="card-label">Leselogik</span>
           <strong>Erst Prioritaet und Rolle, dann Infrastruktur und Detailkontext.</strong>
           <p>Die Zentrale soll den Blick fuehren und nicht den Nutzer mit Technikbausteinen empfangen.</p>
