@@ -30,6 +30,48 @@ if (!function_exists('render_page')) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= app_h($title) ?> | <?= app_h(app_site_title()) ?></title>
   <link rel="stylesheet" href="<?= app_h(app_asset_url('assets/app.css')) ?>">
+  <style>
+    .global-live-ticker {
+      position: relative;
+      overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(90deg,#111827 0%,#172033 50%,#111827 100%);
+      padding: 10px 0;
+      white-space: nowrap;
+    }
+
+    .global-live-ticker-track {
+      display: inline-block;
+      min-width: 100%;
+      padding-left: 100%;
+      animation: globalTickerMove 42s linear infinite;
+      color: #eef4ff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+
+    .global-live-ticker:hover .global-live-ticker-track {
+      animation-play-state: paused;
+    }
+
+    .global-live-dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #39d98a;
+      margin: 0 10px 0 18px;
+      box-shadow: 0 0 0 5px rgba(57,217,138,.16);
+      vertical-align: middle;
+    }
+
+    @keyframes globalTickerMove {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+  </style>
 </head>
 <body<?= $bodyClass !== '' ? ' class="' . app_h($bodyClass) . '"' : '' ?>>
   <div class="page-shell<?= $shellClass !== '' ? ' ' . app_h($shellClass) : '' ?>">
@@ -47,6 +89,13 @@ if (!function_exists('render_page')) {
           <?php endforeach; ?>
         </nav>
       </header>
+
+      <div class="global-live-ticker" aria-label="Projektstatus Live">
+        <div class="global-live-ticker-track" id="global-live-ticker-track">
+          <span class="global-live-dot"></span>
+          LIVE STATUS • webapp-central.de aktiv • Kalendermodul in Entwicklung • Listenansicht priorisiert • Voice-to-Text aktiv • Hallenberg Showcase online • Live-/Lokal-Sync aktiv • Letzte Projektphase 15.05.2026 • Serverstatus OK
+        </div>
+      </div>
     <?php endif; ?>
 
     <main class="content-shell<?= $contentShellClass !== '' ? ' ' . app_h($contentShellClass) : '' ?>">
@@ -80,6 +129,39 @@ if (!function_exists('render_page')) {
       </footer>
     <?php endif; ?>
   </div>
+
+  <script>
+    (function () {
+      var ticker = document.getElementById('global-live-ticker-track');
+
+      if (!ticker) {
+        return;
+      }
+
+      function updateTicker() {
+        var now = new Date();
+        var time = now.toLocaleTimeString('de-DE', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        ticker.innerHTML = '<span class="global-live-dot"></span>'
+          + 'LIVE STATUS ' + time
+          + ' • webapp-central.de aktiv'
+          + ' • Kalendermodul wird erweitert'
+          + ' • Chronologische Listenansicht priorisiert'
+          + ' • Formularlogik wird umgebaut'
+          + ' • Voice-to-Text aktiv'
+          + ' • Hallenberg Medienmodule online'
+          + ' • Lokaler und Live-Sync aktiv'
+          + ' • Serverstatus OK';
+      }
+
+      updateTicker();
+      window.setInterval(updateTicker, 300000);
+    }());
+  </script>
+
   <?php if (app_is_local()): ?>
     <script>
       (function () {
