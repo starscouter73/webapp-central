@@ -4,8 +4,12 @@
   if (!document.querySelector('.calendar-page')) return;
 
   var storageKey = 'webapp-central-calendar-events';
+  var overviewPageSize = 5;
+  var overviewPage = 0;
   var layout = document.querySelector('.calendar-primary-layout');
   var overview = document.querySelector('.calendar-overview-panel');
+  var overviewList = document.getElementById('overview-list');
+  var overviewSearch = document.getElementById('overview-search');
   var form = document.querySelector('.calendar-panel');
   var toolbar = document.querySelector('.calendar-overview-toolbar');
   var statusLine = document.getElementById('voice-status');
@@ -20,7 +24,7 @@
   document.documentElement.classList.add('calendar-priority-mode');
 
   var css = document.createElement('style');
-  css.textContent = '.calendar-priority-mode .calendar-primary-layout{display:block}.calendar-priority-mode .calendar-overview-panel{width:100%}.calendar-priority-mode .calendar-panel{display:none;margin-top:18px}.calendar-priority-mode .calendar-panel.is-entry-open{display:block}.calendar-entry-action-row,.calendar-import-export-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 0}.calendar-entry-hint,.calendar-import-export-hint{color:var(--muted);font-size:13px;line-height:1.45}.calendar-import-file{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}.calendar-priority-mode #calendar-visual-panel{display:block!important;margin:12px 0 18px}.calendar-priority-mode #calendar-visual-panel[hidden]{display:block!important}.calendar-priority-mode #calendar-grid-viewport{width:100%}.calendar-priority-mode .calendar-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-bottom:6px}.calendar-priority-mode .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}.calendar-priority-mode .calendar-day{min-height:92px;padding:12px 12px 10px;overflow:hidden}.calendar-priority-mode .calendar-day strong{font-size:16px}.calendar-priority-mode .calendar-day span{font-size:13px}.calendar-priority-mode .calendar-week-summary{margin-top:26px;display:block;max-height:38px;overflow:hidden}.calendar-priority-mode .calendar-week-summary-item{display:block;padding:5px 8px;border-radius:10px;background:rgba(0,0,0,.05);font-size:12px;line-height:1.15;white-space:normal}.calendar-priority-mode #selected-panel{display:none!important}.lazy-map-card{position:relative;min-height:150px;border-radius:18px;overflow:hidden;border:1px solid rgba(124,156,255,.24);background:linear-gradient(135deg,rgba(42,55,82,.96),rgba(98,120,170,.36)),radial-gradient(circle at 18% 24%,rgba(61,220,151,.24),transparent 30%),radial-gradient(circle at 78% 18%,rgba(124,156,255,.28),transparent 34%);box-shadow:0 18px 38px rgba(15,23,42,.13);display:flex;align-items:flex-end;padding:14px;color:var(--text)}.overview-item-cell-map .lazy-map-card{min-height:112px}.map-preview .lazy-map-card,.event-focus-map.lazy-map-card{min-height:220px}.lazy-map-card:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:28px 28px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.55),rgba(0,0,0,.08));pointer-events:none}.lazy-map-card-content{position:relative;z-index:1;display:grid;gap:8px;width:100%}.lazy-map-card strong{font-size:14px}.lazy-map-card span{font-size:12px;color:var(--muted)}.lazy-map-card-actions{display:flex;gap:8px;flex-wrap:wrap}.lazy-map-card iframe{width:100%;min-height:220px;border:0;border-radius:14px;background:#e5e7eb}.lazy-map-card.is-loaded{display:block;padding:0;background:transparent;border:0;box-shadow:none}.lazy-map-card.is-loaded .lazy-map-card-content{display:block}.overview-item-cell-map .lazy-map-card.is-loaded iframe{min-height:128px}@media(max-width:900px){.calendar-priority-mode .calendar-weekdays,.calendar-priority-mode .calendar-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.calendar-priority-mode .calendar-day{min-height:86px}}';
+  css.textContent = '.calendar-priority-mode .calendar-primary-layout{display:block}.calendar-priority-mode .calendar-overview-panel{width:100%}.calendar-priority-mode .calendar-panel{display:none;margin-top:18px}.calendar-priority-mode .calendar-panel.is-entry-open{display:block}.calendar-entry-action-row,.calendar-import-export-row,.calendar-list-pager{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 0}.calendar-list-pager{justify-content:space-between;border-top:1px solid rgba(124,156,255,.16);padding-top:14px}.calendar-list-pager-info{color:var(--muted);font-size:13px}.calendar-entry-hint,.calendar-import-export-hint{color:var(--muted);font-size:13px;line-height:1.45}.calendar-import-file{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}.calendar-priority-mode #calendar-visual-panel{display:block!important;margin:12px 0 18px}.calendar-priority-mode #calendar-visual-panel[hidden]{display:block!important}.calendar-priority-mode #calendar-grid-viewport{width:100%}.calendar-priority-mode .calendar-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-bottom:6px}.calendar-priority-mode .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}.calendar-priority-mode .calendar-day{min-height:92px;padding:12px 12px 10px;overflow:hidden}.calendar-priority-mode .calendar-day strong{font-size:16px}.calendar-priority-mode .calendar-day span{font-size:13px}.calendar-priority-mode .calendar-week-summary{margin-top:26px;display:block;max-height:38px;overflow:hidden}.calendar-priority-mode .calendar-week-summary-item{display:block;padding:5px 8px;border-radius:10px;background:rgba(0,0,0,.05);font-size:12px;line-height:1.15;white-space:normal}.calendar-priority-mode #selected-panel{display:none!important}.calendar-priority-mode .overview-item{min-height:auto}.lazy-map-card{position:relative;min-height:128px;border-radius:16px;overflow:hidden;border:1px solid rgba(124,156,255,.24);background:linear-gradient(135deg,rgba(42,55,82,.96),rgba(98,120,170,.36)),radial-gradient(circle at 18% 24%,rgba(61,220,151,.24),transparent 30%),radial-gradient(circle at 78% 18%,rgba(124,156,255,.28),transparent 34%);box-shadow:0 12px 26px rgba(15,23,42,.10);display:flex;align-items:flex-end;padding:12px;color:var(--text)}.overview-item-cell-map .lazy-map-card{min-height:78px;border-radius:14px;padding:9px}.map-preview .lazy-map-card,.event-focus-map.lazy-map-card{min-height:180px}.lazy-map-card:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:28px 28px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.55),rgba(0,0,0,.08));pointer-events:none}.lazy-map-card-content{position:relative;z-index:1;display:grid;gap:7px;width:100%}.lazy-map-card strong{font-size:13px}.lazy-map-card span{font-size:11px;color:var(--muted)}.lazy-map-card-actions{display:flex;gap:6px;flex-wrap:wrap}.overview-item-cell-map .lazy-map-card .btn{padding:6px 8px;font-size:11px}.lazy-map-card iframe{width:100%;min-height:180px;border:0;border-radius:14px;background:#e5e7eb}.lazy-map-card.is-loaded{display:block;padding:0;background:transparent;border:0;box-shadow:none}.lazy-map-card.is-loaded .lazy-map-card-content{display:block}.overview-item-cell-map .lazy-map-card.is-loaded iframe{min-height:96px}@media(max-width:900px){.calendar-priority-mode .calendar-weekdays,.calendar-priority-mode .calendar-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.calendar-priority-mode .calendar-day{min-height:86px}}';
   document.head.appendChild(css);
 
   if (visualPanel && overview) {
@@ -81,6 +85,72 @@
   importExportRow.appendChild(importHint);
   actionRow.insertAdjacentElement('afterend', importExportRow);
 
+  var pager = document.createElement('div');
+  pager.className = 'calendar-list-pager';
+  var pagerInfo = document.createElement('span');
+  pagerInfo.className = 'calendar-list-pager-info';
+  var pagerButtons = document.createElement('div');
+  pagerButtons.className = 'button-row';
+  var prevPageButton = document.createElement('button');
+  prevPageButton.className = 'btn btn-ghost';
+  prevPageButton.type = 'button';
+  prevPageButton.textContent = 'Vorherige Termine';
+  var nextPageButton = document.createElement('button');
+  nextPageButton.className = 'btn btn-secondary';
+  nextPageButton.type = 'button';
+  nextPageButton.textContent = 'Naechste Termine';
+  pagerButtons.appendChild(prevPageButton);
+  pagerButtons.appendChild(nextPageButton);
+  pager.appendChild(pagerInfo);
+  pager.appendChild(pagerButtons);
+  if (overviewList) {
+    overviewList.insertAdjacentElement('afterend', pager);
+  }
+
+  function applyOverviewPagination() {
+    if (!overviewList) return;
+    var items = Array.prototype.slice.call(overviewList.querySelectorAll('.overview-item'));
+    var totalPages = Math.max(1, Math.ceil(items.length / overviewPageSize));
+    if (overviewPage >= totalPages) overviewPage = totalPages - 1;
+    if (overviewPage < 0) overviewPage = 0;
+
+    if (!items.length) {
+      pager.hidden = true;
+      return;
+    }
+
+    pager.hidden = items.length <= overviewPageSize;
+    items.forEach(function (item, index) {
+      var start = overviewPage * overviewPageSize;
+      item.hidden = index < start || index >= start + overviewPageSize;
+    });
+
+    var startNumber = overviewPage * overviewPageSize + 1;
+    var endNumber = Math.min(items.length, startNumber + overviewPageSize - 1);
+    pagerInfo.textContent = 'Zeige ' + startNumber + '-' + endNumber + ' von ' + items.length + ' Terminen';
+    prevPageButton.disabled = overviewPage === 0;
+    nextPageButton.disabled = overviewPage >= totalPages - 1;
+  }
+
+  prevPageButton.addEventListener('click', function () {
+    overviewPage -= 1;
+    applyOverviewPagination();
+    overview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  nextPageButton.addEventListener('click', function () {
+    overviewPage += 1;
+    applyOverviewPagination();
+    overview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  if (overviewSearch) {
+    overviewSearch.addEventListener('input', function () {
+      overviewPage = 0;
+      window.setTimeout(applyOverviewPagination, 40);
+    });
+  }
+
   function getAddressFromMapUrl(src) {
     try {
       var url = new URL(src, window.location.origin);
@@ -125,7 +195,7 @@
       openLink.href = buildMapsSearchUrl(address);
       openLink.target = '_blank';
       openLink.rel = 'noreferrer noopener';
-      openLink.textContent = 'In Google Maps öffnen';
+      openLink.textContent = 'Maps öffnen';
 
       loadButton.addEventListener('click', function () {
         var lazyFrame = frame.cloneNode(true);
@@ -290,6 +360,7 @@
   }, true);
 
   upgradeMapFrames(document);
+  applyOverviewPagination();
 
   var mapObserver = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutation) {
@@ -299,6 +370,7 @@
         }
       });
     });
+    window.setTimeout(applyOverviewPagination, 20);
   });
 
   mapObserver.observe(document.querySelector('.calendar-page'), {
