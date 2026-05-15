@@ -8,6 +8,9 @@ if (!function_exists('auth_data_dir')) {
         if (!is_dir($dir)) {
             @mkdir($dir, 0775, true);
         }
+        if (is_dir($dir)) {
+            @chmod($dir, 0775);
+        }
 
         return $dir;
     }
@@ -37,14 +40,40 @@ if (!function_exists('auth_users_sqlite_file')) {
 if (!function_exists('auth_store_kind')) {
     function auth_store_kind(): string
     {
-        return auth_can_use_sqlite() ? 'sqlite' : 'json';
+        static $store = null;
+        if (is_string($store)) {
+            return $store;
+        }
+
+        if (!auth_can_use_sqlite()) {
+            $store = 'json';
+            return $store;
+        }
+
+        try {
+            auth_sqlite();
+            $store = 'sqlite';
+            return $store;
+        } catch (Throwable) {
+            $store = 'json';
+            return $store;
+        }
     }
 }
 
 if (!function_exists('auth_sqlite')) {
     function auth_sqlite(): \PDO
     {
-        $pdo = new PDO('sqlite:' . auth_users_sqlite_file());
+        $dbFile = auth_users_sqlite_file();
+        $dir = dirname($dbFile);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        if (!is_dir($dir) || !is_writable($dir)) {
+            throw new RuntimeException('SQLite directory is not writable.');
+        }
+
+        $pdo = new PDO('sqlite:' . $dbFile);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->exec(
             'CREATE TABLE IF NOT EXISTS users (
@@ -81,7 +110,15 @@ if (!function_exists('auth_json_read')) {
 if (!function_exists('auth_json_write')) {
     function auth_json_write(array $users): void
     {
-        file_put_contents(auth_users_json_file(), json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $file = auth_users_json_file();
+        $dir = dirname($file);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        if (!is_dir($dir) || !is_writable($dir)) {
+            throw new RuntimeException('JSON directory is not writable.');
+        }
+        file_put_contents($file, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 }
 
@@ -148,4 +185,3 @@ if (!function_exists('auth_user_create')) {
         return true;
     }
 }
-
