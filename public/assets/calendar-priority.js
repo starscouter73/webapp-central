@@ -12,9 +12,7 @@
   var titleInput = document.getElementById('event-title');
   var editId = document.getElementById('event-edit-id');
   var visualPanel = document.getElementById('calendar-visual-panel');
-  var gridViewport = document.getElementById('calendar-grid-viewport');
   var selectedPanel = document.getElementById('selected-panel');
-  var monthButton = document.getElementById('view-month');
   var weekButton = document.getElementById('view-week');
 
   if (!layout || !overview || !form || !toolbar) return;
@@ -22,7 +20,7 @@
   document.documentElement.classList.add('calendar-priority-mode');
 
   var css = document.createElement('style');
-  css.textContent = '.calendar-priority-mode .calendar-primary-layout{display:block}.calendar-priority-mode .calendar-overview-panel{width:100%}.calendar-priority-mode .calendar-panel{display:none;margin-top:18px}.calendar-priority-mode .calendar-panel.is-entry-open{display:block}.calendar-entry-action-row,.calendar-import-export-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 0}.calendar-entry-hint,.calendar-import-export-hint{color:var(--muted);font-size:13px;line-height:1.45}.calendar-import-file{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}.calendar-priority-mode #calendar-visual-panel{display:block!important;margin:12px 0 18px}.calendar-priority-mode #calendar-visual-panel[hidden]{display:block!important}.calendar-priority-mode #calendar-grid-viewport{width:100%}.calendar-priority-mode .calendar-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-bottom:6px}.calendar-priority-mode .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}.calendar-priority-mode .calendar-day{min-height:92px;padding:12px 12px 10px;overflow:hidden}.calendar-priority-mode .calendar-day strong{font-size:16px}.calendar-priority-mode .calendar-day span{font-size:13px}.calendar-priority-mode .calendar-week-summary{margin-top:26px;display:block;max-height:38px;overflow:hidden}.calendar-priority-mode .calendar-week-summary-item{display:block;padding:5px 8px;border-radius:10px;background:rgba(0,0,0,.05);font-size:12px;line-height:1.15;white-space:normal}.calendar-priority-mode #selected-panel{display:none!important}@media(max-width:900px){.calendar-priority-mode .calendar-weekdays,.calendar-priority-mode .calendar-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.calendar-priority-mode .calendar-day{min-height:86px}}';
+  css.textContent = '.calendar-priority-mode .calendar-primary-layout{display:block}.calendar-priority-mode .calendar-overview-panel{width:100%}.calendar-priority-mode .calendar-panel{display:none;margin-top:18px}.calendar-priority-mode .calendar-panel.is-entry-open{display:block}.calendar-entry-action-row,.calendar-import-export-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 0}.calendar-entry-hint,.calendar-import-export-hint{color:var(--muted);font-size:13px;line-height:1.45}.calendar-import-file{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}.calendar-priority-mode #calendar-visual-panel{display:block!important;margin:12px 0 18px}.calendar-priority-mode #calendar-visual-panel[hidden]{display:block!important}.calendar-priority-mode #calendar-grid-viewport{width:100%}.calendar-priority-mode .calendar-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-bottom:6px}.calendar-priority-mode .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}.calendar-priority-mode .calendar-day{min-height:92px;padding:12px 12px 10px;overflow:hidden}.calendar-priority-mode .calendar-day strong{font-size:16px}.calendar-priority-mode .calendar-day span{font-size:13px}.calendar-priority-mode .calendar-week-summary{margin-top:26px;display:block;max-height:38px;overflow:hidden}.calendar-priority-mode .calendar-week-summary-item{display:block;padding:5px 8px;border-radius:10px;background:rgba(0,0,0,.05);font-size:12px;line-height:1.15;white-space:normal}.calendar-priority-mode #selected-panel{display:none!important}.lazy-map-card{position:relative;min-height:150px;border-radius:18px;overflow:hidden;border:1px solid rgba(124,156,255,.24);background:linear-gradient(135deg,rgba(42,55,82,.96),rgba(98,120,170,.36)),radial-gradient(circle at 18% 24%,rgba(61,220,151,.24),transparent 30%),radial-gradient(circle at 78% 18%,rgba(124,156,255,.28),transparent 34%);box-shadow:0 18px 38px rgba(15,23,42,.13);display:flex;align-items:flex-end;padding:14px;color:var(--text)}.overview-item-cell-map .lazy-map-card{min-height:112px}.map-preview .lazy-map-card,.event-focus-map.lazy-map-card{min-height:220px}.lazy-map-card:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:28px 28px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.55),rgba(0,0,0,.08));pointer-events:none}.lazy-map-card-content{position:relative;z-index:1;display:grid;gap:8px;width:100%}.lazy-map-card strong{font-size:14px}.lazy-map-card span{font-size:12px;color:var(--muted)}.lazy-map-card-actions{display:flex;gap:8px;flex-wrap:wrap}.lazy-map-card iframe{width:100%;min-height:220px;border:0;border-radius:14px;background:#e5e7eb}.lazy-map-card.is-loaded{display:block;padding:0;background:transparent;border:0;box-shadow:none}.lazy-map-card.is-loaded .lazy-map-card-content{display:block}.overview-item-cell-map .lazy-map-card.is-loaded iframe{min-height:128px}@media(max-width:900px){.calendar-priority-mode .calendar-weekdays,.calendar-priority-mode .calendar-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.calendar-priority-mode .calendar-day{min-height:86px}}';
   document.head.appendChild(css);
 
   if (visualPanel && overview) {
@@ -61,6 +59,7 @@
   importInput.className = 'calendar-import-file';
   importInput.type = 'file';
   importInput.accept = '.json,application/json';
+  importInput.setAttribute('aria-label', 'Kalender JSON importieren');
 
   var importButton = document.createElement('button');
   importButton.className = 'btn btn-secondary';
@@ -81,6 +80,73 @@
   importExportRow.appendChild(exportButton);
   importExportRow.appendChild(importHint);
   actionRow.insertAdjacentElement('afterend', importExportRow);
+
+  function getAddressFromMapUrl(src) {
+    try {
+      var url = new URL(src, window.location.origin);
+      return url.searchParams.get('q') || url.searchParams.get('query') || '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  function buildMapsSearchUrl(address) {
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address || '');
+  }
+
+  function upgradeMapFrames(root) {
+    var scope = root && root.querySelectorAll ? root : document;
+    var frames = scope.querySelectorAll('iframe[src*="google.com/maps"],iframe[src*="maps.google"]');
+
+    frames.forEach(function (frame) {
+      if (frame.dataset.lazyMapDone === '1') return;
+      frame.dataset.lazyMapDone = '1';
+
+      var src = frame.getAttribute('src') || '';
+      var title = frame.getAttribute('title') || 'Kartenvorschau';
+      var address = decodeURIComponent(getAddressFromMapUrl(src) || title.replace(/^.*fuer\s+/i, '').replace(/^.*für\s+/i, ''));
+      var card = document.createElement('div');
+      var content = document.createElement('div');
+      var heading = document.createElement('strong');
+      var meta = document.createElement('span');
+      var actions = document.createElement('div');
+      var loadButton = document.createElement('button');
+      var openLink = document.createElement('a');
+
+      card.className = 'lazy-map-card';
+      content.className = 'lazy-map-card-content';
+      actions.className = 'lazy-map-card-actions';
+      heading.textContent = 'Karten-Vorschau';
+      meta.textContent = address || 'Adresse vorhanden';
+      loadButton.className = 'btn btn-secondary btn-small';
+      loadButton.type = 'button';
+      loadButton.textContent = 'Karte laden';
+      openLink.className = 'btn btn-ghost btn-small';
+      openLink.href = buildMapsSearchUrl(address);
+      openLink.target = '_blank';
+      openLink.rel = 'noreferrer noopener';
+      openLink.textContent = 'In Google Maps öffnen';
+
+      loadButton.addEventListener('click', function () {
+        var lazyFrame = frame.cloneNode(true);
+        lazyFrame.removeAttribute('data-lazy-map-done');
+        lazyFrame.setAttribute('src', src);
+        lazyFrame.style.width = '100%';
+        lazyFrame.style.border = '0';
+        card.classList.add('is-loaded');
+        content.innerHTML = '';
+        content.appendChild(lazyFrame);
+      });
+
+      actions.appendChild(loadButton);
+      actions.appendChild(openLink);
+      content.appendChild(heading);
+      content.appendChild(meta);
+      content.appendChild(actions);
+      card.appendChild(content);
+      frame.replaceWith(card);
+    });
+  }
 
   function readEvents() {
     try {
@@ -222,4 +288,21 @@
       openForm('Bearbeitungsformular geoeffnet.');
     }
   }, true);
+
+  upgradeMapFrames(document);
+
+  var mapObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        if (node.nodeType === 1) {
+          upgradeMapFrames(node);
+        }
+      });
+    });
+  });
+
+  mapObserver.observe(document.querySelector('.calendar-page'), {
+    childList: true,
+    subtree: true
+  });
 }());
