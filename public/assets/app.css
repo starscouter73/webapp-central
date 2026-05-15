@@ -28,6 +28,7 @@ body {
     radial-gradient(circle at bottom, rgba(255, 255, 255, 0.35), transparent 32%),
     var(--bg);
   color: var(--ink);
+  line-height: 1.55;
 }
 
 a {
@@ -37,7 +38,7 @@ a {
 .page-shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 28px 0 48px;
+  padding: 34px 0 56px;
 }
 
 .page-shell-standalone {
@@ -48,7 +49,7 @@ a {
 .site-header {
   display: grid;
   gap: 18px;
-  padding: 24px;
+  padding: 26px 28px;
   border: 1px solid var(--line);
   border-radius: 28px;
   background: var(--surface-strong);
@@ -93,6 +94,10 @@ a {
   margin: 0;
   font-weight: 700;
   letter-spacing: -0.03em;
+}
+
+.brand-block h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
 }
 
 .brand-link {
@@ -175,8 +180,8 @@ a {
 
 .content-shell {
   display: grid;
-  gap: 18px;
-  margin-top: 18px;
+  gap: 22px;
+  margin-top: 22px;
 }
 
 .page-intro,
@@ -265,7 +270,7 @@ a {
 }
 
 .card {
-  padding: 24px;
+  padding: 28px;
   border: 1px solid var(--line);
   border-radius: 28px;
   background: var(--surface);
@@ -316,7 +321,12 @@ a {
 .overview-hero-copy,
 .overview-chip-grid,
 .overview-chip,
+.overview-hero-aside,
+.hero-point-list,
+.hero-point,
+.hero-note-card,
 .category-card,
+.category-card-topline,
 .readmore-card,
 .readmore-body {
   display: grid;
@@ -324,8 +334,21 @@ a {
 }
 
 .overview-hero {
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
-  align-items: end;
+  position: relative;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+  align-items: stretch;
+  gap: 26px;
+  overflow: hidden;
+}
+
+.overview-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 46%),
+    radial-gradient(circle at top right, rgba(185, 146, 86, 0.1), transparent 26%);
+  pointer-events: none;
 }
 
 .overview-hero-copy h3,
@@ -334,27 +357,107 @@ a {
   margin: 0;
 }
 
+.overview-hero-copy,
+.overview-hero-aside {
+  position: relative;
+  z-index: 1;
+}
+
+.overview-hero-copy {
+  align-content: start;
+  gap: 18px;
+}
+
+.overview-hero-copy h3 {
+  max-width: 12ch;
+  font-size: clamp(2.3rem, 4.8vw, 4.4rem);
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+}
+
+.hero-intro-line {
+  margin: 0;
+  max-width: 58ch;
+  color: var(--accent-2);
+  font: 700 0.84rem/1.4 Arial, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.overview-hero-copy > p:not(.hero-intro-line) {
+  max-width: 60ch;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.overview-hero-aside {
+  align-content: start;
+  gap: 18px;
+}
+
 .overview-chip-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .overview-chip {
-  padding: 16px 18px;
+  padding: 18px 18px;
   border: 1px solid var(--line);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.72);
 }
 
 .overview-chip strong {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
 }
 
 .overview-chip span {
   color: var(--muted);
 }
 
+.hero-point-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.hero-point,
+.hero-note-card {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.hero-point strong,
+.hero-note-card strong {
+  font-size: 1rem;
+}
+
+.hero-point span,
+.hero-note-card p {
+  color: var(--muted);
+}
+
 .category-card {
   align-content: start;
+  gap: 16px;
+}
+
+.category-card-topline {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.category-index {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: rgba(111, 143, 124, 0.12);
+  color: var(--accent-2);
+  font: 700 0.82rem/1 Arial, sans-serif;
+  letter-spacing: 0.08em;
 }
 
 .readmore-card {
@@ -396,6 +499,21 @@ a {
 .readmore-body ul,
 .readmore-body ol {
   margin: 0;
+}
+
+.module-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.module-link::before,
+.workspace-link-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  opacity: 0.65;
 }
 
 .accent-card {
@@ -641,6 +759,8 @@ a {
 }
 
 .workspace-link-card {
+  position: relative;
+  overflow: hidden;
   padding: 16px 18px;
   border: 1px solid var(--line);
   border-radius: 22px;
@@ -1924,7 +2044,8 @@ body.lightbox-open {
   .dashboard-grid,
   .split,
   .overview-hero,
-  .overview-chip-grid {
+  .overview-chip-grid,
+  .hero-point-list {
     grid-template-columns: 1fr;
   }
 
@@ -2067,6 +2188,11 @@ body.lightbox-open {
   .page-shell {
     width: min(100% - 20px, 1180px);
     padding-top: 16px;
+  }
+
+  .overview-hero-copy h3 {
+    max-width: none;
+    font-size: clamp(1.9rem, 8vw, 3rem);
   }
 
   .page-shell-standalone {

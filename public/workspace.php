@@ -12,21 +12,29 @@ render_page('Zentrale', 'Struktur', static function (): void {
     <section class="card overview-hero">
       <div class="overview-hero-copy">
         <span class="card-label">Zentrale</span>
-        <h3>Die Arbeitswelt zuerst sortiert, dann vertieft</h3>
-        <p>Projekte, Werkzeuge und Live-Kontext erscheinen hier als klar getrennte Kategorien. Tiefergehende Informationen oeffnen sich erst im zweiten Schritt.</p>
+        <p class="hero-intro-line">Die Zentrale verbindet Projektkontext, Werkzeuge und Live-Betrieb in einer lesbaren, gefuehrten Arbeitsansicht.</p>
+        <h3>Ein Arbeitsraum mit Schwerpunkt statt einer bloßen Sammlung</h3>
+        <p>Hier soll man sofort verstehen, welche Referenzen aktiv sind, welche Bereiche handlungsrelevant bleiben und wo die technische Tiefe beginnt.</p>
       </div>
-      <div class="overview-chip-grid">
-        <div class="overview-chip">
-          <strong><?= count($projects) ?></strong>
-          <span>Projektkategorie</span>
+      <div class="overview-hero-aside">
+        <div class="overview-chip-grid">
+          <div class="overview-chip">
+            <strong><?= count($projects) ?></strong>
+            <span>Projektkategorie</span>
+          </div>
+          <div class="overview-chip">
+            <strong><?= count($tools) ?></strong>
+            <span>Arbeitsbereiche</span>
+          </div>
+          <div class="overview-chip">
+            <strong>Direkt</strong>
+            <span>Repo zu Live-Stand</span>
+          </div>
         </div>
-        <div class="overview-chip">
-          <strong><?= count($tools) ?></strong>
-          <span>Arbeitsbereiche</span>
-        </div>
-        <div class="overview-chip">
-          <strong>Direkt</strong>
-          <span>Repo zu Live-Stand</span>
+        <div class="hero-note-card">
+          <span class="card-label">Leselogik</span>
+          <strong>Erst Prioritaet und Rolle, dann Infrastruktur und Detailkontext.</strong>
+          <p>Die Zentrale soll den Blick fuehren und nicht den Nutzer mit Technikbausteinen empfangen.</p>
         </div>
       </div>
     </section>

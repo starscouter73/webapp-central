@@ -9,21 +9,29 @@ render_page('Module', 'Bausteine', static function (): void {
     <section class="card overview-hero">
       <div class="overview-hero-copy">
         <span class="card-label">Kategorien</span>
-        <h3>Module erst als Rollenbild, dann als Detailansicht</h3>
-        <p>Jeder Bereich wird als uebersichtliche Kategorie praesentiert. Weiterfuehrende Hinweise bleiben in aufklappbaren Bereichen gebuendelt.</p>
+        <p class="hero-intro-line">Die Module sollen nicht wie Menuepunkte wirken, sondern wie klar lesbare Bausteine mit eigener Funktion.</p>
+        <h3>Jeder Bereich bekommt eine erkennbare Rolle und einen ruhigen Auftritt</h3>
+        <p>So entsteht keine beliebige Linksammlung, sondern ein geordneter Katalog aus Bereichen, die man intuitiv unterscheiden und gezielt weiterlesen kann.</p>
       </div>
-      <div class="overview-chip-grid">
-        <div class="overview-chip">
-          <strong><?= count($modules) ?></strong>
-          <span>Module geordnet</span>
+      <div class="overview-hero-aside">
+        <div class="overview-chip-grid">
+          <div class="overview-chip">
+            <strong><?= count($modules) ?></strong>
+            <span>Module geordnet</span>
+          </div>
+          <div class="overview-chip">
+            <strong>Klar</strong>
+            <span>Kategorien zuerst</span>
+          </div>
+          <div class="overview-chip">
+            <strong>Optional</strong>
+            <span>Details per Weiterlesen</span>
+          </div>
         </div>
-        <div class="overview-chip">
-          <strong>Klar</strong>
-          <span>Kategorien zuerst</span>
-        </div>
-        <div class="overview-chip">
-          <strong>Optional</strong>
-          <span>Details per Weiterlesen</span>
+        <div class="hero-note-card">
+          <span class="card-label">Modulbild</span>
+          <strong>Module muessen auf den ersten Blick unterscheidbar und merkfaehig sein.</strong>
+          <p>Darum liegt der Fokus auf Rolle, Kurzprofil und einem kontrollierten Tiefeneinstieg statt auf gleichfoermigen Karten.</p>
         </div>
       </div>
     </section>
