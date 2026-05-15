@@ -10,10 +10,65 @@ if (!function_exists('app_hallenberg_media_base')) {
     }
 }
 
+if (!function_exists('app_hallenberg_media_root')) {
+    function app_hallenberg_media_root(): string
+    {
+        return app_root() . '/public/media/hallenberg';
+    }
+}
+
 if (!function_exists('app_hallenberg_media_fallback_base')) {
     function app_hallenberg_media_fallback_base(): string
     {
         return app_url('media/hallenberg');
+    }
+}
+
+if (!function_exists('app_hallenberg_media_file_path')) {
+    function app_hallenberg_media_file_path(string $category, string $file, bool $fallback = false): string
+    {
+        $baseDirectory = $fallback
+            ? app_hallenberg_media_root()
+            : app_hallenberg_media_root() . '/auswahl';
+
+        $categoryPath = trim($category, '/');
+        if ($categoryPath !== '') {
+            $baseDirectory .= '/' . $categoryPath;
+        }
+
+        return $baseDirectory . '/' . ltrim($file, '/');
+    }
+}
+
+if (!function_exists('app_hallenberg_media_placeholder')) {
+    function app_hallenberg_media_placeholder(string $alt, string $category): string
+    {
+        $title = trim($alt) !== '' ? $alt : 'Hallenberg Medienplatzhalter';
+        $subtitle = $category !== '' ? strtoupper($category) : 'HALLENBERG';
+        $svg = <<<SVG
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="{$title}">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#23312b"/>
+      <stop offset="100%" stop-color="#314138"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <circle cx="1240" cy="190" r="210" fill="rgba(215,192,149,0.18)"/>
+  <circle cx="300" cy="820" r="260" fill="rgba(111,143,124,0.22)"/>
+  <rect x="110" y="120" width="280" height="52" rx="26" fill="rgba(215,192,149,0.18)"/>
+  <text x="150" y="154" fill="#e0c897" font-family="Arial, sans-serif" font-size="28" font-weight="700">{$subtitle}</text>
+  <text x="110" y="350" fill="#f8f5ee" font-family="Georgia, serif" font-size="82" font-weight="700">Medienvorschau</text>
+  <text x="110" y="430" fill="rgba(248,245,238,0.74)" font-family="Arial, sans-serif" font-size="34">Originaldatei ist aktuell nicht im Projekt enthalten.</text>
+  <text x="110" y="490" fill="rgba(248,245,238,0.74)" font-family="Arial, sans-serif" font-size="28">{$title}</text>
+  <rect x="110" y="620" width="560" height="180" rx="28" fill="rgba(255,255,255,0.06)" stroke="rgba(215,192,149,0.16)"/>
+  <text x="160" y="710" fill="#f8f5ee" font-family="Arial, sans-serif" font-size="30" font-weight="700">Status</text>
+  <text x="160" y="760" fill="rgba(248,245,238,0.74)" font-family="Arial, sans-serif" font-size="24">Bildreferenz bleibt sichtbar, bis echte Hallenberg-Medien</text>
+  <text x="160" y="795" fill="rgba(248,245,238,0.74)" font-family="Arial, sans-serif" font-size="24">wieder unter /public/media/hallenberg/ bereitliegen.</text>
+</svg>
+SVG;
+
+        return 'data:image/svg+xml;charset=UTF-8,' . rawurlencode($svg);
     }
 }
 
@@ -22,12 +77,17 @@ if (!function_exists('app_hallenberg_media_item')) {
     {
         $base = $fallback ? app_hallenberg_media_fallback_base() : app_hallenberg_media_base() . '/' . $category;
         $path = str_replace('%2F', '/', rawurlencode(ltrim($file, '/')));
+        $filePath = app_hallenberg_media_file_path($category, $file, $fallback);
+        $src = is_file($filePath)
+            ? $base . '/' . $path
+            : app_hallenberg_media_placeholder($alt, $category);
 
         return [
-            'src' => $base . '/' . $path,
+            'src' => $src,
             'alt' => $alt,
             'category' => $category,
             'fallback' => $fallback,
+            'available' => is_file($filePath),
         ];
     }
 }
