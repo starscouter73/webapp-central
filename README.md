@@ -58,7 +58,8 @@ Vorgesehener Weg:
 1. Aenderungen im Repo machen
 2. nach `main` pushen
 3. GitHub Actions verbindet sich per SSH mit dem Server
-4. der Server aktualisiert das Repo und fuehrt `docker compose --env-file .env up -d --build` aus
+4. der Runner uebertraegt die Projektdateien direkt nach `DEPLOY_PATH`
+5. wenn Docker fuer den Deploy-Benutzer erreichbar ist, folgt `docker compose --env-file .env up -d --build`
 
 Der Workflow liegt hier:
 
@@ -78,6 +79,13 @@ DEPLOY_PATH
 
 Auf dem Server muss zusaetzlich im Deploy-Verzeichnis eine produktive `.env` liegen. Diese Datei wird nicht aus Git deployed und bleibt bewusst nur lokal auf dem Server.
 
+Der Workflow spiegelt absichtlich den praktischen Live-Weg:
+
+1. **kein serverseitiges `git pull` noetig**
+2. **Dateien werden direkt per SSH kopiert**
+3. **Compose-Rebuild nur dann hart erforderlich, wenn Docker-/Compose-Dateien geaendert wurden**
+4. **reine PHP-/Content-Aenderungen koennen bei Bind-Mount-Setup auch ohne Docker-Neustart live wirksam werden**
+
 Empfohlener Weg auf dem Server:
 
 1. `.env.example` nach `.env` kopieren
@@ -86,10 +94,10 @@ Empfohlener Weg auf dem Server:
 
 Server-Voraussetzungen:
 
-1. Das Repository ist auf dem Server bereits unter `DEPLOY_PATH` geklont.
+1. Unter `DEPLOY_PATH` existiert das Zielverzeichnis.
 2. Im Deploy-Verzeichnis liegt eine gueltige `.env`.
 3. `docker` und `docker compose` sind auf dem Server verfuegbar.
-4. Der Deploy-Benutzer darf in diesem Ordner `git pull` und `docker compose up -d --build` ausfuehren.
+4. Fuer Infrastruktur-Aenderungen sollte der Deploy-Benutzer `docker compose up -d --build` ausfuehren duerfen.
 
 ## Server-Ziel
 
