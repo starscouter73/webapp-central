@@ -1087,21 +1087,44 @@ render_page('Kalender', 'Termine', static function (): void {
 
           displayEvents.slice(0, 24).forEach(function (eventItem) {
             var article = document.createElement('article');
+            var main = document.createElement('div');
             var heading = document.createElement('div');
             var title = document.createElement('strong');
-            var meta = document.createElement('span');
+            var stamp = document.createElement('div');
+            var datePill = document.createElement('span');
+            var timePill = document.createElement('span');
+            var address = document.createElement('p');
             var note = document.createElement('p');
             var actions = document.createElement('div');
             var editButton = document.createElement('button');
             var visualizeButton = document.createElement('button');
+            var miniMap;
 
             article.className = 'overview-item';
+            main.className = 'overview-item-main';
             heading.className = 'overview-item-heading';
+            stamp.className = 'overview-item-stamp';
             title.textContent = eventItem.title;
-            meta.className = 'agenda-meta';
-            meta.textContent = formatEventStamp(eventItem);
-            note.textContent = eventItem.address || eventItem.note || 'Ohne weitere Details';
+            datePill.className = 'overview-item-date';
+            datePill.textContent = formatEventDate(eventItem);
+            timePill.className = 'overview-item-time';
+            timePill.textContent = eventItem.time || 'Ohne Uhrzeit';
+            address.className = 'overview-item-location';
+            address.textContent = eventItem.address || 'Ohne Adresse';
+            note.className = 'overview-item-note';
+            note.textContent = eventItem.note || 'Ohne weitere Details';
             actions.className = 'overview-item-actions';
+
+            if (eventItem.address) {
+              article.className += ' has-map';
+              miniMap = document.createElement('iframe');
+              miniMap.className = 'overview-item-map';
+              miniMap.title = 'Mini-Map fuer ' + eventItem.title;
+              miniMap.loading = 'lazy';
+              miniMap.referrerPolicy = 'no-referrer-when-downgrade';
+              miniMap.tabIndex = -1;
+              miniMap.src = buildMapEmbedUrl(eventItem.address);
+            }
 
             editButton.className = 'btn btn-secondary btn-small';
             editButton.type = 'button';
@@ -1126,12 +1149,21 @@ render_page('Kalender', 'Termine', static function (): void {
             });
 
             heading.appendChild(title);
-            heading.appendChild(meta);
-            article.appendChild(heading);
-            article.appendChild(note);
+            stamp.appendChild(datePill);
+            stamp.appendChild(timePill);
+            main.appendChild(heading);
+            main.appendChild(stamp);
+            main.appendChild(address);
+            if (eventItem.note) {
+              main.appendChild(note);
+            }
             actions.appendChild(editButton);
             actions.appendChild(visualizeButton);
-            article.appendChild(actions);
+            main.appendChild(actions);
+            article.appendChild(main);
+            if (miniMap) {
+              article.appendChild(miniMap);
+            }
             overviewList.appendChild(article);
           });
         }
@@ -1211,6 +1243,11 @@ render_page('Kalender', 'Termine', static function (): void {
         function formatEventStamp(eventItem) {
           var date = new Date(eventItem.date + 'T12:00:00');
           return pad(date.getDate()) + '.' + pad(date.getMonth() + 1) + '.' + date.getFullYear() + ' | ' + (eventItem.time || 'Ohne Uhrzeit');
+        }
+
+        function formatEventDate(eventItem) {
+          var date = new Date(eventItem.date + 'T12:00:00');
+          return pad(date.getDate()) + '.' + pad(date.getMonth() + 1) + '.' + date.getFullYear();
         }
 
         function buildWeekLabel(weekDates) {
