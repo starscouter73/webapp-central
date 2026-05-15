@@ -129,16 +129,18 @@ render_page('Kalender', 'Termine', static function (): void {
             </div>
           </div>
         </div>
-        <div class="calendar-weekdays" aria-hidden="true">
-          <span>Mo</span>
-          <span>Di</span>
-          <span>Mi</span>
-          <span>Do</span>
-          <span>Fr</span>
-          <span>Sa</span>
-          <span>So</span>
+        <div class="calendar-grid-viewport" id="calendar-grid-viewport">
+          <div class="calendar-weekdays" aria-hidden="true">
+            <span>Mo</span>
+            <span>Di</span>
+            <span>Mi</span>
+            <span>Do</span>
+            <span>Fr</span>
+            <span>Sa</span>
+            <span>So</span>
+          </div>
+          <div class="calendar-grid" id="calendar-grid"></div>
         </div>
-        <div class="calendar-grid" id="calendar-grid"></div>
 
         <div class="calendar-detail-layout">
           <article class="calendar-subpanel" id="selected-panel">
@@ -240,6 +242,7 @@ render_page('Kalender', 'Termine', static function (): void {
 
         var monthLabel = document.getElementById('calendar-month');
         var grid = document.getElementById('calendar-grid');
+        var gridViewport = document.getElementById('calendar-grid-viewport');
         var selectedPanel = document.getElementById('selected-panel');
         var selectedLabel = document.getElementById('selected-date-label');
         var selectedEvents = document.getElementById('selected-events');
@@ -553,11 +556,12 @@ render_page('Kalender', 'Termine', static function (): void {
             if (dayEvents.length) {
               dayEvents.sort(compareEvents).slice(0, 3).forEach(function (eventItem) {
                 var item = document.createElement('span');
+                item.className = 'calendar-week-summary-item';
                 item.textContent = (eventItem.time || '--:--') + ' ' + eventItem.title;
                 summary.appendChild(item);
               });
             } else {
-              summary.innerHTML = '<span>Keine Eintraege</span>';
+              summary.innerHTML = '<span class="calendar-week-summary-empty">Keine Eintraege</span>';
             }
 
             button.appendChild(dayLabel);
@@ -1017,6 +1021,9 @@ render_page('Kalender', 'Termine', static function (): void {
         function syncViewToggle() {
           monthViewButton.className = activeView === 'month' ? 'btn btn-secondary is-active' : 'btn btn-ghost';
           weekViewButton.className = activeView === 'week' ? 'btn btn-secondary is-active' : 'btn btn-ghost';
+          gridViewport.className = activeView === 'week'
+            ? 'calendar-grid-viewport is-week-view'
+            : 'calendar-grid-viewport';
         }
 
         function getWeekDates(isoDate) {

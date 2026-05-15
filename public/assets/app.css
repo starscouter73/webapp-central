@@ -629,6 +629,23 @@ a {
   background: rgba(255, 255, 255, 0.5);
 }
 
+.calendar-grid-viewport {
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.calendar-grid-viewport .calendar-weekdays,
+.calendar-grid-viewport .calendar-grid {
+  min-width: 760px;
+}
+
+.calendar-grid-viewport.is-week-view .calendar-weekdays,
+.calendar-grid-viewport.is-week-view .calendar-grid {
+  min-width: 980px;
+}
+
 .calendar-weekdays,
 .calendar-grid {
   display: grid;
@@ -647,11 +664,13 @@ a {
 .calendar-day {
   display: grid;
   gap: 10px;
+  min-width: 0;
   min-height: 110px;
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.74);
+  overflow: hidden;
   text-align: left;
   cursor: pointer;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
@@ -659,11 +678,15 @@ a {
 
 .calendar-day strong {
   font-size: 1.05rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .calendar-day span {
   color: var(--muted);
   font-size: 0.9rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .calendar-day:hover {
@@ -673,7 +696,8 @@ a {
 
 .calendar-day-week {
   min-height: 210px;
-  align-content: start;
+  grid-template-rows: auto auto 1fr;
+  align-content: stretch;
 }
 
 .calendar-day.is-muted {
@@ -704,15 +728,27 @@ a {
 
 .calendar-week-summary {
   margin-top: auto;
+  min-width: 0;
+  align-content: start;
 }
 
-.calendar-week-summary span {
+.calendar-week-summary-item,
+.calendar-week-summary-empty {
   display: block;
   padding: 8px 10px;
   border-radius: 12px;
   background: rgba(23, 33, 38, 0.05);
   color: var(--ink);
   font-size: 0.86rem;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.calendar-week-summary-item {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .calendar-form-row {
