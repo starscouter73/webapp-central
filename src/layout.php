@@ -17,7 +17,7 @@ if (!function_exists('render_page')) {
         $contentShellClass = trim((string)($options['content_shell_class'] ?? ''));
         $headerClass = '';
 
-        if (!headers_sent()) {
+        if (!headers_sent() && app_is_local()) {
             header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             header('Pragma: no-cache');
             header('Expires: 0');
