@@ -15,6 +15,7 @@ if (!function_exists('render_page')) {
         $bodyClass = trim((string)($options['body_class'] ?? ''));
         $shellClass = trim((string)($options['shell_class'] ?? ''));
         $contentShellClass = trim((string)($options['content_shell_class'] ?? ''));
+        $headerClass = $currentPage === 'index.php' ? ' site-header-accent' : '';
 
         if (!headers_sent()) {
             header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -33,7 +34,7 @@ if (!function_exists('render_page')) {
 <body<?= $bodyClass !== '' ? ' class="' . app_h($bodyClass) . '"' : '' ?>>
   <div class="page-shell<?= $shellClass !== '' ? ' ' . app_h($shellClass) : '' ?>">
     <?php if ($showHeader): ?>
-      <header class="site-header">
+      <header class="site-header<?= $headerClass ?>">
         <div class="brand-block">
           <h1><a class="brand-link" href="<?= app_h(app_url('index.php')) ?>"><?= app_h(app_site_title()) ?></a></h1>
           <p><?= app_h(app_tagline()) ?></p>

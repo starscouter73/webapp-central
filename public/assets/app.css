@@ -55,6 +55,38 @@ a {
   backdrop-filter: blur(18px);
 }
 
+.site-header-accent {
+  background:
+    linear-gradient(140deg, rgba(47, 108, 98, 0.9), rgba(23, 33, 38, 0.94)),
+    var(--surface);
+  border-color: rgba(47, 108, 98, 0.2);
+  color: #fff;
+}
+
+.site-header-accent .brand-block p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.site-header-accent .brand-link {
+  color: #fff;
+}
+
+.site-header-accent .site-nav a {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.site-header-accent .site-nav a.is-active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+
+.site-header-accent .site-nav a:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .brand-block h1,
 .card h3 {
   margin: 0;
