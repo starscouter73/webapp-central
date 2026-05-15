@@ -9,23 +9,32 @@ render_page('Zentrale', 'Struktur', static function (): void {
     $projects = app_workspace_projects();
     $tools = app_workspace_tools();
     ?>
-    <section class="grid two-up">
-      <article class="card">
+    <section class="card overview-hero">
+      <div class="overview-hero-copy">
         <span class="card-label">Zentrale</span>
-        <h3>Projektbereich statt Modulsammlung</h3>
-        <p>Hier laufen die aktiven Webprojekte zusammen. Einzelne Showcases wie Hallenberg sitzen unter der Zentrale und nicht mehr als gleichrangige Hauptnavigation.</p>
-      </article>
-      <article class="card">
-        <span class="card-label">Arbeitslogik</span>
-        <h3>Repo, Live-Stand und Serverpfad bleiben direkt greifbar</h3>
-        <p>Die App wird weiter direkt im Repository gepflegt und anschliessend unmittelbar auf den Server synchronisiert. <code>public/</code> bleibt dabei der klare Webroot.</p>
-      </article>
+        <h3>Die Arbeitswelt zuerst sortiert, dann vertieft</h3>
+        <p>Projekte, Werkzeuge und Live-Kontext erscheinen hier als klar getrennte Kategorien. Tiefergehende Informationen oeffnen sich erst im zweiten Schritt.</p>
+      </div>
+      <div class="overview-chip-grid">
+        <div class="overview-chip">
+          <strong><?= count($projects) ?></strong>
+          <span>Projektkategorie</span>
+        </div>
+        <div class="overview-chip">
+          <strong><?= count($tools) ?></strong>
+          <span>Arbeitsbereiche</span>
+        </div>
+        <div class="overview-chip">
+          <strong>Direkt</strong>
+          <span>Repo zu Live-Stand</span>
+        </div>
+      </div>
     </section>
 
     <section class="grid split">
       <article class="card">
         <span class="card-label">Projekte</span>
-        <h3>Aktive Referenzen und Showcases</h3>
+        <h3>Aktive Referenzen im Ueberblick</h3>
         <div class="workspace-card-list">
           <?php foreach ($projects as $project): ?>
             <a class="workspace-link-card" href="<?= app_h($project['href']) ?>">
@@ -41,7 +50,7 @@ render_page('Zentrale', 'Struktur', static function (): void {
       </article>
       <article class="card">
         <span class="card-label">Arbeitsbereiche</span>
-        <h3>Werkzeuge und Seiten unterhalb der Zentrale</h3>
+        <h3>Werkzeuge mit klarer Aufgabenrolle</h3>
         <div class="workspace-card-list">
           <?php foreach ($tools as $tool): ?>
             <a class="workspace-link-card" href="<?= app_h($tool['href']) ?>">
@@ -59,24 +68,35 @@ render_page('Zentrale', 'Struktur', static function (): void {
 
     <section class="grid split">
       <article class="card">
-        <span class="card-label">Ordnerlogik</span>
-        <h3>Webapp Central als Grundstruktur</h3>
-        <div class="code-block">
-          <code>public/</code>
-          <code>src/</code>
-          <code>docker/</code>
-          <code>.github/</code>
-        </div>
-        <p>So bleibt die Plattform offen fuer weitere Projekte, ohne dass einzelne Showcases das Gesamtsystem zerfasern.</p>
+        <span class="card-label">Grundstruktur</span>
+        <h3>Technik nur als geordneter Unterbau zeigen</h3>
+        <p>Die Kernlogik bleibt kompakt lesbar. Der technische Unterbau wird nicht breit ausgespielt, sondern nur bei Bedarf aufgeklappt.</p>
+        <details class="readmore-card">
+          <summary>Ordnerlogik weiterlesen</summary>
+          <div class="readmore-body">
+            <div class="code-block">
+              <code>public/</code>
+              <code>src/</code>
+              <code>docker/</code>
+              <code>.github/</code>
+            </div>
+            <p>So bleibt die Plattform offen fuer weitere Projekte, ohne dass einzelne Showcases das Gesamtsystem zerfasern.</p>
+          </div>
+        </details>
       </article>
       <article class="card">
         <span class="card-label">Ablauf</span>
         <h3>Praktischer Arbeitsrhythmus</h3>
-        <ol class="simple-list ordered-list">
-          <?php foreach ($steps as $step): ?>
-            <li><?= app_h($step) ?></li>
-          <?php endforeach; ?>
-        </ol>
+        <details class="readmore-card" open>
+          <summary>Arbeitsweg weiterlesen</summary>
+          <div class="readmore-body">
+            <ol class="simple-list ordered-list">
+              <?php foreach ($steps as $step): ?>
+                <li><?= app_h($step) ?></li>
+              <?php endforeach; ?>
+            </ol>
+          </div>
+        </details>
       </article>
     </section>
 
@@ -84,11 +104,16 @@ render_page('Zentrale', 'Struktur', static function (): void {
       <article class="card">
         <span class="card-label">Zugriff</span>
         <h3>Wichtige Live-Ziele</h3>
-        <ul class="simple-list">
-          <li><code>https://webapp-central.de/</code> als sichtbarer Live-Stand</li>
-          <li><code>http://45.133.9.232/</code> als Server-Ziel hinter dem Reverse Proxy</li>
-          <li><code>/opt/webapps/webzentrale/</code> als aktueller App-Ordner auf dem Server</li>
-        </ul>
+        <details class="readmore-card">
+          <summary>Zielpfade weiterlesen</summary>
+          <div class="readmore-body">
+            <ul class="simple-list">
+              <li><code>https://webapp-central.de/</code> als sichtbarer Live-Stand</li>
+              <li><code>http://45.133.9.232/</code> als Server-Ziel hinter dem Reverse Proxy</li>
+              <li><code>/opt/webapps/webzentrale/</code> als aktueller App-Ordner auf dem Server</li>
+            </ul>
+          </div>
+        </details>
       </article>
       <article class="card">
         <span class="card-label">Hinweis</span>
@@ -101,9 +126,12 @@ render_page('Zentrale', 'Struktur', static function (): void {
       <span class="card-label">Projektkontext</span>
       <h3>Kurztext fuer Neustart und Tester</h3>
       <p>Wenn Codex oder der Browser neu startet, kannst du diesen Block direkt kopieren und wieder einfuegen. Der Text wird aus dem aktuellen Projektstand erzeugt und bleibt damit naeher am Live-Zustand.</p>
-      <div class="project-context-box">
-        <pre id="project-resume-text"><?= app_h($resumePrompt) ?></pre>
-      </div>
+      <details class="readmore-card">
+        <summary>Projekttext weiterlesen</summary>
+        <div class="readmore-body project-context-box">
+          <pre id="project-resume-text"><?= app_h($resumePrompt) ?></pre>
+        </div>
+      </details>
       <div class="button-row">
         <button class="btn btn-primary" id="copy-project-context" type="button">Projekttext kopieren</button>
       </div>

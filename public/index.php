@@ -8,48 +8,105 @@ render_page(app_site_title(), 'Startseite', static function (): void {
     $highlights = app_highlights();
     $statusCheckedAt = (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->format('d.m.Y H:i');
     $infrastructureOverviewHtml = app_render_markdown(app_infrastructure_overview_markdown());
+    $overviewCategories = [
+        [
+            'label' => 'Projekte',
+            'title' => 'Referenzen zuerst sichtbar machen',
+            'text' => 'Showcases und Projektseiten werden als eigene Kategorie gebuendelt und erst danach vertieft.',
+            'href' => app_url('workspace.php'),
+            'link' => 'Projektbereiche ansehen',
+            'details' => [
+                'Hallenberg steht als Referenzprojekt bereit.',
+                'Weitere Showcases koennen spaeter unter derselben Logik einsortiert werden.',
+            ],
+        ],
+        [
+            'label' => 'Arbeitsbereiche',
+            'title' => 'Module als klare Kategorien lesen',
+            'text' => 'Kalender, Zentrale und weitere Bereiche werden als Uebersichtskarten mit klarer Rolle praesentiert.',
+            'href' => app_url('modules.php'),
+            'link' => 'Module im Ueberblick',
+            'details' => [
+                'Jede Kategorie erhaelt erst einen Kurzueberblick und dann einen Weiterlesen-Bereich.',
+                'So bleibt die Seite visuell ruhig und trotzdem informationsreich.',
+            ],
+        ],
+        [
+            'label' => 'Live-Betrieb',
+            'title' => 'Status und Ablauf getrennt erfassen',
+            'text' => 'Deployment, Live-Stand und Serverpfad bleiben direkt sichtbar, ohne die Startseite zu ueberladen.',
+            'href' => app_url('workspace.php'),
+            'link' => 'Zum Live-Kontext',
+            'details' => [
+                'Der Live-Stand wird zuerst knapp visualisiert.',
+                'Technische Details liegen in aufklappbaren Kontextbloecken.',
+            ],
+        ],
+    ];
     ?>
-    <section class="grid dashboard-grid">
-      <article class="card feature-card">
-        <span class="card-label">Ausrichtung</span>
-        <h3>Klare Zentrale fuer den neuen Auftritt</h3>
-        <p>Die Seite arbeitet als eigenstaendige Webzentrale und ist auf den naechsten Schritt Richtung Server und Domainbetrieb vorbereitet.</p>
-        <div class="metric-row">
-          <div class="metric-tile">
-            <strong><?= count($modules) ?></strong>
-            <span>Bereiche angelegt</span>
-          </div>
-          <div class="metric-tile">
-            <strong>Live</strong>
-            <span>direkt pflegbar</span>
-          </div>
+    <section class="card overview-hero">
+      <div class="overview-hero-copy">
+        <span class="card-label">Ueberblick</span>
+        <h3>Elegant starten, dann gezielt weiterlesen</h3>
+        <p>Die Startseite ordnet zuerst Projekte, Bereiche und Live-Kontext. Details liegen nachgelagert in ruhigen, aufklappbaren Bloecken.</p>
+      </div>
+      <div class="overview-chip-grid">
+        <div class="overview-chip">
+          <strong><?= count($modules) ?></strong>
+          <span>Kategorien sichtbar</span>
         </div>
-      </article>
-      <article class="card feature-card accent-card">
-        <span class="card-label">Direkt live</span>
-        <h3><?= app_h(app_site_title()) ?> laeuft direkt hier</h3>
-        <p>Struktur, Text und Gestaltung lassen sich direkt hier mit Codex pflegen und anschliessend sofort auf dem Server sichtbar machen.</p>
-        <div class="button-row">
-          <a class="btn btn-primary" href="<?= app_h(app_url('workspace.php')) ?>">Zur Zentrale</a>
-          <a class="btn btn-ghost" href="<?= app_h(app_url('modules.php')) ?>">Module ansehen</a>
+        <div class="overview-chip">
+          <strong>Live</strong>
+          <span>Stand direkt erreichbar</span>
         </div>
-      </article>
+        <div class="overview-chip">
+          <strong>Mehr lesen</strong>
+          <span>Details nur bei Bedarf</span>
+        </div>
+      </div>
+      <div class="button-row">
+        <a class="btn btn-primary" href="<?= app_h(app_url('workspace.php')) ?>">Zur Zentrale</a>
+        <a class="btn btn-ghost" href="<?= app_h(app_url('modules.php')) ?>">Kategorien ansehen</a>
+      </div>
     </section>
 
     <section class="grid three-up">
-      <?php foreach ($highlights as $highlight): ?>
-        <article class="card">
-          <span class="card-label"><?= app_h($highlight['label']) ?></span>
-          <h3><?= app_h($highlight['title']) ?></h3>
-          <p><?= app_h($highlight['text']) ?></p>
+      <?php foreach ($overviewCategories as $category): ?>
+        <article class="card category-card">
+          <span class="card-label"><?= app_h($category['label']) ?></span>
+          <h3><?= app_h($category['title']) ?></h3>
+          <p><?= app_h($category['text']) ?></p>
+          <a class="btn btn-secondary" href="<?= app_h($category['href']) ?>"><?= app_h($category['link']) ?></a>
+          <details class="readmore-card">
+            <summary>Weiterlesen</summary>
+            <div class="readmore-body">
+              <ul class="simple-list">
+                <?php foreach ($category['details'] as $detail): ?>
+                  <li><?= app_h($detail) ?></li>
+                <?php endforeach; ?>
+              </ul>
+            </div>
+          </details>
         </article>
       <?php endforeach; ?>
     </section>
 
     <section class="grid split">
+      <article class="card">
+        <span class="card-label">Kernpunkte</span>
+        <h3>Die wichtigsten Leitlinien auf einen Blick</h3>
+        <div class="module-list">
+          <?php foreach ($highlights as $highlight): ?>
+            <article class="module-link">
+              <strong><?= app_h($highlight['title']) ?></strong>
+              <span><?= app_h($highlight['text']) ?></span>
+            </article>
+          <?php endforeach; ?>
+        </div>
+      </article>
       <article class="card prompt-card">
         <span class="card-label">Projektstatus</span>
-        <h3>Status wie in einer klassischen Serverliste</h3>
+        <h3>Live-Informationen erst kompakt, dann im Detail</h3>
         <div class="status-icon-list">
           <article class="status-icon-item">
             <span class="status-icon is-online" aria-hidden="true"></span>
@@ -60,24 +117,29 @@ render_page(app_site_title(), 'Startseite', static function (): void {
             </div>
           </article>
         </div>
-        <div class="project-context-box markdown-overview">
-          <?= $infrastructureOverviewHtml ?>
-        </div>
-        <div class="button-row">
-          <a class="btn btn-primary" href="<?= app_h(app_url('workspace.php')) ?>">Projektkontext in Zentrale</a>
-        </div>
+        <details class="readmore-card is-wide-open">
+          <summary>Projektkontext weiterlesen</summary>
+          <div class="readmore-body project-context-box markdown-overview">
+            <?= $infrastructureOverviewHtml ?>
+          </div>
+        </details>
       </article>
-      <article class="card">
-        <span class="card-label">Direkte Wege</span>
-        <div class="module-list">
-          <?php foreach ($modules as $module): ?>
-            <a class="module-link" href="<?= app_h($module['href']) ?>">
-              <strong><?= app_h($module['name']) ?></strong>
-              <span><?= app_h($module['summary']) ?></span>
-            </a>
-          <?php endforeach; ?>
-        </div>
-      </article>
+    </section>
+
+    <section class="card">
+      <span class="card-label">Kategorien</span>
+      <h3>Bereiche zuerst als Uebersichtskarten lesen</h3>
+      <div class="module-list">
+        <?php foreach ($modules as $module): ?>
+          <article class="module-link">
+            <strong><?= app_h($module['name']) ?></strong>
+            <span><?= app_h($module['summary']) ?></span>
+            <div class="button-row">
+              <a class="btn btn-secondary" href="<?= app_h($module['href']) ?>">Oeffnen</a>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      </div>
     </section>
     <?php
 });

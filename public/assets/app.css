@@ -316,6 +316,92 @@ a {
   min-height: 100%;
 }
 
+.overview-hero,
+.overview-hero-copy,
+.overview-chip-grid,
+.overview-chip,
+.category-card,
+.readmore-card,
+.readmore-body {
+  display: grid;
+  gap: 14px;
+}
+
+.overview-hero {
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  align-items: end;
+}
+
+.overview-hero-copy h3,
+.category-card h3,
+.readmore-card summary {
+  margin: 0;
+}
+
+.overview-chip-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.overview-chip {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.overview-chip strong {
+  font-size: 1.05rem;
+}
+
+.overview-chip span {
+  color: var(--muted);
+}
+
+.category-card {
+  align-content: start;
+}
+
+.readmore-card {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.readmore-card summary {
+  cursor: pointer;
+  list-style: none;
+  font: 700 0.84rem/1.2 Arial, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.readmore-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.readmore-card summary::after {
+  content: '+';
+  float: right;
+  color: var(--accent);
+  font-size: 1rem;
+}
+
+.readmore-card[open] summary::after {
+  content: '-';
+}
+
+.readmore-card.is-wide-open {
+  gap: 16px;
+}
+
+.readmore-body p,
+.readmore-body ul,
+.readmore-body ol {
+  margin: 0;
+}
+
 .accent-card {
   background:
     linear-gradient(140deg, rgba(78, 179, 172, 0.82), rgba(14, 24, 38, 0.94)),
@@ -1839,7 +1925,9 @@ body.lightbox-open {
   .two-up,
   .three-up,
   .dashboard-grid,
-  .split {
+  .split,
+  .overview-hero,
+  .overview-chip-grid {
     grid-template-columns: 1fr;
   }
 
