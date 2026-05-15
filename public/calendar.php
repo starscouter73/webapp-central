@@ -149,6 +149,14 @@ render_page('Kalender', 'Termine', static function (): void {
               <input id="overview-search" type="search" placeholder="Nach Titel, Adresse, Notiz oder Datum suchen">
             </label>
             <div class="calendar-overview-metrics" id="overview-metrics"></div>
+            <div class="calendar-overview-head" aria-hidden="true">
+              <span>Datum</span>
+              <span>Uhrzeit</span>
+              <span>Termin</span>
+              <span>Ort</span>
+              <span>Aktionen</span>
+              <span>Karte</span>
+            </div>
             <div class="calendar-overview-list" id="overview-list">
               <p class="empty-state">Noch keine Termine vorhanden.</p>
             </div>
@@ -1087,36 +1095,40 @@ render_page('Kalender', 'Termine', static function (): void {
 
           displayEvents.slice(0, 24).forEach(function (eventItem) {
             var article = document.createElement('article');
-            var main = document.createElement('div');
-            var heading = document.createElement('div');
-            var title = document.createElement('strong');
-            var stamp = document.createElement('div');
-            var datePill = document.createElement('span');
-            var timePill = document.createElement('span');
-            var address = document.createElement('p');
-            var note = document.createElement('p');
+            var dateCell = document.createElement('div');
+            var timeCell = document.createElement('div');
+            var titleCell = document.createElement('div');
+            var locationCell = document.createElement('div');
             var actions = document.createElement('div');
             var editButton = document.createElement('button');
             var visualizeButton = document.createElement('button');
+            var mapCell = document.createElement('div');
+            var title = document.createElement('strong');
+            var note = document.createElement('p');
+            var address = document.createElement('p');
+            var dateValue = document.createElement('span');
+            var timeValue = document.createElement('span');
             var miniMap;
 
             article.className = 'overview-item';
-            main.className = 'overview-item-main';
-            heading.className = 'overview-item-heading';
-            stamp.className = 'overview-item-stamp';
+            dateCell.className = 'overview-item-cell overview-item-cell-date';
+            timeCell.className = 'overview-item-cell overview-item-cell-time';
+            titleCell.className = 'overview-item-cell overview-item-cell-title';
+            locationCell.className = 'overview-item-cell overview-item-cell-location';
+            mapCell.className = 'overview-item-cell overview-item-cell-map';
+            actions.className = 'overview-item-cell overview-item-actions';
             title.textContent = eventItem.title;
-            datePill.className = 'overview-item-date';
-            datePill.textContent = formatEventDate(eventItem);
-            timePill.className = 'overview-item-time';
-            timePill.textContent = eventItem.time || 'Ohne Uhrzeit';
+            title.className = 'overview-item-title';
+            dateValue.className = 'overview-item-date';
+            dateValue.textContent = formatEventDate(eventItem);
+            timeValue.className = 'overview-item-time';
+            timeValue.textContent = eventItem.time || 'Ohne Uhrzeit';
             address.className = 'overview-item-location';
             address.textContent = eventItem.address || 'Ohne Adresse';
             note.className = 'overview-item-note';
             note.textContent = eventItem.note || 'Ohne weitere Details';
-            actions.className = 'overview-item-actions';
 
             if (eventItem.address) {
-              article.className += ' has-map';
               miniMap = document.createElement('iframe');
               miniMap.className = 'overview-item-map';
               miniMap.title = 'Mini-Map fuer ' + eventItem.title;
@@ -1124,6 +1136,10 @@ render_page('Kalender', 'Termine', static function (): void {
               miniMap.referrerPolicy = 'no-referrer-when-downgrade';
               miniMap.tabIndex = -1;
               miniMap.src = buildMapEmbedUrl(eventItem.address);
+            } else {
+              miniMap = document.createElement('div');
+              miniMap.className = 'overview-item-map overview-item-map-placeholder';
+              miniMap.textContent = 'Keine Karte';
             }
 
             editButton.className = 'btn btn-secondary btn-small';
@@ -1148,24 +1164,37 @@ render_page('Kalender', 'Termine', static function (): void {
               openEventFocus(eventItem.id);
             });
 
-            heading.appendChild(title);
-            stamp.appendChild(datePill);
-            stamp.appendChild(timePill);
-            main.appendChild(heading);
-            main.appendChild(stamp);
-            main.appendChild(address);
+            dateCell.appendChild(buildOverviewCellLabel('Datum'));
+            dateCell.appendChild(dateValue);
+            timeCell.appendChild(buildOverviewCellLabel('Uhrzeit'));
+            timeCell.appendChild(timeValue);
+            titleCell.appendChild(buildOverviewCellLabel('Termin'));
+            titleCell.appendChild(title);
             if (eventItem.note) {
-              main.appendChild(note);
+              titleCell.appendChild(note);
             }
+            locationCell.appendChild(buildOverviewCellLabel('Ort'));
+            locationCell.appendChild(address);
+            actions.appendChild(buildOverviewCellLabel('Aktionen'));
             actions.appendChild(editButton);
             actions.appendChild(visualizeButton);
-            main.appendChild(actions);
-            article.appendChild(main);
-            if (miniMap) {
-              article.appendChild(miniMap);
-            }
+            mapCell.appendChild(buildOverviewCellLabel('Karte'));
+            mapCell.appendChild(miniMap);
+            article.appendChild(dateCell);
+            article.appendChild(timeCell);
+            article.appendChild(titleCell);
+            article.appendChild(locationCell);
+            article.appendChild(actions);
+            article.appendChild(mapCell);
             overviewList.appendChild(article);
           });
+        }
+
+        function buildOverviewCellLabel(text) {
+          var label = document.createElement('span');
+          label.className = 'overview-item-label';
+          label.textContent = text;
+          return label;
         }
 
         function setActiveView(nextView) {
