@@ -2,12 +2,14 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
+require_once dirname(__DIR__) . '/src/hallenberg.php';
 
 render_page('Zentrale', 'Struktur', static function (): void {
     $steps = app_workspace_steps();
     $resumePrompt = app_project_resume_prompt_live();
     $projects = app_workspace_projects();
     $tools = app_workspace_tools();
+    $hallenbergStory = app_hallenberg_story();
     ?>
     <section class="card overview-hero">
       <div class="overview-hero-copy">
@@ -39,6 +41,19 @@ render_page('Zentrale', 'Struktur', static function (): void {
       </div>
     </section>
 
+    <section class="grid split showcase-band">
+      <article class="card showcase-panel">
+        <span class="card-label">Projektfokus</span>
+        <h3>Die Zentrale braucht ein sichtbares Leitprojekt, nicht nur eine Liste von Bereichen</h3>
+        <p>Hallenberg uebernimmt diese Rolle als Premium-Referenz. Damit bekommt die Seite eine erkennbare Hauptachse und wirkt weniger wie ein neutraler Verwaltungsraum.</p>
+      </article>
+      <article class="card showcase-visual-panel">
+        <figure class="showcase-inline-photo">
+          <img src="<?= app_h($hallenbergStory['hero']['media'][0]['src']) ?>" alt="<?= app_h($hallenbergStory['hero']['media'][0]['alt']) ?>" loading="lazy">
+        </figure>
+      </article>
+    </section>
+
     <section class="grid split">
       <article class="card">
         <span class="card-label">Projekte</span>
@@ -46,6 +61,9 @@ render_page('Zentrale', 'Struktur', static function (): void {
         <div class="workspace-card-list">
           <?php foreach ($projects as $project): ?>
             <a class="workspace-link-card" href="<?= app_h($project['href']) ?>">
+              <div class="workspace-card-preview is-photo">
+                <img src="<?= app_h($hallenbergStory['drone']['media'][1]['src']) ?>" alt="<?= app_h($hallenbergStory['drone']['media'][1]['alt']) ?>" loading="lazy">
+              </div>
               <div class="workspace-link-meta">
                 <span class="status-pill"><?= app_h($project['status']) ?></span>
                 <span><?= app_h($project['meta']) ?></span>
@@ -60,8 +78,13 @@ render_page('Zentrale', 'Struktur', static function (): void {
         <span class="card-label">Arbeitsbereiche</span>
         <h3>Werkzeuge mit klarer Aufgabenrolle</h3>
         <div class="workspace-card-list">
-          <?php foreach ($tools as $tool): ?>
+          <?php foreach ($tools as $index => $tool): ?>
             <a class="workspace-link-card" href="<?= app_h($tool['href']) ?>">
+              <div class="workspace-card-preview <?= $index === 0 ? 'is-grid' : 'is-signal' ?>">
+                <span class="preview-bar is-1"></span>
+                <span class="preview-bar is-2"></span>
+                <span class="preview-bar is-3"></span>
+              </div>
               <div class="workspace-link-meta">
                 <span class="status-pill"><?= app_h($tool['status']) ?></span>
                 <span><?= app_h($tool['meta']) ?></span>

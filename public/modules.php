@@ -2,9 +2,11 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
+require_once dirname(__DIR__) . '/src/hallenberg.php';
 
 render_page('Module', 'Bausteine', static function (): void {
     $modules = app_modules();
+    $hallenbergStory = app_hallenberg_story();
     ?>
     <section class="card overview-hero">
       <div class="overview-hero-copy">
@@ -36,9 +38,31 @@ render_page('Module', 'Bausteine', static function (): void {
       </div>
     </section>
 
+    <section class="grid split showcase-band">
+      <article class="card showcase-panel">
+        <span class="card-label">Modulcharakter</span>
+        <h3>Jeder Bereich soll schon vor dem Klick eine eigene Anmutung mitbringen</h3>
+        <p>Deshalb erhalten die Modulbereiche Preview-Flaechen und eine klarere visuelle Unterscheidung. Das macht die Auswahl merkfaehiger und wirkt weniger wie eine uniforme Kartenwand.</p>
+      </article>
+      <article class="card showcase-visual-panel">
+        <figure class="showcase-inline-photo">
+          <img src="<?= app_h($hallenbergStory['modules']['media'][0]['src']) ?>" alt="<?= app_h($hallenbergStory['modules']['media'][0]['alt']) ?>" loading="lazy">
+        </figure>
+      </article>
+    </section>
+
     <section class="grid two-up">
-      <?php foreach ($modules as $module): ?>
+      <?php foreach ($modules as $index => $module): ?>
         <article class="card category-card">
+          <div class="category-preview <?= $index === 4 ? 'is-photo' : ($index % 2 === 0 ? 'is-grid' : 'is-signal') ?>">
+            <?php if ($index === 4): ?>
+              <img src="<?= app_h($hallenbergStory['hero']['media'][1]['src']) ?>" alt="<?= app_h($hallenbergStory['hero']['media'][1]['alt']) ?>" loading="lazy">
+            <?php else: ?>
+              <span class="preview-bar is-1"></span>
+              <span class="preview-bar is-2"></span>
+              <span class="preview-bar is-3"></span>
+            <?php endif; ?>
+          </div>
           <div class="stack-row">
             <span class="card-label"><?= app_h($module['status']) ?></span>
             <span class="status-pill"><?= app_h($module['name']) ?></span>
