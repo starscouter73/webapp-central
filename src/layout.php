@@ -9,6 +9,7 @@ if (!function_exists('render_page')) {
         $currentPage = app_current_page();
         $currentMeta = app_current_page_meta();
         $currentNavParent = (string)($currentMeta['nav_parent'] ?? $currentPage);
+        $description = trim((string)($options['description'] ?? $currentMeta['description'] ?? app_tagline()));
         $showHeader = (bool)($options['show_header'] ?? true);
         $showBreadcrumb = (bool)($options['show_breadcrumb'] ?? true);
         $showFooter = (bool)($options['show_footer'] ?? true);
@@ -17,10 +18,23 @@ if (!function_exists('render_page')) {
         $contentShellClass = trim((string)($options['content_shell_class'] ?? ''));
         $headerClass = '';
 
-        if (!headers_sent() && app_is_local()) {
-            header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-            header('Pragma: no-cache');
-            header('Expires: 0');
+        if (!headers_sent()) {
+            header('X-Frame-Options: SAMEORIGIN');
+            header('X-Content-Type-Options: nosniff');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+            header('Cross-Origin-Opener-Policy: same-origin-allow-popups');
+            header('Permissions-Policy: geolocation=(), camera=(), payment=(), usb=()');
+            header("Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: https:; frame-src 'self' https://www.google.com https://maps.google.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; form-action 'self'");
+
+            if (!app_is_local() && (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')) {
+                header('Strict-Transport-Security: max-age=86400; includeSubDomains');
+            }
+
+            if (app_is_local()) {
+                header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+                header('Pragma: no-cache');
+                header('Expires: 0');
+            }
         }
         ?>
 <!doctype html>
@@ -28,6 +42,7 @@ if (!function_exists('render_page')) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="<?= app_h($description) ?>">
   <title><?= app_h($title) ?> | <?= app_h(app_site_title()) ?></title>
   <link rel="stylesheet" href="<?= app_h(app_asset_url('assets/app.css')) ?>">
   <style>
