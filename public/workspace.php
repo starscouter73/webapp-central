@@ -16,6 +16,14 @@ render_page('Zentrale', 'Struktur', static function (): void {
       <div class="platform-shell-copy">
         <span class="card-label">Operations Layer</span>
         <strong>Projektfokus, Infrastruktur und Live-Kontext in einer dunklen Arbeitsansicht</strong>
+        <div class="platform-shell-links">
+          <a href="#auftakt">Auftakt</a>
+          <a href="#fokus">Fokus</a>
+          <a href="#projekte">Projekte</a>
+          <a href="#struktur">Struktur</a>
+          <a href="#zugriff">Zugriff</a>
+          <a href="#kontext">Kontext</a>
+        </div>
       </div>
     </section>
 
@@ -47,15 +55,6 @@ render_page('Zentrale', 'Struktur', static function (): void {
           <p>Die Zentrale soll den Blick fuehren und nicht den Nutzer mit Technikbausteinen empfangen.</p>
         </div>
       </div>
-    </section>
-
-    <section class="platform-sticky-nav" aria-label="Seitenabschnitte">
-      <a href="#auftakt">Auftakt</a>
-      <a href="#fokus">Fokus</a>
-      <a href="#projekte">Projekte</a>
-      <a href="#struktur">Struktur</a>
-      <a href="#zugriff">Zugriff</a>
-      <a href="#kontext">Kontext</a>
     </section>
 
     <section class="grid split showcase-band" id="fokus">

@@ -13,6 +13,12 @@ render_page('Module', 'Bausteine', static function (): void {
       <div class="platform-shell-copy">
         <span class="card-label">Module Catalog</span>
         <strong>Jede Kategorie wirkt wie ein eigener Produktbaustein statt wie ein bloßer Menüpunkt</strong>
+        <div class="platform-shell-links">
+          <a href="#auftakt">Auftakt</a>
+          <a href="#fokus">Fokus</a>
+          <a href="#katalog">Katalog</a>
+          <a href="#ausbau">Ausbau</a>
+        </div>
       </div>
     </section>
 
@@ -44,13 +50,6 @@ render_page('Module', 'Bausteine', static function (): void {
           <p>Darum liegt der Fokus auf Rolle, Kurzprofil und einem kontrollierten Tiefeneinstieg statt auf gleichfoermigen Karten.</p>
         </div>
       </div>
-    </section>
-
-    <section class="platform-sticky-nav" aria-label="Seitenabschnitte">
-      <a href="#auftakt">Auftakt</a>
-      <a href="#fokus">Fokus</a>
-      <a href="#katalog">Katalog</a>
-      <a href="#ausbau">Ausbau</a>
     </section>
 
     <section class="grid split showcase-band" id="fokus">

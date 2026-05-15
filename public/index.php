@@ -57,6 +57,13 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       <div class="platform-shell-copy">
         <span class="card-label">Platform System</span>
         <strong>Webapp Central als direkte Erweiterung der Hallenberg-Sprache</strong>
+        <div class="platform-shell-links">
+          <a href="#auftakt">Auftakt</a>
+          <a href="#featured">Featured</a>
+          <a href="#kategorien">Kategorien</a>
+          <a href="#leitlinien">Leitlinien</a>
+          <a href="#module">Module</a>
+        </div>
       </div>
     </section>
 
@@ -123,14 +130,6 @@ render_page(app_site_title(), 'Startseite', static function (): void {
         <a class="btn btn-primary" href="<?= app_h(app_url('workspace.php')) ?>">Zur Zentrale</a>
         <a class="btn btn-ghost" href="<?= app_h(app_url('modules.php')) ?>">Kategorien ansehen</a>
       </div>
-    </section>
-
-    <section class="platform-sticky-nav" aria-label="Seitenabschnitte">
-      <a href="#auftakt">Auftakt</a>
-      <a href="#featured">Featured</a>
-      <a href="#kategorien">Kategorien</a>
-      <a href="#leitlinien">Leitlinien</a>
-      <a href="#module">Module</a>
     </section>
 
     <section class="grid split showcase-band" id="featured">
