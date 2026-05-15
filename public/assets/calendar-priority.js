@@ -11,14 +11,32 @@
   var statusLine = document.getElementById('voice-status');
   var titleInput = document.getElementById('event-title');
   var editId = document.getElementById('event-edit-id');
+  var visualPanel = document.getElementById('calendar-visual-panel');
+  var gridViewport = document.getElementById('calendar-grid-viewport');
+  var selectedPanel = document.getElementById('selected-panel');
+  var monthButton = document.getElementById('view-month');
+  var weekButton = document.getElementById('view-week');
 
   if (!layout || !overview || !form || !toolbar) return;
 
   document.documentElement.classList.add('calendar-priority-mode');
 
   var css = document.createElement('style');
-  css.textContent = '.calendar-priority-mode .calendar-primary-layout{display:block}.calendar-priority-mode .calendar-overview-panel{width:100%}.calendar-priority-mode .calendar-panel{display:none;margin-top:18px}.calendar-priority-mode .calendar-panel.is-entry-open{display:block}.calendar-entry-action-row,.calendar-import-export-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 0}.calendar-entry-hint,.calendar-import-export-hint{color:var(--muted);font-size:13px;line-height:1.45}.calendar-import-file{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}';
+  css.textContent = '.calendar-priority-mode .calendar-primary-layout{display:block}.calendar-priority-mode .calendar-overview-panel{width:100%}.calendar-priority-mode .calendar-panel{display:none;margin-top:18px}.calendar-priority-mode .calendar-panel.is-entry-open{display:block}.calendar-entry-action-row,.calendar-import-export-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 0}.calendar-entry-hint,.calendar-import-export-hint{color:var(--muted);font-size:13px;line-height:1.45}.calendar-import-file{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}.calendar-priority-mode #calendar-visual-panel{display:block!important;margin:12px 0 18px}.calendar-priority-mode #calendar-visual-panel[hidden]{display:block!important}.calendar-priority-mode #calendar-grid-viewport{width:100%}.calendar-priority-mode .calendar-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-bottom:6px}.calendar-priority-mode .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}.calendar-priority-mode .calendar-day{min-height:92px;padding:12px 12px 10px;overflow:hidden}.calendar-priority-mode .calendar-day strong{font-size:16px}.calendar-priority-mode .calendar-day span{font-size:13px}.calendar-priority-mode .calendar-week-summary{margin-top:26px;display:block;max-height:38px;overflow:hidden}.calendar-priority-mode .calendar-week-summary-item{display:block;padding:5px 8px;border-radius:10px;background:rgba(0,0,0,.05);font-size:12px;line-height:1.15;white-space:normal}.calendar-priority-mode #selected-panel{display:none!important}@media(max-width:900px){.calendar-priority-mode .calendar-weekdays,.calendar-priority-mode .calendar-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.calendar-priority-mode .calendar-day{min-height:86px}}';
   document.head.appendChild(css);
+
+  if (visualPanel && overview) {
+    overview.insertAdjacentElement('beforebegin', visualPanel);
+    visualPanel.hidden = false;
+  }
+
+  if (selectedPanel) {
+    selectedPanel.hidden = true;
+  }
+
+  if (weekButton) {
+    window.setTimeout(function () { weekButton.click(); }, 80);
+  }
 
   var actionRow = document.createElement('div');
   actionRow.className = 'calendar-entry-action-row';
