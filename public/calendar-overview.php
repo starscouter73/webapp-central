@@ -33,6 +33,7 @@ render_page('Terminuebersicht', 'Termine', static function (): void {
     <script>
       (function () {
         var storageKey = 'webapp-central-calendar-events';
+        var serverApiUrl = '<?= app_h(app_url('calendar.php?api=events')) ?>';
         var overviewTitle = document.getElementById('overview-title');
         var overviewSummary = document.getElementById('overview-summary');
         var overviewMetrics = document.getElementById('overview-metrics');
@@ -53,6 +54,7 @@ render_page('Terminuebersicht', 'Termine', static function (): void {
         });
 
         renderOverview();
+        syncEventsFromServer();
 
         function loadEvents() {
           try {
@@ -62,10 +64,92 @@ render_page('Terminuebersicht', 'Termine', static function (): void {
             }
 
             var parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : [];
+            return Array.isArray(parsed) ? parsed.map(normalizeEventShape).filter(Boolean) : [];
           } catch (error) {
             return [];
           }
+        }
+
+        function normalizeEventShape(eventItem) {
+          if (!eventItem || typeof eventItem !== 'object') {
+            return null;
+          }
+
+          var id = String(eventItem.id || '').trim();
+          var title = String(eventItem.title || '').trim();
+          var date = String(eventItem.date || '').trim();
+          var time = String(eventItem.time || '').trim();
+          var address = String(eventItem.address || '').trim();
+          var note = String(eventItem.note || '').trim();
+          var updatedAt = String(eventItem.updatedAt || '').trim();
+
+          if (!id || !title || !date) {
+            return null;
+          }
+
+          return {
+            id: id,
+            title: title,
+            date: date,
+            time: time,
+            address: address,
+            note: note,
+            updatedAt: updatedAt || new Date().toISOString()
+          };
+        }
+
+        function mergeEvents(localEvents, remoteEvents) {
+          var merged = {};
+
+          localEvents.forEach(function (item) {
+            var normalized = normalizeEventShape(item);
+            if (normalized) {
+              merged[normalized.id] = normalized;
+            }
+          });
+
+          remoteEvents.forEach(function (item) {
+            var normalized = normalizeEventShape(item);
+            var known = normalized ? merged[normalized.id] : null;
+
+            if (!normalized) {
+              return;
+            }
+
+            if (!known || String(normalized.updatedAt || '') >= String(known.updatedAt || '')) {
+              merged[normalized.id] = normalized;
+            }
+          });
+
+          return Object.keys(merged).map(function (id) {
+            return merged[id];
+          });
+        }
+
+        function syncEventsFromServer() {
+          fetch(serverApiUrl, { cache: 'no-store' })
+            .then(function (response) {
+              if (!response.ok) {
+                throw new Error('server');
+              }
+
+              return response.json();
+            })
+            .then(function (payload) {
+              var remoteEvents = Array.isArray(payload.events) ? payload.events : [];
+              var mergedEvents = mergeEvents(events, remoteEvents);
+
+              if (!mergedEvents.length && !events.length) {
+                return;
+              }
+
+              events = mergedEvents;
+              window.localStorage.setItem(storageKey, JSON.stringify(events));
+              renderOverview();
+            })
+            .catch(function () {
+              // Offline/Server down: local data remains source of truth.
+            });
         }
 
         function renderOverview() {

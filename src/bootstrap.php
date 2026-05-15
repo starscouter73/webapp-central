@@ -257,6 +257,13 @@ if (!function_exists('app_asset_url')) {
     }
 }
 
+if (!function_exists('app_calendar_storage_file')) {
+    function app_calendar_storage_file(): string
+    {
+        return app_env('APP_CALENDAR_STORAGE_FILE', app_root() . '/var/runtime/calendar-events.json');
+    }
+}
+
 if (!function_exists('app_pages')) {
     function app_pages(): array
     {

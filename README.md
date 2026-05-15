@@ -112,6 +112,7 @@ HOST_HTTP_PORT=8080
 APP_SITE_NAME=webapp-central.de
 APP_SITE_TITLE=Webapp Central
 APP_TAGLINE=Zentrale Arbeitsflaeche fuer Webprojekte, Inhalte und Entwicklung.
+APP_CALENDAR_STORAGE_FILE=
 APP_LEGAL_NAME=
 APP_LEGAL_ADDRESS_STREET=
 APP_LEGAL_ADDRESS_POSTAL=

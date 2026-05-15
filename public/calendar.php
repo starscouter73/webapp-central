@@ -1,6 +1,111 @@
 <?php
 declare(strict_types=1);
 
+require_once dirname(__DIR__) . '/src/bootstrap.php';
+
+if (isset($_GET['api']) && $_GET['api'] === 'events') {
+    $storageFile = app_calendar_storage_file();
+    $storageDir = dirname($storageFile);
+
+    $sendJson = static function (array $payload, int $status = 200): void {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    };
+
+    $normalizeEvent = static function (array $event): ?array {
+        $id = trim((string)($event['id'] ?? ''));
+        $title = trim((string)($event['title'] ?? ''));
+        $date = trim((string)($event['date'] ?? ''));
+        $time = trim((string)($event['time'] ?? ''));
+        $address = trim((string)($event['address'] ?? ''));
+        $note = trim((string)($event['note'] ?? ''));
+        $updatedAt = trim((string)($event['updatedAt'] ?? ''));
+
+        if ($id === '' || $title === '' || $date === '') {
+            return null;
+        }
+
+        return [
+            'id' => $id,
+            'title' => $title,
+            'date' => $date,
+            'time' => $time,
+            'address' => $address,
+            'note' => $note,
+            'updatedAt' => $updatedAt !== '' ? $updatedAt : gmdate('c'),
+        ];
+    };
+
+    if (!is_dir($storageDir) && !mkdir($storageDir, 0775, true) && !is_dir($storageDir)) {
+        $sendJson(['ok' => false, 'message' => 'Speicherverzeichnis konnte nicht erstellt werden.'], 500);
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        if (!is_file($storageFile)) {
+            $sendJson(['events' => []]);
+        }
+
+        $raw = file_get_contents($storageFile);
+        $decoded = json_decode((string)$raw, true);
+        if (!is_array($decoded)) {
+            $decoded = [];
+        }
+
+        $events = [];
+        foreach ($decoded as $event) {
+            if (is_array($event)) {
+                $normalized = $normalizeEvent($event);
+                if ($normalized !== null) {
+                    $events[] = $normalized;
+                }
+            }
+        }
+
+        $sendJson(['events' => $events]);
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $rawInput = file_get_contents('php://input');
+        $decoded = json_decode((string)$rawInput, true);
+
+        if (!is_array($decoded)) {
+            $sendJson(['ok' => false, 'message' => 'Ungueltiges JSON.'], 400);
+        }
+
+        $incoming = $decoded['events'] ?? $decoded;
+        if (!is_array($incoming)) {
+            $sendJson(['ok' => false, 'message' => 'Ungueltiges Event-Format.'], 400);
+        }
+
+        $events = [];
+        foreach ($incoming as $event) {
+            if (is_array($event)) {
+                $normalized = $normalizeEvent($event);
+                if ($normalized !== null) {
+                    $events[] = $normalized;
+                }
+            }
+        }
+
+        $written = file_put_contents(
+            $storageFile,
+            json_encode($events, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            LOCK_EX
+        );
+
+        if ($written === false) {
+            $sendJson(['ok' => false, 'message' => 'Termine konnten nicht gespeichert werden.'], 500);
+        }
+
+        $sendJson(['ok' => true, 'count' => count($events)]);
+    }
+
+    $sendJson(['ok' => false, 'message' => 'Methode nicht erlaubt.'], 405);
+}
+
 require_once dirname(__DIR__) . '/src/layout.php';
 
 render_page('Kalender', 'Termine', static function (): void {
@@ -52,7 +157,7 @@ render_page('Kalender', 'Termine', static function (): void {
           <article class="calendar-subpanel calendar-panel">
             <span class="card-label" id="event-form-label">Neuer Termin</span>
             <h3 id="event-form-title">Per Sprache oder manuell eintragen</h3>
-            <p>Sage zum Beispiel: "Morgen 14 Uhr Zahnarzt" oder "20.05. 09:30 Teammeeting". Danach kannst du den Eintrag direkt speichern.</p>
+            <p>Sage zum Beispiel: "Morgen 14 Uhr Zahnarzt in Winterberg". Du kannst Termine schnell in einem Satz erfassen oder dich gefuehrt Feld fuer Feld durchsprechen lassen.</p>
 
             <div class="calendar-form">
               <input id="event-edit-id" name="edit-id" type="hidden" value="">
@@ -88,7 +193,11 @@ render_page('Kalender', 'Termine', static function (): void {
                 <textarea id="event-note" name="note" rows="3" placeholder="Optionale Details"></textarea>
               </label>
               <div class="button-row">
-                <button class="btn btn-primary" id="voice-start" type="button">Voice to Text starten</button>
+                <button class="btn btn-primary" id="voice-quick" type="button">Schnell per Satz</button>
+                <button class="btn btn-secondary" id="voice-guided" type="button">Gefuehrt per Feld</button>
+                <button class="btn btn-ghost" id="voice-stop" type="button" hidden>Voice stoppen</button>
+              </div>
+              <div class="button-row">
                 <button class="btn btn-secondary" id="event-save" type="button">Termin speichern</button>
                 <button class="btn btn-ghost" id="event-cancel" type="button" hidden>Bearbeitung beenden</button>
               </div>
@@ -112,7 +221,13 @@ render_page('Kalender', 'Termine', static function (): void {
         var monthNames = ['Januar', 'Februar', 'Maerz', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
         var weekdayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
         var query = new URLSearchParams(window.location.search);
+        var serverApiUrl = '<?= app_h(app_url('calendar.php?api=events')) ?>';
         var recognition = null;
+        var voiceMode = 'idle';
+        var guidedVoiceState = null;
+        var voiceCaptureActive = false;
+        var queuedVoicePrompt = '';
+        var persistTimer = null;
         var editingEventId = '';
         var activeView = 'month';
         var selectedEventId = query.get('event') || '';
@@ -139,6 +254,9 @@ render_page('Kalender', 'Termine', static function (): void {
         var mapPreview = document.getElementById('event-map-preview');
         var mapFrame = document.getElementById('event-map-frame');
         var noteInput = document.getElementById('event-note');
+        var quickVoiceButton = document.getElementById('voice-quick');
+        var guidedVoiceButton = document.getElementById('voice-guided');
+        var stopVoiceButton = document.getElementById('voice-stop');
         var saveButton = document.getElementById('event-save');
         var cancelButton = document.getElementById('event-cancel');
         var status = document.getElementById('voice-status');
@@ -193,8 +311,16 @@ render_page('Kalender', 'Termine', static function (): void {
           renderFormMapPreview(addressInput.value);
         });
 
-        document.getElementById('voice-start').addEventListener('click', function () {
-          startVoiceCapture();
+        quickVoiceButton.addEventListener('click', function () {
+          startQuickVoiceCapture();
+        });
+
+        guidedVoiceButton.addEventListener('click', function () {
+          startGuidedVoiceCapture();
+        });
+
+        stopVoiceButton.addEventListener('click', function () {
+          stopVoiceCapture('Sprachmodus beendet.');
         });
         monthViewButton.addEventListener('click', function () {
           setActiveView('month');
@@ -207,6 +333,7 @@ render_page('Kalender', 'Termine', static function (): void {
         dateInput.value = selectedDate;
         renderCalendar();
         renderSelectedDay();
+        syncEventsFromServer();
 
         function loadEvents() {
           try {
@@ -216,14 +343,126 @@ render_page('Kalender', 'Termine', static function (): void {
             }
 
             var parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : [];
+            return Array.isArray(parsed) ? parsed.map(normalizeEventShape).filter(Boolean) : [];
           } catch (error) {
             return [];
           }
         }
 
         function persistEvents() {
+          events = events.map(normalizeEventShape).filter(Boolean);
           window.localStorage.setItem(storageKey, JSON.stringify(events));
+          scheduleServerPersist();
+        }
+
+        function normalizeEventShape(eventItem) {
+          if (!eventItem || typeof eventItem !== 'object') {
+            return null;
+          }
+
+          var id = String(eventItem.id || '').trim();
+          var title = String(eventItem.title || '').trim();
+          var date = String(eventItem.date || '').trim();
+          var time = String(eventItem.time || '').trim();
+          var address = String(eventItem.address || '').trim();
+          var note = String(eventItem.note || '').trim();
+          var updatedAt = String(eventItem.updatedAt || '').trim();
+
+          if (!id || !title || !date) {
+            return null;
+          }
+
+          return {
+            id: id,
+            title: title,
+            date: date,
+            time: time,
+            address: address,
+            note: note,
+            updatedAt: updatedAt || new Date().toISOString()
+          };
+        }
+
+        function mergeEvents(localEvents, remoteEvents) {
+          var merged = {};
+
+          localEvents.forEach(function (item) {
+            var normalized = normalizeEventShape(item);
+            if (normalized) {
+              merged[normalized.id] = normalized;
+            }
+          });
+
+          remoteEvents.forEach(function (item) {
+            var normalized = normalizeEventShape(item);
+            var known = normalized ? merged[normalized.id] : null;
+
+            if (!normalized) {
+              return;
+            }
+
+            if (!known) {
+              merged[normalized.id] = normalized;
+              return;
+            }
+
+            if (String(normalized.updatedAt || '') >= String(known.updatedAt || '')) {
+              merged[normalized.id] = normalized;
+            }
+          });
+
+          return Object.keys(merged).map(function (id) {
+            return merged[id];
+          });
+        }
+
+        function scheduleServerPersist() {
+          if (persistTimer) {
+            window.clearTimeout(persistTimer);
+          }
+
+          persistTimer = window.setTimeout(function () {
+            persistTimer = null;
+            persistEventsToServer();
+          }, 240);
+        }
+
+        function persistEventsToServer() {
+          fetch(serverApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ events: events })
+          }).catch(function () {
+            status.textContent = 'Hinweis: Termin lokal gespeichert, Serversync gerade nicht erreichbar.';
+          });
+        }
+
+        function syncEventsFromServer() {
+          fetch(serverApiUrl, { cache: 'no-store' })
+            .then(function (response) {
+              if (!response.ok) {
+                throw new Error('server');
+              }
+              return response.json();
+            })
+            .then(function (payload) {
+              var remoteEvents = Array.isArray(payload.events) ? payload.events : [];
+              var mergedEvents = mergeEvents(events, remoteEvents);
+
+              if (!mergedEvents.length && !events.length) {
+                return;
+              }
+
+              events = mergedEvents;
+              window.localStorage.setItem(storageKey, JSON.stringify(events));
+              renderCalendar();
+              renderSelectedDay();
+            })
+            .catch(function () {
+              // Offline/Server down: local data remains source of truth.
+            });
         }
 
         function renderCalendar() {
@@ -500,7 +739,8 @@ render_page('Kalender', 'Termine', static function (): void {
             date: dateValue,
             time: timeValue,
             address: addressValue,
-            note: noteValue
+            note: noteValue,
+            updatedAt: new Date().toISOString()
           };
 
           if (!title || !dateValue) {
@@ -556,6 +796,23 @@ render_page('Kalender', 'Termine', static function (): void {
           if (message) {
             status.textContent = message;
           }
+        }
+
+        function syncVoiceButtons() {
+          var active = voiceMode !== 'idle';
+
+          quickVoiceButton.hidden = active;
+          guidedVoiceButton.hidden = active;
+          stopVoiceButton.hidden = !active;
+        }
+
+        function queueOrStartVoiceCapture(promptText) {
+          if (voiceCaptureActive) {
+            queuedVoicePrompt = promptText || '';
+            return;
+          }
+
+          startVoiceCapture(promptText);
         }
 
         function findEventIndex(eventId) {
@@ -1024,11 +1281,76 @@ render_page('Kalender', 'Termine', static function (): void {
           mapPreview.hidden = false;
         }
 
-        function startVoiceCapture() {
+        function startQuickVoiceCapture() {
+          voiceMode = 'quick';
+          guidedVoiceState = null;
+          queuedVoicePrompt = '';
+          syncVoiceButtons();
+          queueOrStartVoiceCapture('Sage den Termin in einem Satz, zum Beispiel: Morgen 14 Uhr Zahnarzt in Winterberg.');
+        }
+
+        function startGuidedVoiceCapture() {
+          voiceMode = 'guided';
+          guidedVoiceState = {
+            index: 0,
+            steps: [
+              { key: 'title', label: 'Titel', prompt: 'Wie heisst der Termin?' },
+              { key: 'date', label: 'Datum', prompt: 'Welches Datum hat der Termin? Du kannst zum Beispiel morgen oder den zwanzigsten Mai sagen.' },
+              { key: 'time', label: 'Uhrzeit', prompt: 'Welche Uhrzeit hat der Termin?' },
+              { key: 'address', label: 'Adresse', prompt: 'Welche Adresse oder welcher Ort gehoert dazu? Du kannst auch ueberspringen sagen.' },
+              { key: 'note', label: 'Notiz', prompt: 'Gibt es noch eine Notiz oder Beschreibung? Du kannst auch ueberspringen sagen.' }
+            ]
+          };
+          transcript.hidden = false;
+          transcript.textContent = 'Gefuehrte Spracheingabe gestartet.';
+          syncVoiceButtons();
+          continueGuidedVoiceCapture();
+        }
+
+        function continueGuidedVoiceCapture() {
+          var step;
+
+          if (!guidedVoiceState || !guidedVoiceState.steps || guidedVoiceState.index >= guidedVoiceState.steps.length) {
+            voiceMode = 'idle';
+            guidedVoiceState = null;
+            syncVoiceButtons();
+            status.textContent = 'Gefuehrte Spracheingabe abgeschlossen. Bitte kurz pruefen und speichern.';
+            return;
+          }
+
+          step = guidedVoiceState.steps[guidedVoiceState.index];
+          queueOrStartVoiceCapture(step.prompt);
+        }
+
+        function stopVoiceCapture(message) {
+          voiceMode = 'idle';
+          guidedVoiceState = null;
+          voiceCaptureActive = false;
+          queuedVoicePrompt = '';
+          syncVoiceButtons();
+
+          if (recognition) {
+            try {
+              recognition.abort();
+            } catch (error) {
+              // no-op
+            }
+          }
+
+          if (window.speechSynthesis && typeof window.speechSynthesis.cancel === 'function') {
+            window.speechSynthesis.cancel();
+          }
+
+          status.textContent = message || 'Sprachmodus beendet.';
+        }
+
+        function startVoiceCapture(promptText) {
           var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
           if (!SpeechRecognition) {
             status.textContent = 'Dieser Browser unterstuetzt die Sprachaufnahme aktuell nicht.';
+            voiceMode = 'idle';
+            syncVoiceButtons();
             return;
           }
 
@@ -1044,25 +1366,67 @@ render_page('Kalender', 'Termine', static function (): void {
                 text = String(event.results[0][0].transcript || '').trim();
               }
 
-              applyTranscript(text);
+              handleVoiceResult(text);
             });
 
             recognition.addEventListener('error', function (event) {
+              voiceCaptureActive = false;
+              queuedVoicePrompt = '';
               status.textContent = 'Sprachaufnahme fehlgeschlagen: ' + event.error;
+              voiceMode = 'idle';
+              guidedVoiceState = null;
+              syncVoiceButtons();
             });
 
             recognition.addEventListener('end', function () {
+              var nextPrompt = '';
+
+              voiceCaptureActive = false;
+
+              if (queuedVoicePrompt && voiceMode !== 'idle') {
+                nextPrompt = queuedVoicePrompt;
+                queuedVoicePrompt = '';
+                window.setTimeout(function () {
+                  queueOrStartVoiceCapture(nextPrompt);
+                }, 180);
+                return;
+              }
+
               if (status.textContent === 'Aufnahme laeuft ...') {
                 status.textContent = 'Sprachaufnahme beendet.';
               }
             });
           }
 
-          status.textContent = 'Aufnahme laeuft ...';
-          recognition.start();
+          status.textContent = promptText || 'Aufnahme laeuft ...';
+          speakPrompt(promptText, function () {
+            try {
+              status.textContent = 'Aufnahme laeuft ...';
+              voiceCaptureActive = true;
+              recognition.start();
+            } catch (error) {
+              voiceCaptureActive = false;
+              status.textContent = 'Sprachaufnahme konnte nicht gestartet werden.';
+              voiceMode = 'idle';
+              guidedVoiceState = null;
+              queuedVoicePrompt = '';
+              syncVoiceButtons();
+            }
+          });
         }
 
-        function applyTranscript(text) {
+        function handleVoiceResult(text) {
+          if (voiceMode === 'guided') {
+            applyGuidedTranscript(text);
+            return;
+          }
+
+          applyQuickTranscript(text);
+          voiceMode = 'idle';
+          syncVoiceButtons();
+        }
+
+        function applyQuickTranscript(text) {
           var parsed = parseGermanTranscript(text);
 
           transcript.hidden = false;
@@ -1078,56 +1442,131 @@ render_page('Kalender', 'Termine', static function (): void {
           if (parsed.time) {
             timeInput.value = parsed.time;
           }
+          if (parsed.address) {
+            addressInput.value = parsed.address;
+          }
+          if (parsed.note) {
+            noteInput.value = parsed.note;
+          }
+
+          renderFormMapPreview(addressInput.value);
 
           renderCalendar();
           renderSelectedDay();
-          status.textContent = 'Sprachtext uebernommen. Bitte kurz pruefen und dann speichern.';
+          status.textContent = parsed.missing.length
+            ? 'Sprachtext uebernommen. Bitte noch pruefen: ' + parsed.missing.join(', ') + '.'
+            : 'Sprachtext uebernommen. Bitte kurz pruefen und dann speichern.';
+        }
+
+        function applyGuidedTranscript(text) {
+          var step;
+          var value;
+
+          if (!guidedVoiceState || !guidedVoiceState.steps || guidedVoiceState.index >= guidedVoiceState.steps.length) {
+            stopVoiceCapture('Sprachmodus beendet.');
+            return;
+          }
+
+          step = guidedVoiceState.steps[guidedVoiceState.index];
+          value = readGuidedFieldValue(step.key, text);
+
+          transcript.hidden = false;
+          transcript.textContent = 'Erkannt fuer ' + step.label + ': ' + text;
+
+          if (step.key === 'title' && value) {
+            titleInput.value = value;
+          }
+          if (step.key === 'date' && value) {
+            dateInput.value = value;
+            selectedDate = value;
+          }
+          if (step.key === 'time' && value) {
+            timeInput.value = value;
+          }
+          if (step.key === 'address') {
+            addressInput.value = value;
+            renderFormMapPreview(value);
+          }
+          if (step.key === 'note') {
+            noteInput.value = value;
+          }
+
+          guidedVoiceState.index += 1;
+          renderCalendar();
+          renderSelectedDay();
+          continueGuidedVoiceCapture();
         }
 
         function parseGermanTranscript(text) {
           var result = {
-            title: text,
+            title: '',
             date: dateInput.value || selectedDate,
-            time: ''
+            time: '',
+            address: '',
+            note: '',
+            missing: []
           };
-          var working = normalizeText(text);
-          var today = new Date();
-          var dateMatch = working.match(/(\d{1,2})[.\-/](\d{1,2})(?:[.\-/](\d{2,4}))?/);
-          var timeMatch = working.match(/(\d{1,2})(?::| uhr ?)(\d{0,2})/);
+          var original = compactText(text);
+          var dateInfo = parseVoiceDateInfo(original);
+          var timeInfo = parseVoiceTimeInfo(original);
+          var addressMatch;
+          var noteMatch;
+          var cleanedTitle = original;
+          var detailParts = [];
 
-          if (working.indexOf('uebermorgen') !== -1) {
-            result.date = shiftDate(today, 2);
-          } else if (working.indexOf('morgen') !== -1) {
-            result.date = shiftDate(today, 1);
-          } else if (working.indexOf('heute') !== -1) {
-            result.date = shiftDate(today, 0);
-          } else if (dateMatch) {
-            var year = dateMatch[3] ? Number(dateMatch[3]) : today.getFullYear();
-            if (year < 100) {
-              year += 2000;
-            }
-            result.date = [
-              String(year),
-              pad(Number(dateMatch[2])),
-              pad(Number(dateMatch[1]))
-            ].join('-');
+          if (dateInfo.value) {
+            result.date = dateInfo.value;
+            cleanedTitle = removeMatchSegment(cleanedTitle, dateInfo.matchedText);
           }
 
-          if (timeMatch) {
-            result.time = pad(Number(timeMatch[1])) + ':' + pad(Number(timeMatch[2] || 0));
+          if (timeInfo.value) {
+            result.time = timeInfo.value;
+            cleanedTitle = removeMatchSegment(cleanedTitle, timeInfo.matchedText);
           }
 
-          result.title = cleanTitle(working);
+          noteMatch = original.match(/\b(?:notiz|hinweis|bemerkung|beschreibung|text)\s+(.+)$/i);
+          if (noteMatch) {
+            result.note = compactText(noteMatch[1]);
+            cleanedTitle = cleanedTitle.replace(noteMatch[0], ' ');
+          }
+
+          addressMatch = cleanedTitle.match(/\b(?:in|im|bei|an der|am|an|auf)\s+(.+)$/i);
+          if (addressMatch) {
+            result.address = compactText(addressMatch[1]);
+            cleanedTitle = cleanedTitle.slice(0, addressMatch.index);
+          }
+
+          detailParts = extractDetailParts(cleanedTitle);
+          result.title = cleanTitle(detailParts[0] || cleanedTitle);
+
+          if (detailParts.length > 1 && !result.address) {
+            result.address = compactText(detailParts.slice(1).join(' '));
+          }
+
+          if (!result.title || result.title === 'Neuer Termin') {
+            result.missing.push('Titel');
+          }
+          if (!dateInfo.value && !dateInput.value) {
+            result.missing.push('Datum');
+          }
+          if (!result.time) {
+            result.missing.push('Uhrzeit');
+          }
+          if (!result.address && /\b(?:in|im|bei|am|an|auf)\b/i.test(original)) {
+            result.missing.push('Ort/Adresse');
+          }
+
           return result;
         }
 
         function cleanTitle(text) {
-          return text
+          return compactText(String(text || '')
             .replace(/uebermorgen|morgen|heute/gi, ' ')
+            .replace(/\b(?:naechsten|kommenden)\b/gi, ' ')
             .replace(/\d{1,2}[.\-/]\d{1,2}(?:[.\-/]\d{2,4})?/g, ' ')
-            .replace(/\d{1,2}(?::| uhr ?)\d{0,2}/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim() || 'Neuer Termin';
+            .replace(/\b(?:um\s+)?\d{1,2}(?::\d{1,2})?(?:\s*uhr)?\b/gi, ' ')
+            .replace(/\b(?:in|im|bei|an der|am|an|auf)\b.+$/i, ' ')
+            .replace(/\b(?:notiz|hinweis|bemerkung|beschreibung|text)\b.+$/i, ' ')) || 'Neuer Termin';
         }
 
         function normalizeText(text) {
@@ -1138,6 +1577,240 @@ render_page('Kalender', 'Termine', static function (): void {
             .replace(/\u00f6/g, 'oe')
             .replace(/\u00fc/g, 'ue')
             .replace(/\u00df/g, 'ss');
+        }
+
+        function compactText(text) {
+          return String(text || '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        }
+        function removeMatchSegment(text, matchText) {
+          if (!matchText) {
+            return compactText(text);
+          }
+          return compactText(String(text || '').replace(matchText, ' '));
+        }
+
+        function extractDetailParts(text) {
+          return compactText(text)
+            .split(/\s+-\s+|\s+bei\s+/i)
+            .map(function (part) {
+              return compactText(part);
+            })
+            .filter(Boolean);
+        }
+        function parseVoiceDateInfo(text) {
+          var normalized = normalizeText(text);
+          var today = new Date();
+          var numericMatch = normalized.match(/(\d{1,2})[.\-/](\d{1,2})(?:[.\-/](\d{2,4}))?/);
+          var monthMatch = normalized.match(/\b(?:am\s+|den\s+)?(\d{1,2})\.?\s+(januar|februar|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)(?:\s+(\d{2,4}))?\b/);
+          var weekdayInfo = parseWeekdayDate(normalized, today);
+          var year;
+          var month;
+          if (normalized.indexOf('uebermorgen') !== -1) {
+            return { value: shiftDate(today, 2), matchedText: findMatchedToken(text, /uebermorgen/i) };
+          }
+          if (normalized.indexOf('morgen') !== -1) {
+            return { value: shiftDate(today, 1), matchedText: findMatchedToken(text, /morgen/i) };
+          }
+          if (normalized.indexOf('heute') !== -1) {
+            return { value: shiftDate(today, 0), matchedText: findMatchedToken(text, /heute/i) };
+          }
+          if (numericMatch) {
+            year = numericMatch[3] ? Number(numericMatch[3]) : today.getFullYear();
+            if (year < 100) {
+              year += 2000;
+            }
+            return {
+              value: [String(year), pad(Number(numericMatch[2])), pad(Number(numericMatch[1]))].join('-'),
+              matchedText: numericMatch[0]
+            };
+          }
+          if (monthMatch) {
+            month = monthNameToNumber(monthMatch[2]);
+            year = monthMatch[3] ? Number(monthMatch[3]) : today.getFullYear();
+            if (year < 100) {
+              year += 2000;
+            }
+            return {
+              value: [String(year), pad(month), pad(Number(monthMatch[1]))].join('-'),
+              matchedText: monthMatch[0]
+            };
+          }
+          if (weekdayInfo) {
+            return weekdayInfo;
+          }
+          return { value: '', matchedText: '' };
+        }
+        function parseWeekdayDate(normalized, baseDate) {
+          var weekdayMap = {
+            montag: 1,
+            dienstag: 2,
+            mittwoch: 3,
+            donnerstag: 4,
+            freitag: 5,
+            samstag: 6,
+            sonntag: 0
+          };
+          var weekday = '';
+          var targetWeekday = 0;
+          var dayDiff = 0;
+          var shiftedDate = new Date(baseDate);
+          Object.keys(weekdayMap).some(function (name) {
+            if (normalized.indexOf(name) !== -1) {
+              weekday = name;
+              targetWeekday = weekdayMap[name];
+              return true;
+            }
+            return false;
+          });
+          if (!weekday) {
+            return null;
+          }
+          dayDiff = targetWeekday - baseDate.getDay();
+          if (dayDiff <= 0 || /\b(?:naechsten|kommenden)\b/.test(normalized)) {
+            dayDiff += 7;
+          }
+          shiftedDate.setDate(shiftedDate.getDate() + dayDiff);
+          return {
+            value: toIsoDate(shiftedDate),
+            matchedText: weekday
+          };
+        }
+        function monthNameToNumber(monthName) {
+          var monthMap = {
+            januar: 1,
+            februar: 2,
+            maerz: 3,
+            april: 4,
+            mai: 5,
+            juni: 6,
+            juli: 7,
+            august: 8,
+            september: 9,
+            oktober: 10,
+            november: 11,
+            dezember: 12
+          };
+          return monthMap[normalizeText(monthName)] || 1;
+        }
+        function findMatchedToken(text, regex) {
+          var match = String(text || '').match(regex);
+          return match ? match[0] : '';
+        }
+        function parseVoiceTimeInfo(text) {
+          var normalized = normalizeText(text);
+          var fullMatch = normalized.match(/\b(?:um\s+)?(\d{1,2})(?::(\d{1,2}))?(?:\s*uhr)?\b/);
+          var halfMatch = normalized.match(/\bhalb\s+(\d{1,2})\b/);
+          var quarterAfterMatch = normalized.match(/\bviertel\s+nach\s+(\d{1,2})\b/);
+          var quarterBeforeMatch = normalized.match(/\bviertel\s+vor\s+(\d{1,2})\b/);
+          var hour = 0;
+          if (quarterAfterMatch) {
+            hour = Number(quarterAfterMatch[1]);
+            return {
+              value: pad(hour) + ':15',
+              matchedText: quarterAfterMatch[0]
+            };
+          }
+          if (quarterBeforeMatch) {
+            hour = Number(quarterBeforeMatch[1]) - 1;
+            if (hour < 0) {
+              hour = 23;
+            }
+            return {
+              value: pad(hour) + ':45',
+              matchedText: quarterBeforeMatch[0]
+            };
+          }
+          if (halfMatch) {
+            hour = Number(halfMatch[1]) - 1;
+            if (hour < 0) {
+              hour = 23;
+            }
+            return {
+              value: pad(hour) + ':30',
+              matchedText: halfMatch[0]
+            };
+          }
+          if (fullMatch) {
+            return {
+              value: pad(Number(fullMatch[1])) + ':' + pad(Number(fullMatch[2] || 0)),
+              matchedText: fullMatch[0]
+            };
+          }
+          return { value: '', matchedText: '' };
+        }
+        function readGuidedFieldValue(fieldKey, text) {
+          var compact = compactText(text);
+          var normalized = normalizeText(compact);
+
+          if (isSkippedVoiceAnswer(normalized)) {
+            return '';
+          }
+
+          if (fieldKey === 'title') {
+            return compact || titleInput.value.trim();
+          }
+
+          if (fieldKey === 'date') {
+            return parseVoiceDate(compact) || dateInput.value || selectedDate;
+          }
+
+          if (fieldKey === 'time') {
+            return parseVoiceTime(compact) || timeInput.value;
+          }
+
+          if (fieldKey === 'address') {
+            return compact;
+          }
+
+          if (fieldKey === 'note') {
+            return compact;
+          }
+
+          return compact;
+        }
+
+        function parseVoiceDate(text) {
+          return parseVoiceDateInfo(text).value || '';
+        }
+
+        function parseVoiceTime(text) {
+          return parseVoiceTimeInfo(text).value || '';
+        }
+
+        function isSkippedVoiceAnswer(normalizedText) {
+          return ['ueberspringen', 'weiter', 'keine', 'nichts', 'leer'].some(function (keyword) {
+            return normalizedText === normalizeText(keyword) || normalizedText.indexOf(normalizeText(keyword)) === 0;
+          });
+        }
+
+        function speakPrompt(promptText, callback) {
+          if (!promptText) {
+            window.setTimeout(callback, 120);
+            return;
+          }
+
+          if (!window.speechSynthesis || typeof window.SpeechSynthesisUtterance === 'undefined') {
+            window.setTimeout(callback, 280);
+            return;
+          }
+
+          try {
+            window.speechSynthesis.cancel();
+            var utterance = new window.SpeechSynthesisUtterance(promptText);
+            utterance.lang = 'de-DE';
+            utterance.rate = 1;
+            utterance.onend = function () {
+              window.setTimeout(callback, 120);
+            };
+            utterance.onerror = function () {
+              window.setTimeout(callback, 120);
+            };
+            window.speechSynthesis.speak(utterance);
+          } catch (error) {
+            window.setTimeout(callback, 280);
+          }
         }
 
         function shiftDate(baseDate, days) {
