@@ -290,6 +290,52 @@ a {
   line-height: 1.7;
 }
 
+.legal-grid {
+  align-items: start;
+}
+
+.legal-card,
+.legal-block,
+.legal-address,
+.legal-notice {
+  display: grid;
+  gap: 12px;
+}
+
+.legal-card h4,
+.legal-card address,
+.legal-card p {
+  margin: 0;
+}
+
+.legal-block + .legal-block {
+  margin-top: 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.legal-address {
+  font-style: normal;
+  color: var(--muted);
+}
+
+.legal-list {
+  margin-top: 0;
+}
+
+.legal-notice {
+  margin-top: 8px;
+  padding: 16px 18px;
+  border: 1px solid rgba(184, 92, 56, 0.22);
+  border-radius: 20px;
+  background: rgba(184, 92, 56, 0.08);
+}
+
+.legal-notice-ready {
+  border-color: rgba(47, 108, 98, 0.22);
+  background: rgba(47, 108, 98, 0.08);
+}
+
 .button-row,
 .swatch-row,
 .code-block,

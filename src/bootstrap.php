@@ -68,6 +68,83 @@ if (!function_exists('app_site_name')) {
     }
 }
 
+if (!function_exists('app_legal_name')) {
+    function app_legal_name(): string
+    {
+        return app_env('APP_LEGAL_NAME', 'Mark Dorth');
+    }
+}
+
+if (!function_exists('app_legal_address_street')) {
+    function app_legal_address_street(): string
+    {
+        return app_env('APP_LEGAL_ADDRESS_STREET', '');
+    }
+}
+
+if (!function_exists('app_legal_address_postal')) {
+    function app_legal_address_postal(): string
+    {
+        return app_env('APP_LEGAL_ADDRESS_POSTAL', '');
+    }
+}
+
+if (!function_exists('app_legal_address_city')) {
+    function app_legal_address_city(): string
+    {
+        return app_env('APP_LEGAL_ADDRESS_CITY', '');
+    }
+}
+
+if (!function_exists('app_legal_country')) {
+    function app_legal_country(): string
+    {
+        return app_env('APP_LEGAL_COUNTRY', 'Deutschland');
+    }
+}
+
+if (!function_exists('app_legal_email')) {
+    function app_legal_email(): string
+    {
+        return app_env('APP_LEGAL_EMAIL', '');
+    }
+}
+
+if (!function_exists('app_legal_phone')) {
+    function app_legal_phone(): string
+    {
+        return app_env('APP_LEGAL_PHONE', '');
+    }
+}
+
+if (!function_exists('app_legal_vat_id')) {
+    function app_legal_vat_id(): string
+    {
+        return app_env('APP_LEGAL_VAT_ID', '');
+    }
+}
+
+if (!function_exists('app_legal_responsible_person')) {
+    function app_legal_responsible_person(): string
+    {
+        return app_env('APP_LEGAL_RESPONSIBLE_PERSON', app_legal_name());
+    }
+}
+
+if (!function_exists('app_legal_dispute_notice')) {
+    function app_legal_dispute_notice(): string
+    {
+        return app_env('APP_LEGAL_DISPUTE_NOTICE', '');
+    }
+}
+
+if (!function_exists('app_legal_privacy_email')) {
+    function app_legal_privacy_email(): string
+    {
+        return app_env('APP_LEGAL_PRIVACY_EMAIL', app_legal_email());
+    }
+}
+
 if (!function_exists('app_tagline')) {
     function app_tagline(): string
     {
@@ -81,6 +158,87 @@ if (!function_exists('app_url')) {
     function app_url(string $path = ''): string
     {
         return '/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('app_legal_address_lines')) {
+    function app_legal_address_lines(): array
+    {
+        $lines = [];
+        $street = trim(app_legal_address_street());
+        $postal = trim(app_legal_address_postal());
+        $city = trim(app_legal_address_city());
+        $country = trim(app_legal_country());
+
+        if ($street !== '') {
+            $lines[] = $street;
+        }
+
+        $postalCity = trim($postal . ' ' . $city);
+        if ($postalCity !== '') {
+            $lines[] = $postalCity;
+        }
+
+        if ($country !== '') {
+            $lines[] = $country;
+        }
+
+        return $lines;
+    }
+}
+
+if (!function_exists('app_legal_address_inline')) {
+    function app_legal_address_inline(): string
+    {
+        return implode(', ', app_legal_address_lines());
+    }
+}
+
+if (!function_exists('app_legal_contact_channels')) {
+    function app_legal_contact_channels(): array
+    {
+        $channels = [];
+        $email = trim(app_legal_email());
+        $phone = trim(app_legal_phone());
+
+        if ($email !== '') {
+            $channels[] = [
+                'label' => 'E-Mail',
+                'value' => $email,
+                'href' => 'mailto:' . $email,
+            ];
+        }
+
+        if ($phone !== '') {
+            $channels[] = [
+                'label' => 'Telefon',
+                'value' => $phone,
+                'href' => 'tel:' . preg_replace('/[^0-9+]/', '', $phone),
+            ];
+        }
+
+        return $channels;
+    }
+}
+
+if (!function_exists('app_legal_missing_fields')) {
+    function app_legal_missing_fields(): array
+    {
+        $missing = [];
+
+        if (trim(app_legal_name()) === '') {
+            $missing[] = 'Name des Diensteanbieters';
+        }
+
+        if (trim(app_legal_address_street()) === '' || trim(app_legal_address_postal()) === '' || trim(app_legal_address_city()) === '') {
+            $missing[] = 'vollstaendige ladungsfaehige Anschrift';
+        }
+
+        if (trim(app_legal_email()) === '') {
+            $missing[] = 'E-Mail-Adresse fuer die schnelle Kontaktaufnahme';
+        }
+
+        return $missing;
     }
 }
 
@@ -501,6 +659,7 @@ if (!function_exists('app_footer_links')) {
     {
         return [
             ['file' => 'impressum.php', 'label' => 'Impressum'],
+            ['file' => 'datenschutz.php', 'label' => 'Datenschutz'],
             ['file' => 'kontakt.php', 'label' => 'Kontakt'],
         ];
     }

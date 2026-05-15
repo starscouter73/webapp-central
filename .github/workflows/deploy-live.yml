@@ -36,4 +36,10 @@ jobs:
             $git_safe fetch --all --prune
             $git_safe checkout -B main origin/main
             $git_safe reset --hard origin/main
-            docker compose up -d --build
+            if [ ! -f .env ]; then
+              echo "Server .env fehlt unter ${{ secrets.DEPLOY_PATH }}. Deploy abgebrochen." >&2
+              echo "Lege dort zuerst eine produktive .env auf Basis von .env.example an." >&2
+              exit 1
+            fi
+            docker compose --env-file .env config >/dev/null
+            docker compose --env-file .env up -d --build

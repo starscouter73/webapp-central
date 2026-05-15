@@ -7,3 +7,4 @@ node_modules/
 vendor/
 *.log
 php_errors.log
+.env
