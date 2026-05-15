@@ -1104,11 +1104,16 @@ render_page('Kalender', 'Termine', static function (): void {
             var visualizeButton = document.createElement('button');
             var mapCell = document.createElement('div');
             var title = document.createElement('strong');
+            var chipRow = document.createElement('div');
+            var typeChip = document.createElement('span');
+            var statusChip = document.createElement('span');
             var note = document.createElement('p');
             var address = document.createElement('p');
             var dateValue = document.createElement('span');
             var timeValue = document.createElement('span');
             var miniMap;
+            var typeMeta = getEventTypeMeta(eventItem);
+            var statusMeta = getEventStatusMeta(eventItem);
 
             article.className = 'overview-item';
             dateCell.className = 'overview-item-cell overview-item-cell-date';
@@ -1119,6 +1124,11 @@ render_page('Kalender', 'Termine', static function (): void {
             actions.className = 'overview-item-cell overview-item-actions';
             title.textContent = eventItem.title;
             title.className = 'overview-item-title';
+            chipRow.className = 'overview-item-chip-row';
+            typeChip.className = 'overview-item-chip overview-item-chip-type ' + typeMeta.className;
+            typeChip.textContent = typeMeta.label;
+            statusChip.className = 'overview-item-chip overview-item-chip-status ' + statusMeta.className;
+            statusChip.textContent = statusMeta.label;
             dateValue.className = 'overview-item-date';
             dateValue.textContent = formatEventDate(eventItem);
             timeValue.className = 'overview-item-time';
@@ -1170,6 +1180,9 @@ render_page('Kalender', 'Termine', static function (): void {
             timeCell.appendChild(timeValue);
             titleCell.appendChild(buildOverviewCellLabel('Termin'));
             titleCell.appendChild(title);
+            chipRow.appendChild(typeChip);
+            chipRow.appendChild(statusChip);
+            titleCell.appendChild(chipRow);
             if (eventItem.note) {
               titleCell.appendChild(note);
             }
@@ -1195,6 +1208,53 @@ render_page('Kalender', 'Termine', static function (): void {
           label.className = 'overview-item-label';
           label.textContent = text;
           return label;
+        }
+
+        function getEventTypeMeta(eventItem) {
+          var source = normalizeText([eventItem.title, eventItem.note, eventItem.address].join(' '));
+
+          if (/(montage|enpal|stromzaehler|tausch|modul|wallbox|wechselrichter|anschluss|technik)/.test(source)) {
+            return { label: 'Technik', className: 'is-technik' };
+          }
+
+          if (/(drohne|foto|video|medien|aufnahme|shoot)/.test(source)) {
+            return { label: 'Medien', className: 'is-medien' };
+          }
+
+          if (/(besprechung|meeting|call|telefon|abstimmung)/.test(source)) {
+            return { label: 'Abstimmung', className: 'is-abstimmung' };
+          }
+
+          if (/(fahrt|anreise|route|logistik|lieferung)/.test(source)) {
+            return { label: 'Logistik', className: 'is-logistik' };
+          }
+
+          if (/(doku|dokumentation|angebot|rechnung|pdf)/.test(source)) {
+            return { label: 'Doku', className: 'is-doku' };
+          }
+
+          return { label: 'Termin', className: 'is-standard' };
+        }
+
+        function getEventStatusMeta(eventItem) {
+          var today = toIsoDate(new Date());
+          var timestamp = buildEventTimestamp(eventItem);
+          var nowTimestamp = Date.now();
+          var inSevenDays = nowTimestamp + (7 * 24 * 60 * 60 * 1000);
+
+          if (eventItem.date < today) {
+            return { label: 'Vergangen', className: 'is-past' };
+          }
+
+          if (eventItem.date === today) {
+            return { label: 'Heute', className: 'is-today' };
+          }
+
+          if (timestamp <= inSevenDays) {
+            return { label: 'Diese Woche', className: 'is-soon' };
+          }
+
+          return { label: 'Geplant', className: 'is-planned' };
         }
 
         function setActiveView(nextView) {
