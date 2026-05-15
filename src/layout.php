@@ -15,7 +15,7 @@ if (!function_exists('render_page')) {
         $bodyClass = trim((string)($options['body_class'] ?? ''));
         $shellClass = trim((string)($options['shell_class'] ?? ''));
         $contentShellClass = trim((string)($options['content_shell_class'] ?? ''));
-        $headerClass = $currentPage === 'index.php' ? ' site-header-accent' : '';
+        $headerClass = '';
 
         if (!headers_sent()) {
             header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
