@@ -16,12 +16,65 @@ Dieses Projekt ist von einer lokal gepraegten Docker-Desktop-Entwicklung zu eine
 - Deployments aktuell teilweise manuell, aber bereits auf spaetere CI/CD-Schritte ausrichtbar
 - Live-nahe Arbeitsweise ueber Repository, SSH und serverseitige Bereitstellung
 
-### Aktueller Fokus
+### Aktueller Projektstatus
 
-- Die Webapp wird direkt im Repository weiterentwickelt
-- Struktur, Frontend und Skriptlogik werden gemeinsam gepflegt
-- Aenderungen gehen zeitnah in den Versionsstand und auf die Live-Umgebung
-- Die Infrastruktur bleibt bewusst cloud- und serverfaehig vorbereitet
+**Stand:** fortlaufend zu pflegen. Dieser Abschnitt ersetzt aeltere Momentaufnahmen, die den Kalender noch als aktuellen Schwerpunkt nennen.
+
+#### Projekt
+
+- Domain: `webapp-central.de`
+- Repository: `starscouter73/webapp-central`
+- Produktivbranch: `main`
+- Serverpfad: `/opt/webapps/webzentrale/`
+- Lokales Repo: `C:\Users\dorth\Documents\webapp-zentrale`
+
+#### Aktuelle Arbeitsrichtung
+
+Der Kalender ist nicht mehr der aktuelle Hauptfokus. Er bleibt als vorhandenes Modul Bestandteil der Plattform.
+
+Der aktuelle Fokus liegt auf:
+
+- sauberem GitHub-/Server-/Lokal-Sync
+- stabiler Repository-Struktur
+- `webapp-central.de` als uebergreifende Projektzentrale
+- Hallenberg-Showcase als hochwertige Referenzseite
+- konsistentem Dark-/Glass-/Hallenberg-Design
+- sauberem Medien- und Dokumentationsworkflow
+- Vorbereitung weiterer Webapps, Module und Referenzbereiche
+
+#### Bestehende Hauptbereiche
+
+- Startseite
+- Zentrale / Moduluebersicht
+- Workspace / Arbeitsbereich
+- Kalender als vorhandenes Funktionsmodul
+- Hallenberg-Projektseite mit Medienlogik
+- Hallenberg-Showcase mit Drohnen-, Modul-, Technik- und Dokumentationssektionen
+
+#### Arbeitsregel
+
+Alte Projektstatusbloecke mit konkreter Datumsangabe oder altem Fokus duerfen nicht mehr ungeprueft verwendet werden.
+
+Vor jeder groesseren Aenderung gilt:
+
+1. Repository-Status pruefen.
+2. Serverstand pruefen.
+3. Lokalen Stand pruefen, falls lokal gearbeitet wird.
+4. Aenderungen sauber committen.
+5. Nach Bedarf rebasen.
+6. Push nach `main`.
+7. Live-Seite pruefen.
+8. Dokumentation aktualisieren.
+
+#### Kein aktueller Fokus mehr
+
+Nicht mehr als aktueller Schwerpunkt behandeln:
+
+- reine Kalenderentwicklung
+- `/calendar.php` als Hauptarbeitsziel
+- `/calendar-overview.php` als Hauptarbeitsziel
+
+Diese Bereiche nur bearbeiten, wenn ausdruecklich daran gearbeitet werden soll.
 
 <details>
 <summary>🟢 Phase 1 — Lokaler Ausgangspunkt mit Docker Desktop</summary>
@@ -48,9 +101,9 @@ Aus Architektursicht fuehrte das zu einer doppelten Belastung: Einerseits blieb 
 <details>
 <summary>🟢 Phase 3 — Strategischer Richtungswechsel</summary>
 
-Relativ frueh im Entwicklungsverlauf wurde daher entschieden, die Strategie anzupassen. Diese Entscheidung entstand nicht aus einer singulaeren Stoerung, sondern aus dem Zusammenspiel von Projektwachstum, Infrastrukturbedarf und der Beobachtung, dass eine rein lokal an Docker Desktop gebundene Arbeitsweise auf Dauer unnötige Reibung erzeugt.
+Relativ frueh im Entwicklungsverlauf wurde daher entschieden, die Strategie anzupassen. Diese Entscheidung entstand nicht aus einer singulaeren Stoerung, sondern aus dem Zusammenspiel von Projektwachstum, Infrastrukturbedarf und der Beobachtung, dass eine rein lokal an Docker Desktop gebundene Arbeitsweise auf Dauer unnoetige Reibung erzeugt.
 
-Der Wechsel bedeutete bewusst eine Abkehr von der ausschliesslichen lokalen Containerzentrierung. Stattdessen rueckte GitHub als zentrale Versionsbasis staerker in den Mittelpunkt. Code, Repository-Struktur und technische Infrastruktur wurden enger zusammen gedacht, sodass der Entwicklungsweg nicht mehr primär ueber lokale Laufzeitabstraktion, sondern ueber nachvollziehbare Dateien, commits und direkte Bereitstellungswege organisiert wird.
+Der Wechsel bedeutete bewusst eine Abkehr von der ausschliesslichen lokalen Containerzentrierung. Stattdessen rueckte GitHub als zentrale Versionsbasis staerker in den Mittelpunkt. Code, Repository-Struktur und technische Infrastruktur wurden enger zusammen gedacht, sodass der Entwicklungsweg nicht mehr primaer ueber lokale Laufzeitabstraktion, sondern ueber nachvollziehbare Dateien, Commits und direkte Bereitstellungswege organisiert wird.
 
 Diese Umstellung war zugleich eine Vorbereitung auf server- und cloudorientiertes Arbeiten. Ziel war nicht, lokale Entwicklung abzuschaffen, sondern sie gezielter einzusetzen und den Hauptworkflow schlanker, direkter und naeher an der spaeteren Betriebsumgebung auszurichten.
 
@@ -59,7 +112,7 @@ Diese Umstellung war zugleich eine Vorbereitung auf server- und cloudorientierte
 <details>
 <summary>🟢 Phase 4 — Aktuelle repository- und servernahe Arbeitsweise</summary>
 
-Der aktuelle Workflow ist deutlich direkter aufgebaut. Entwicklung findet heute primär entlang der Repository-Strukturen statt: Code, Styles, Skripte und Hilfslogik werden unmittelbar im Projekt gepflegt und versioniert. GitHub fungiert dabei als zentrale Projektquelle und als verbindliche Referenz fuer den laufenden Stand.
+Der aktuelle Workflow ist deutlich direkter aufgebaut. Entwicklung findet heute primaer entlang der Repository-Strukturen statt: Code, Styles, Skripte und Hilfslogik werden unmittelbar im Projekt gepflegt und versioniert. GitHub fungiert dabei als zentrale Projektquelle und als verbindliche Referenz fuer den laufenden Stand.
 
 Aenderungen werden zeitnah committed und gepusht. Dadurch bleibt der Entwicklungsstand in Echtzeit nachvollziehbar und fuer kuenftige Automatisierungsschritte anschlussfaehig. Diese Arbeitsweise reduziert lokale Zusatzkomplexitaet und verschiebt den Fokus auf die eigentlichen Projektartefakte statt auf schwere Umgebungssimulation.
 
@@ -75,7 +128,7 @@ Die wesentlichen technischen Komponenten lassen sich heute klar benennen:
 - Docker Desktop als urspruengliche lokale Laufzeit- und Testbasis
 - Docker-Container fuer isolierte Dienste und reproduzierbare Entwicklungsumgebungen
 - VS Code als zentrale Bearbeitungsumgebung fuer Code, Struktur und Navigation
-- GitHub als primäre Versionsquelle und gemeinsame Projektreferenz
+- GitHub als primaere Versionsquelle und gemeinsame Projektreferenz
 - Codex beziehungsweise KI-gestuetzte Entwicklung als Beschleuniger fuer Umsetzung, Ueberarbeitung und Strukturarbeit
 - Repository-Workflow als Rueckgrat fuer Aenderungen, Nachvollziehbarkeit und Uebergaben
 - SSH als technischer Pfad fuer direkte serverseitige Bereitstellung
