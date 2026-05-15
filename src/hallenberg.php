@@ -38,6 +38,7 @@ if (!function_exists('app_hallenberg_sections')) {
         return [
             ['id' => 'hero', 'label' => 'Projekt'],
             ['id' => 'overview', 'label' => 'Uebersicht'],
+            ['id' => 'documents', 'label' => 'Unterlagen'],
             ['id' => 'situation', 'label' => 'Ausgangssituation'],
             ['id' => 'engineering', 'label' => 'Engineering'],
             ['id' => 'substructure', 'label' => 'Unterkonstruktion'],

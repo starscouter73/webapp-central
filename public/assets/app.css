@@ -954,6 +954,9 @@ a {
 .swatch-4 { background: #f6f1e8; }
 
 .hallenberg-page,
+.chapter-pager,
+.chapter-pager-meta,
+.chapter-pager-actions,
 .hallenberg-section,
 .section-heading,
 .section-copy,
@@ -977,6 +980,37 @@ a {
 
 .hallenberg-page {
   gap: 24px;
+}
+
+.chapter-pager {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 18px 22px;
+  border-radius: 24px;
+  background: rgba(15, 17, 21, 0.86);
+  backdrop-filter: blur(18px);
+}
+
+.chapter-pager-meta strong {
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.chapter-pager-meta p {
+  margin: 0;
+  color: rgba(245, 245, 245, 0.68);
+}
+
+.chapter-pager-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+}
+
+.chapter-pager .btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .project-body {
@@ -1155,6 +1189,12 @@ a {
 
 .hallenberg-sticky-nav a:hover {
   background: rgba(255, 180, 0, 0.12);
+  color: #fff;
+}
+
+.hallenberg-sticky-nav a.is-active {
+  background: rgba(255, 180, 0, 0.18);
+  border-color: rgba(255, 180, 0, 0.28);
   color: #fff;
 }
 
@@ -1425,6 +1465,14 @@ a {
   min-height: 320px;
 }
 
+body.chapter-mode-active [data-chapter] {
+  display: none;
+}
+
+body.chapter-mode-active [data-chapter].is-active {
+  display: grid;
+}
+
 .lightbox-shell {
   position: fixed;
   inset: 0;
@@ -1508,6 +1556,14 @@ body.lightbox-open {
   .site-footer {
     flex-direction: column;
     align-items: start;
+  }
+
+  .chapter-pager {
+    grid-template-columns: 1fr;
+  }
+
+  .chapter-pager-actions {
+    justify-content: start;
   }
 
   .hallenberg-hero-card,

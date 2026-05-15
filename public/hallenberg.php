@@ -39,7 +39,19 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <article class="hallenberg-hero-card">
+      <section class="chapter-pager card" aria-label="Kapitelsteuerung">
+        <div class="chapter-pager-meta">
+          <span class="card-label">Kapitelmodus</span>
+          <strong id="chapter-current-title">Projekt</strong>
+          <p id="chapter-current-position">Kapitel 1 von <?= count($sections) ?></p>
+        </div>
+        <div class="chapter-pager-actions">
+          <button class="btn btn-ghost" id="chapter-prev" type="button">Zurueck</button>
+          <button class="btn btn-primary" id="chapter-next" type="button">Weiter</button>
+        </div>
+      </section>
+
+      <article class="hallenberg-hero-card" id="hero" data-chapter="hero">
         <div class="hallenberg-hero-media">
           <?php foreach ($story['hero']['media'] as $index => $media): ?>
             <div class="hero-media-frame <?= $index === 0 ? 'is-primary' : 'is-secondary' ?>">
@@ -47,7 +59,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
             </div>
           <?php endforeach; ?>
         </div>
-        <div class="hallenberg-hero-copy" id="hero">
+        <div class="hallenberg-hero-copy">
           <span class="card-label"><?= app_h($story['hero']['eyebrow']) ?></span>
           <h2><?= app_h($story['hero']['title']) ?></h2>
           <p class="hallenberg-hero-subtitle"><?= app_h($story['hero']['subtitle']) ?></p>
@@ -63,11 +75,11 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
 
       <section class="hallenberg-sticky-nav card" aria-label="Kapitelnavigation">
         <?php foreach ($sections as $section): ?>
-          <a href="#<?= app_h($section['id']) ?>"><?= app_h($section['label']) ?></a>
+          <a href="#<?= app_h($section['id']) ?>" data-chapter-link="<?= app_h($section['id']) ?>"><?= app_h($section['label']) ?></a>
         <?php endforeach; ?>
       </section>
 
-      <section class="hallenberg-section stack" id="overview">
+      <section class="hallenberg-section stack" id="overview" data-chapter="overview">
         <div class="section-heading">
           <span class="card-label">Projektuebersicht</span>
           <h3>Vom Fachwerkhaus zur Premium-Energieplattform</h3>
@@ -86,7 +98,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-section" id="documents">
+      <section class="hallenberg-section" id="documents" data-chapter="documents">
         <div class="section-heading">
           <span class="card-label">Projektunterlagen</span>
           <h3>Direkte Downloads fuer Review, Ablage und Weiterbearbeitung</h3>
@@ -106,7 +118,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-section split-media" id="situation">
+      <section class="hallenberg-section split-media" id="situation" data-chapter="situation">
         <div class="section-copy">
           <span class="card-label">Ausgangssituation</span>
           <h3>Historische Struktur, anspruchsvolle Dachgeometrie</h3>
@@ -127,7 +139,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-section engineering-stage" id="engineering">
+      <section class="hallenberg-section engineering-stage" id="engineering" data-chapter="engineering">
         <div class="section-heading">
           <span class="card-label">Planning & Engineering</span>
           <h3>23,4 kWp Planung, Stringlogik und bauliche Freigaben</h3>
@@ -153,7 +165,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-section split-media" id="substructure">
+      <section class="hallenberg-section split-media" id="substructure" data-chapter="substructure">
         <div class="section-copy">
           <span class="card-label">Unterkonstruktion</span>
           <h3>Dachhaken, Schienen und Lastverteilung als statische Basis</h3>
@@ -174,7 +186,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-section" id="modules">
+      <section class="hallenberg-section" id="modules" data-chapter="modules">
         <div class="section-heading">
           <span class="card-label">Modulmontage</span>
           <h3>Full-Black-Optik, Spiegelungen und eine ruhige Dachzeichnung</h3>
@@ -190,7 +202,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-section hallenberg-drone-section" id="drone">
+      <section class="hallenberg-section hallenberg-drone-section" id="drone" data-chapter="drone">
         <div class="section-heading">
           <span class="card-label">Drohnenaufnahmen</span>
           <h3>Topdown-Perspektiven und die Gesamtwirkung im Ortsbild</h3>
@@ -206,7 +218,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-section split-media" id="technical">
+      <section class="hallenberg-section split-media" id="technical" data-chapter="technical">
         <div class="section-copy">
           <span class="card-label">Technik & Kabelwege</span>
           <h3>Vom Fallrohr durch den Keller in den Technikbereich</h3>
@@ -227,7 +239,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-section split-media" id="scaffold">
+      <section class="hallenberg-section split-media" id="scaffold" data-chapter="scaffold">
         <div class="section-copy">
           <span class="card-label">Geruest & Montagelogistik</span>
           <h3>Zugangssysteme, Podeste und Materialwege</h3>
@@ -243,7 +255,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-section hallenberg-timeline-section" id="timeline">
+      <section class="hallenberg-section hallenberg-timeline-section" id="timeline" data-chapter="timeline">
         <div class="section-heading">
           <span class="card-label">Baufortschritt</span>
           <h3>Timeline von Bestand bis Fertigstellung</h3>
@@ -268,7 +280,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-section future-grid" id="future">
+      <section class="hallenberg-section future-grid" id="future" data-chapter="future">
         <div class="section-copy">
           <span class="card-label">Smart Energy & Zukunft</span>
           <h3>Speicher, Wallbox, Monitoring und spaetere Waermepumpe</h3>
@@ -315,7 +327,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         </div>
       </section>
 
-      <section class="hallenberg-finale card" id="finale">
+      <section class="hallenberg-finale card" id="finale" data-chapter="finale">
         <div class="hallenberg-finale-copy">
           <span class="card-label">Gesamtwirkung</span>
           <h3><?= app_h($story['finale']['title']) ?></h3>
@@ -394,6 +406,144 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
         var futureDetailFacts = document.getElementById('future-detail-facts');
         var futureDetailMedia = document.getElementById('future-detail-media');
         var futureData = <?= json_encode($futureProducts, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+        var chapters = Array.prototype.slice.call(document.querySelectorAll('[data-chapter]'));
+        var chapterLinks = Array.prototype.slice.call(document.querySelectorAll('[data-chapter-link]'));
+        var chapterPrev = document.getElementById('chapter-prev');
+        var chapterNext = document.getElementById('chapter-next');
+        var chapterCurrentTitle = document.getElementById('chapter-current-title');
+        var chapterCurrentPosition = document.getElementById('chapter-current-position');
+        var chapterData = <?= json_encode($sections, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+        var chapterAnchors = Array.prototype.slice.call(document.querySelectorAll('a[href^="#"]'));
+        var chapterLookup = {};
+        var activeChapterId = '';
+
+        chapterData.forEach(function (item) {
+          chapterLookup[item.id] = item.label;
+        });
+
+        function getChapterIndex(chapterId) {
+          var index = -1;
+
+          chapters.some(function (chapterItem, chapterIndex) {
+            if (chapterItem.getAttribute('data-chapter') === chapterId) {
+              index = chapterIndex;
+              return true;
+            }
+
+            return false;
+          });
+
+          return index;
+        }
+
+        function renderChapterState(chapterId, syncHash) {
+          var index = getChapterIndex(chapterId);
+
+          if (index < 0) {
+            index = 0;
+            chapterId = chapters.length ? chapters[0].getAttribute('data-chapter') || '' : '';
+          }
+
+          activeChapterId = chapterId;
+          document.body.classList.add('chapter-mode-active');
+
+          chapters.forEach(function (chapterItem) {
+            var isActive = chapterItem.getAttribute('data-chapter') === chapterId;
+            chapterItem.classList.toggle('is-active', isActive);
+            chapterItem.toggleAttribute('hidden', !isActive);
+          });
+
+          chapterLinks.forEach(function (link) {
+            var isActive = link.getAttribute('data-chapter-link') === chapterId;
+            link.classList.toggle('is-active', isActive);
+          });
+
+          if (chapterCurrentTitle) {
+            chapterCurrentTitle.textContent = chapterLookup[chapterId] || 'Projekt';
+          }
+
+          if (chapterCurrentPosition) {
+            chapterCurrentPosition.textContent = 'Kapitel ' + String(index + 1) + ' von ' + String(chapters.length);
+          }
+
+          if (chapterPrev) {
+            chapterPrev.disabled = index <= 0;
+          }
+
+          if (chapterNext) {
+            chapterNext.disabled = index >= chapters.length - 1;
+            chapterNext.textContent = index >= chapters.length - 1 ? 'Fertig' : 'Weiter';
+          }
+
+          if (syncHash && chapterId) {
+            window.history.replaceState(null, '', '#' + chapterId);
+          }
+
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function moveChapter(direction) {
+          var currentIndex = getChapterIndex(activeChapterId);
+          var nextIndex = currentIndex + direction;
+
+          if (nextIndex < 0 || nextIndex >= chapters.length) {
+            return;
+          }
+
+          renderChapterState(chapters[nextIndex].getAttribute('data-chapter') || '', true);
+        }
+
+        if (chapterPrev) {
+          chapterPrev.addEventListener('click', function () {
+            moveChapter(-1);
+          });
+        }
+
+        if (chapterNext) {
+          chapterNext.addEventListener('click', function () {
+            moveChapter(1);
+          });
+        }
+
+        chapterLinks.forEach(function (link) {
+          link.addEventListener('click', function (event) {
+            var chapterId = link.getAttribute('data-chapter-link') || '';
+
+            if (!chapterId) {
+              return;
+            }
+
+            event.preventDefault();
+            renderChapterState(chapterId, true);
+          });
+        });
+
+        chapterAnchors.forEach(function (anchor) {
+          anchor.addEventListener('click', function (event) {
+            var targetId = (anchor.getAttribute('href') || '').replace(/^#/, '');
+
+            if (!targetId || getChapterIndex(targetId) < 0) {
+              return;
+            }
+
+            event.preventDefault();
+            renderChapterState(targetId, true);
+          });
+        });
+
+        window.addEventListener('hashchange', function () {
+          if (!window.location.hash) {
+            return;
+          }
+
+          renderChapterState(window.location.hash.replace(/^#/, ''), false);
+        });
+
+        if (window.location.hash) {
+          renderChapterState(window.location.hash.replace(/^#/, ''), false);
+        } else if (chapters.length) {
+          renderChapterState(chapters[0].getAttribute('data-chapter') || '', false);
+        }
 
         function bindFigure(figure) {
           figure.addEventListener('click', function () {
