@@ -116,111 +116,17 @@ render_page('Kalender', 'Termine', static function (): void {
           <div>
             <span class="card-label">Terminverwaltung</span>
             <h3 id="calendar-month">Chronologische Terminliste</h3>
-            <p id="calendar-view-summary">Bestehende Termine zuerst, Monats- und Wochenansicht nur bei Bedarf.</p>
-          </div>
-          <div class="calendar-toolbar-actions">
-            <div class="calendar-view-toggle" role="tablist" aria-label="Ansicht wechseln">
-              <button class="btn btn-secondary is-active" id="view-list" type="button">Liste</button>
-              <button class="btn btn-ghost" id="view-month" type="button">Monat</button>
-              <button class="btn btn-ghost" id="view-week" type="button">Woche</button>
-            </div>
-            <div class="button-row" id="calendar-range-actions">
-            <button class="btn btn-ghost" id="calendar-prev" type="button">Zurueck</button>
-            <button class="btn btn-secondary" id="calendar-today" type="button">Heute</button>
-            <button class="btn btn-ghost" id="calendar-next" type="button">Weiter</button>
-            </div>
+            <p id="calendar-view-summary">Die Wochenansicht bleibt dauerhaft oberhalb der Terminliste als schnelle Orientierung sichtbar.</p>
           </div>
         </div>
-        <div class="calendar-primary-layout">
-          <article class="calendar-subpanel calendar-overview-panel">
-            <div class="calendar-overview-toolbar">
-              <div>
-                <span class="card-label">Termine</span>
-                <h3 id="overview-title">Anstehende Termine</h3>
-                <p id="overview-summary">Die naechsten Termine werden geladen.</p>
-              </div>
-              <div class="button-row">
-                <button class="btn btn-secondary" id="overview-pdf" type="button">PDF exportieren</button>
-                <button class="btn btn-secondary" id="overview-print" type="button">Uebersicht drucken</button>
-              </div>
+        <section class="calendar-visual-panel" id="calendar-visual-panel">
+          <div class="calendar-week-strip-head">
+            <strong id="calendar-week-label">Woche wird geladen</strong>
+            <div class="button-row">
+              <button class="btn btn-ghost btn-small" id="calendar-week-prev" type="button" aria-label="Vorherige Woche">←</button>
+              <button class="btn btn-ghost btn-small" id="calendar-week-next" type="button" aria-label="Naechste Woche">→</button>
             </div>
-            <label class="field calendar-search-field">
-              <span>Termin-Suche</span>
-              <input id="overview-search" type="search" placeholder="Nach Titel, Adresse, Notiz oder Datum suchen">
-            </label>
-            <div class="calendar-overview-metrics" id="overview-metrics"></div>
-            <div class="calendar-overview-head" aria-hidden="true">
-              <span>Datum</span>
-              <span>Uhrzeit</span>
-              <span>Termin</span>
-              <span>Ort</span>
-              <span>Aktionen</span>
-              <span>Karte</span>
-            </div>
-            <div class="calendar-overview-list" id="overview-list">
-              <p class="empty-state">Noch keine Termine vorhanden.</p>
-            </div>
-          </article>
-
-          <article class="calendar-subpanel calendar-panel">
-            <span class="card-label" id="event-form-label">Neuer Termin</span>
-            <h3 id="event-form-title">Per Sprache oder manuell eintragen</h3>
-            <p>Sage zum Beispiel: "Morgen 14 Uhr Zahnarzt in Winterberg". Du kannst Termine schnell in einem Satz erfassen oder dich gefuehrt Feld fuer Feld durchsprechen lassen.</p>
-
-            <div class="calendar-form">
-              <input id="event-edit-id" name="edit-id" type="hidden" value="">
-              <label class="field">
-                <span>Titel</span>
-                <input id="event-title" name="title" type="text" placeholder="Terminname">
-              </label>
-              <div class="calendar-form-row">
-                <label class="field">
-                  <span>Datum</span>
-                  <input id="event-date" name="date" type="date">
-                </label>
-                <label class="field">
-                  <span>Uhrzeit</span>
-                  <input id="event-time" name="time" type="time">
-                </label>
-              </div>
-              <label class="field">
-                <span>Adresse</span>
-                <input id="event-address" name="address" type="text" placeholder="Ort oder Adresse fuer Karte">
-              </label>
-              <div class="map-preview" id="event-map-preview" hidden>
-                <strong>Kartenvorschau</strong>
-                <iframe
-                  id="event-map-frame"
-                  title="Kartenvorschau"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                ></iframe>
-              </div>
-              <label class="field">
-                <span>Notiz</span>
-                <textarea id="event-note" name="note" rows="3" placeholder="Optionale Details"></textarea>
-              </label>
-              <div class="button-row">
-                <button class="btn btn-primary" id="voice-quick" type="button">Schnell per Satz</button>
-                <button class="btn btn-secondary" id="voice-guided" type="button">Gefuehrt per Feld</button>
-                <button class="btn btn-ghost" id="voice-stop" type="button" hidden>Voice stoppen</button>
-              </div>
-              <div class="button-row">
-                <button class="btn btn-secondary" id="event-save" type="button">Termin speichern</button>
-                <button class="btn btn-ghost" id="event-cancel" type="button" hidden>Bearbeitung beenden</button>
-              </div>
-              <p class="calendar-status" id="voice-status">Sprachmodus bereit. Die Funktion nutzt die Sprachschnittstelle deines Browsers.</p>
-              <p class="calendar-transcript" id="voice-transcript" hidden></p>
-            </div>
-
-            <div class="calendar-note">
-              <strong>Hinweis</strong>
-              <p>Die Spracheingabe laeuft direkt im Browser. Termine bleiben aktuell lokal auf diesem Geraet gespeichert. Adressen werden als direkter Karten-Link geoeffnet.</p>
-            </div>
-          </article>
-        </div>
-
-        <section class="calendar-visual-panel" id="calendar-visual-panel" hidden>
+          </div>
           <div class="calendar-grid-viewport" id="calendar-grid-viewport">
             <div class="calendar-weekdays" aria-hidden="true">
               <span>Mo</span>
@@ -247,7 +153,105 @@ render_page('Kalender', 'Termine', static function (): void {
             </div>
           </article>
         </section>
+        <div class="calendar-primary-layout">
+          <article class="calendar-subpanel calendar-overview-panel">
+            <div class="calendar-overview-toolbar">
+              <div>
+                <span class="card-label">Termine</span>
+                <h3 id="overview-title">Anstehende Termine</h3>
+                <p id="overview-summary">Die naechsten Termine werden geladen.</p>
+              </div>
+              <div class="button-row">
+                <button class="btn btn-primary" id="open-composer" type="button">Neuer Termin</button>
+                <button class="btn btn-secondary" id="overview-pdf" type="button">PDF exportieren</button>
+                <button class="btn btn-secondary" id="overview-print" type="button">Uebersicht drucken</button>
+              </div>
+            </div>
+            <label class="field calendar-search-field">
+              <span>Termin-Suche</span>
+              <input id="overview-search" type="search" placeholder="Nach Titel, Adresse, Notiz oder Datum suchen">
+            </label>
+            <div class="calendar-overview-metrics" id="overview-metrics"></div>
+            <div class="calendar-overview-head" aria-hidden="true">
+              <span>Datum</span>
+              <span>Uhrzeit</span>
+              <span>Termin</span>
+              <span>Ort</span>
+              <span>Aktionen</span>
+              <span>Karte</span>
+            </div>
+            <div class="calendar-overview-list" id="overview-list">
+              <p class="empty-state">Noch keine Termine vorhanden.</p>
+            </div>
+          </article>
+        </div>
+
       </article>
+
+      <div class="calendar-composer-shell" id="calendar-composer-shell" hidden>
+        <button class="calendar-composer-backdrop" id="calendar-composer-backdrop" type="button" aria-label="Maske schliessen"></button>
+        <article class="calendar-composer-panel">
+          <div class="calendar-composer-header">
+            <div>
+              <span class="card-label" id="event-form-label">Neuer Termin</span>
+              <h3 id="event-form-title">Per Sprache oder manuell eintragen</h3>
+              <p>Sage zum Beispiel: "Morgen 14 Uhr Zahnarzt in Winterberg". Du kannst Termine schnell in einem Satz erfassen oder dich gefuehrt Feld fuer Feld durchsprechen lassen.</p>
+            </div>
+            <button class="btn btn-ghost btn-small" id="composer-close" type="button">Schliessen</button>
+          </div>
+
+          <div class="calendar-form">
+            <input id="event-edit-id" name="edit-id" type="hidden" value="">
+            <label class="field">
+              <span>Titel</span>
+              <input id="event-title" name="title" type="text" placeholder="Terminname">
+            </label>
+            <div class="calendar-form-row">
+              <label class="field">
+                <span>Datum</span>
+                <input id="event-date" name="date" type="date">
+              </label>
+              <label class="field">
+                <span>Uhrzeit</span>
+                <input id="event-time" name="time" type="time">
+              </label>
+            </div>
+            <label class="field">
+              <span>Adresse</span>
+              <input id="event-address" name="address" type="text" placeholder="Ort oder Adresse fuer Karte">
+            </label>
+            <div class="map-preview" id="event-map-preview" hidden>
+              <strong>Kartenvorschau</strong>
+              <iframe
+                id="event-map-frame"
+                title="Kartenvorschau"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
+            <label class="field">
+              <span>Notiz</span>
+              <textarea id="event-note" name="note" rows="3" placeholder="Optionale Details"></textarea>
+            </label>
+            <div class="button-row">
+              <button class="btn btn-primary" id="voice-quick" type="button">Schnell per Satz</button>
+              <button class="btn btn-secondary" id="voice-guided" type="button">Gefuehrt per Feld</button>
+              <button class="btn btn-ghost" id="voice-stop" type="button" hidden>Voice stoppen</button>
+            </div>
+            <div class="button-row">
+              <button class="btn btn-secondary" id="event-save" type="button">Termin speichern</button>
+              <button class="btn btn-ghost" id="event-cancel" type="button" hidden>Bearbeitung beenden</button>
+            </div>
+            <p class="calendar-status" id="voice-status">Sprachmodus bereit. Die Funktion nutzt die Sprachschnittstelle deines Browsers.</p>
+            <p class="calendar-transcript" id="voice-transcript" hidden></p>
+          </div>
+
+          <div class="calendar-note">
+            <strong>Hinweis</strong>
+            <p>Die Spracheingabe laeuft direkt im Browser. Termine bleiben aktuell lokal auf diesem Geraet gespeichert. Adressen werden als direkter Karten-Link geoeffnet.</p>
+          </div>
+        </article>
+      </div>
 
     </section>
 
@@ -265,9 +269,7 @@ render_page('Kalender', 'Termine', static function (): void {
         var queuedVoicePrompt = '';
         var persistTimer = null;
         var editingEventId = '';
-        var activeView = ['list', 'month', 'week'].indexOf(String(query.get('view') || 'list')) !== -1
-          ? String(query.get('view') || 'list')
-          : 'list';
+        var activeView = 'week';
         var selectedEventId = query.get('event') || '';
         var detailArmed = selectedEventId !== '';
         var events = loadEvents();
@@ -280,7 +282,12 @@ render_page('Kalender', 'Termine', static function (): void {
         var grid = document.getElementById('calendar-grid');
         var gridViewport = document.getElementById('calendar-grid-viewport');
         var visualPanel = document.getElementById('calendar-visual-panel');
+        var weekLabel = document.getElementById('calendar-week-label');
         var viewSummary = document.getElementById('calendar-view-summary');
+        var composerShell = document.getElementById('calendar-composer-shell');
+        var composerBackdrop = document.getElementById('calendar-composer-backdrop');
+        var composerCloseButton = document.getElementById('composer-close');
+        var openComposerButton = document.getElementById('open-composer');
         var selectedPanel = document.getElementById('selected-panel');
         var selectedLabel = document.getElementById('selected-date-label');
         var selectedEvents = document.getElementById('selected-events');
@@ -307,10 +314,8 @@ render_page('Kalender', 'Termine', static function (): void {
         var cancelButton = document.getElementById('event-cancel');
         var status = document.getElementById('voice-status');
         var transcript = document.getElementById('voice-transcript');
-        var listViewButton = document.getElementById('view-list');
-        var monthViewButton = document.getElementById('view-month');
-        var weekViewButton = document.getElementById('view-week');
-        var rangeActions = document.getElementById('calendar-range-actions');
+        var weekPrevButton = document.getElementById('calendar-week-prev');
+        var weekNextButton = document.getElementById('calendar-week-next');
 
         document.getElementById('overview-print').addEventListener('click', function () {
           printAgendaOverview('overview');
@@ -324,50 +329,25 @@ render_page('Kalender', 'Termine', static function (): void {
           renderOverview();
         });
 
-        document.getElementById('calendar-prev').addEventListener('click', function () {
-          if (activeView === 'list') {
-            return;
-          }
-
-          if (activeView === 'week') {
-            selectDate(shiftIsoDate(selectedDate, -7));
-            return;
-          }
-
-          viewMonth -= 1;
-          if (viewMonth < 0) {
-            viewMonth = 11;
-            viewYear -= 1;
-          }
-          renderCalendar();
+        openComposerButton.addEventListener('click', function () {
+          clearEditMode('');
+          openComposer();
         });
 
-        document.getElementById('calendar-next').addEventListener('click', function () {
-          if (activeView === 'list') {
-            return;
-          }
-
-          if (activeView === 'week') {
-            selectDate(shiftIsoDate(selectedDate, 7));
-            return;
-          }
-
-          viewMonth += 1;
-          if (viewMonth > 11) {
-            viewMonth = 0;
-            viewYear += 1;
-          }
-          renderCalendar();
+        composerBackdrop.addEventListener('click', function () {
+          closeComposer('');
         });
 
-        document.getElementById('calendar-today').addEventListener('click', function () {
-          var today = new Date();
-          viewYear = today.getFullYear();
-          viewMonth = today.getMonth();
-          selectDate(toIsoDate(today));
-          if (activeView === 'list') {
-            renderOverview();
-          }
+        composerCloseButton.addEventListener('click', function () {
+          closeComposer('');
+        });
+
+        weekPrevButton.addEventListener('click', function () {
+          selectDate(shiftIsoDate(selectedDate, -7));
+        });
+
+        weekNextButton.addEventListener('click', function () {
+          selectDate(shiftIsoDate(selectedDate, 7));
         });
 
         saveButton.addEventListener('click', function () {
@@ -393,17 +373,6 @@ render_page('Kalender', 'Termine', static function (): void {
         stopVoiceButton.addEventListener('click', function () {
           stopVoiceCapture('Sprachmodus beendet.');
         });
-        listViewButton.addEventListener('click', function () {
-          setActiveView('list');
-        });
-        monthViewButton.addEventListener('click', function () {
-          setActiveView('month');
-        });
-
-        weekViewButton.addEventListener('click', function () {
-          setActiveView('week');
-        });
-
         dateInput.value = selectedDate;
         renderOverview();
         renderCalendar();
@@ -565,77 +534,15 @@ render_page('Kalender', 'Termine', static function (): void {
 
         function renderCalendar() {
           syncViewToggle();
-
-          if (activeView === 'list') {
-            monthLabel.textContent = 'Chronologische Terminliste';
-            viewSummary.textContent = 'Bestehende Termine zuerst, Monats- und Wochenansicht nur bei Bedarf.';
-            visualPanel.hidden = true;
-            return;
-          }
-
-          visualPanel.hidden = false;
-
-          if (activeView === 'week') {
-            renderWeekCalendar();
-            return;
-          }
-
-          monthLabel.textContent = monthNames[viewMonth] + ' ' + viewYear;
-          viewSummary.textContent = 'Monatsansicht zur Orientierung. Die Verwaltung bleibt in der Terminliste.';
-          grid.innerHTML = '';
-
-          var firstDay = new Date(viewYear, viewMonth, 1);
-          var startOffset = (firstDay.getDay() + 6) % 7;
-          var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-          var daysInPreviousMonth = new Date(viewYear, viewMonth, 0).getDate();
-          var totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
-
-          for (var index = 0; index < totalCells; index += 1) {
-            var dayNumber = index - startOffset + 1;
-            var cellDate = new Date(viewYear, viewMonth, dayNumber);
-            var isoDate = toIsoDate(cellDate);
-            var isCurrentMonth = dayNumber >= 1 && dayNumber <= daysInMonth;
-            var isToday = isoDate === toIsoDate(new Date());
-            var dayEvents = getEventsForDate(isoDate);
-            var button = document.createElement('button');
-            var dayLabel = document.createElement('strong');
-            var meta = document.createElement('span');
-            var dots = document.createElement('div');
-
-            button.type = 'button';
-            button.className = 'calendar-day';
-            if (!isCurrentMonth) {
-              button.className += ' is-muted';
-            }
-            if (isoDate === selectedDate) {
-              button.className += ' is-selected';
-            }
-            if (isToday) {
-              button.className += ' is-today';
-            }
-
-            dayLabel.textContent = String(isCurrentMonth ? dayNumber : (dayNumber < 1 ? daysInPreviousMonth + dayNumber : dayNumber - daysInMonth));
-            meta.textContent = dayEvents.length ? dayEvents.length + ' Termin' + (dayEvents.length === 1 ? '' : 'e') : 'frei';
-            dots.className = 'calendar-dots';
-
-            dayEvents.slice(0, 3).forEach(function () {
-              var dot = document.createElement('span');
-              dots.appendChild(dot);
-            });
-
-            button.appendChild(dayLabel);
-            button.appendChild(meta);
-            button.appendChild(dots);
-            button.addEventListener('click', createDateHandler(isoDate));
-            grid.appendChild(button);
-          }
+          monthLabel.textContent = 'Chronologische Terminliste';
+          viewSummary.textContent = 'Die Wochenansicht bleibt dauerhaft oberhalb der Terminliste als schnelle Orientierung sichtbar.';
+          renderWeekCalendar();
         }
 
         function renderWeekCalendar() {
           var weekDates = getWeekDates(selectedDate);
 
-          monthLabel.textContent = buildWeekLabel(weekDates);
-          viewSummary.textContent = 'Wochenansicht zur Orientierung. Die Verwaltung bleibt in der Terminliste.';
+          weekLabel.textContent = buildWeekLabel(weekDates);
           grid.innerHTML = '';
 
           weekDates.forEach(function (isoDate) {
@@ -872,6 +779,7 @@ render_page('Kalender', 'Termine', static function (): void {
           selectDate(dateValue);
           selectedEventId = payload.id;
           clearEditMode('');
+          closeComposer('Termin gespeichert.');
           transcript.hidden = true;
           detailArmed = true;
         }
@@ -890,6 +798,7 @@ render_page('Kalender', 'Termine', static function (): void {
           saveButton.textContent = 'Termin aktualisieren';
           cancelButton.hidden = false;
           status.textContent = 'Termin zur Bearbeitung geladen.';
+          openComposer();
         }
 
         function clearEditMode(message) {
@@ -908,6 +817,19 @@ render_page('Kalender', 'Termine', static function (): void {
           if (message) {
             status.textContent = message;
           }
+        }
+
+        function openComposer() {
+          composerShell.hidden = false;
+          document.body.classList.add('calendar-composer-open');
+        }
+
+        function closeComposer(message) {
+          if (message) {
+            status.textContent = message;
+          }
+          composerShell.hidden = true;
+          document.body.classList.remove('calendar-composer-open');
         }
 
         function syncVoiceButtons() {
@@ -1170,7 +1092,6 @@ render_page('Kalender', 'Termine', static function (): void {
               selectDate(eventItem.date);
               selectedEventId = eventItem.id;
               detailArmed = true;
-              setActiveView('month');
               openEventFocus(eventItem.id);
             });
 
@@ -1257,28 +1178,8 @@ render_page('Kalender', 'Termine', static function (): void {
           return { label: 'Geplant', className: 'is-planned' };
         }
 
-        function setActiveView(nextView) {
-          if (nextView === 'week') {
-            activeView = 'week';
-          } else if (nextView === 'month') {
-            activeView = 'month';
-          } else {
-            activeView = 'list';
-          }
-          renderCalendar();
-          if (activeView !== 'list') {
-            renderSelectedDay();
-          }
-        }
-
         function syncViewToggle() {
-          listViewButton.className = activeView === 'list' ? 'btn btn-secondary is-active' : 'btn btn-ghost';
-          monthViewButton.className = activeView === 'month' ? 'btn btn-secondary is-active' : 'btn btn-ghost';
-          weekViewButton.className = activeView === 'week' ? 'btn btn-secondary is-active' : 'btn btn-ghost';
-          rangeActions.hidden = activeView === 'list';
-          gridViewport.className = activeView === 'week'
-            ? 'calendar-grid-viewport is-week-view'
-            : 'calendar-grid-viewport';
+          gridViewport.className = 'calendar-grid-viewport is-week-view';
         }
 
         function getWeekDates(isoDate) {
