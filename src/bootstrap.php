@@ -260,7 +260,34 @@ if (!function_exists('app_asset_url')) {
 if (!function_exists('app_calendar_storage_file')) {
     function app_calendar_storage_file(): string
     {
-        return app_env('APP_CALENDAR_STORAGE_FILE', app_root() . '/var/runtime/calendar-events.json');
+        $configured = trim(app_env('APP_CALENDAR_STORAGE_FILE', ''));
+        $candidates = [];
+
+        if ($configured !== '') {
+            $candidates[] = $configured;
+        }
+
+        $candidates[] = '/var/www/storage/calendar-events.json';
+        $candidates[] = app_root() . '/var/runtime/calendar-events.json';
+        $candidates[] = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'webapp-central' . DIRECTORY_SEPARATOR . 'calendar-events.json';
+
+        foreach ($candidates as $candidate) {
+            $directory = dirname($candidate);
+
+            if (is_dir($directory)) {
+                if (is_writable($directory) || is_file($candidate)) {
+                    return $candidate;
+                }
+
+                continue;
+            }
+
+            if (@mkdir($directory, 0775, true) || is_dir($directory)) {
+                return $candidate;
+            }
+        }
+
+        return end($candidates) ?: app_root() . '/var/runtime/calendar-events.json';
     }
 }
 

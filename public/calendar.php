@@ -39,7 +39,7 @@ if (isset($_GET['api']) && $_GET['api'] === 'events') {
         ];
     };
 
-    if (!is_dir($storageDir) && !mkdir($storageDir, 0775, true) && !is_dir($storageDir)) {
+    if (!is_dir($storageDir) && !@mkdir($storageDir, 0775, true) && !is_dir($storageDir)) {
         $sendJson(['ok' => false, 'message' => 'Speicherverzeichnis konnte nicht erstellt werden.'], 500);
     }
 
@@ -419,6 +419,22 @@ render_page('Kalender', 'Termine', static function (): void {
           });
         }
 
+        function buildEventSignature(collection) {
+          return getSortedEvents((Array.isArray(collection) ? collection : []).map(normalizeEventShape).filter(Boolean))
+            .map(function (eventItem) {
+              return [
+                eventItem.id,
+                eventItem.date,
+                eventItem.time,
+                eventItem.title,
+                eventItem.address,
+                eventItem.note,
+                eventItem.updatedAt
+              ].join('|');
+            })
+            .join('||');
+        }
+
         function scheduleServerPersist() {
           if (persistTimer) {
             window.clearTimeout(persistTimer);
@@ -453,6 +469,8 @@ render_page('Kalender', 'Termine', static function (): void {
             .then(function (payload) {
               var remoteEvents = Array.isArray(payload.events) ? payload.events : [];
               var mergedEvents = mergeEvents(events, remoteEvents);
+              var remoteSignature = buildEventSignature(remoteEvents);
+              var mergedSignature = buildEventSignature(mergedEvents);
 
               if (!mergedEvents.length && !events.length) {
                 return;
@@ -462,6 +480,10 @@ render_page('Kalender', 'Termine', static function (): void {
               window.localStorage.setItem(storageKey, JSON.stringify(events));
               renderCalendar();
               renderSelectedDay();
+
+              if (mergedSignature !== remoteSignature) {
+                scheduleServerPersist();
+              }
             })
             .catch(function () {
               // Offline/Server down: local data remains source of truth.
