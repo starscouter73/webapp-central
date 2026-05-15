@@ -4,15 +4,33 @@ declare(strict_types=1);
 if (!function_exists('auth_data_dir')) {
     function auth_data_dir(): string
     {
-        $dir = dirname(__DIR__, 2) . '/data';
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0775, true);
-        }
-        if (is_dir($dir)) {
-            @chmod($dir, 0775);
+        static $resolved = null;
+        if (is_string($resolved)) {
+            return $resolved;
         }
 
-        return $dir;
+        $candidates = [
+            dirname(__DIR__, 2) . '/data',
+            '/var/www/storage',
+            dirname(__DIR__, 2) . '/var/runtime',
+            rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'webapp-central',
+        ];
+
+        foreach ($candidates as $dir) {
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+            if (is_dir($dir)) {
+                @chmod($dir, 0775);
+            }
+            if (is_dir($dir) && is_writable($dir)) {
+                $resolved = $dir;
+                return $resolved;
+            }
+        }
+
+        $resolved = $candidates[array_key_last($candidates)];
+        return $resolved;
     }
 }
 
@@ -116,8 +134,16 @@ if (!function_exists('auth_json_write')) {
             @mkdir($dir, 0775, true);
         }
         if (!is_dir($dir) || !is_writable($dir)) {
-            throw new RuntimeException('JSON directory is not writable.');
+            $fallbackDir = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'webapp-central';
+            if (!is_dir($fallbackDir)) {
+                @mkdir($fallbackDir, 0775, true);
+            }
+            if (!is_dir($fallbackDir) || !is_writable($fallbackDir)) {
+                throw new RuntimeException('JSON directory is not writable.');
+            }
+            $file = $fallbackDir . DIRECTORY_SEPARATOR . 'users.json';
         }
+
         file_put_contents($file, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 }
