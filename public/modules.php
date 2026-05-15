@@ -8,7 +8,15 @@ render_page('Module', 'Bausteine', static function (): void {
     $modules = app_modules();
     $hallenbergStory = app_hallenberg_story();
     ?>
-    <section class="card overview-hero">
+    <section class="platform-shell-header">
+      <a class="platform-shell-anchor" href="<?= app_h(app_url('workspace.php')) ?>">Zur Zentrale</a>
+      <div class="platform-shell-copy">
+        <span class="card-label">Module Catalog</span>
+        <strong>Jede Kategorie wirkt wie ein eigener Produktbaustein statt wie ein bloßer Menüpunkt</strong>
+      </div>
+    </section>
+
+    <section class="card overview-hero" id="auftakt">
       <div class="overview-hero-copy">
         <span class="card-label">Kategorien</span>
         <p class="hero-intro-line">Die Module sollen nicht wie Menuepunkte wirken, sondern wie klar lesbare Bausteine mit eigener Funktion.</p>
@@ -38,7 +46,14 @@ render_page('Module', 'Bausteine', static function (): void {
       </div>
     </section>
 
-    <section class="grid split showcase-band">
+    <section class="platform-sticky-nav" aria-label="Seitenabschnitte">
+      <a href="#auftakt">Auftakt</a>
+      <a href="#fokus">Fokus</a>
+      <a href="#katalog">Katalog</a>
+      <a href="#ausbau">Ausbau</a>
+    </section>
+
+    <section class="grid split showcase-band" id="fokus">
       <article class="card showcase-panel">
         <span class="card-label">Modulcharakter</span>
         <h3>Jeder Bereich soll schon vor dem Klick eine eigene Anmutung mitbringen</h3>
@@ -51,7 +66,7 @@ render_page('Module', 'Bausteine', static function (): void {
       </article>
     </section>
 
-    <section class="grid two-up">
+    <section class="grid two-up" id="katalog">
       <?php foreach ($modules as $index => $module): ?>
         <article class="card category-card">
           <div class="category-preview <?= $index === 4 ? 'is-photo' : ($index % 2 === 0 ? 'is-grid' : 'is-signal') ?>">
@@ -82,7 +97,7 @@ render_page('Module', 'Bausteine', static function (): void {
       <?php endforeach; ?>
     </section>
 
-    <section class="card">
+    <section class="card" id="ausbau">
       <span class="card-label">Ausbauidee</span>
       <h3>Naechste sinnvolle Erweiterungen</h3>
       <ul class="simple-list">

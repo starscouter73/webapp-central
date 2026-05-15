@@ -52,7 +52,15 @@ render_page(app_site_title(), 'Startseite', static function (): void {
         ],
     ];
     ?>
-    <section class="card overview-hero">
+    <section class="platform-shell-header">
+      <a class="platform-shell-anchor" href="<?= app_h(app_url('hallenberg.php')) ?>">Hallenberg Referenz</a>
+      <div class="platform-shell-copy">
+        <span class="card-label">Platform System</span>
+        <strong>Webapp Central als direkte Erweiterung der Hallenberg-Sprache</strong>
+      </div>
+    </section>
+
+    <section class="card overview-hero" id="auftakt">
       <div class="overview-hero-copy">
         <span class="card-label">Ueberblick</span>
         <p class="hero-intro-line">Webapp Central ordnet Projekte, Arbeitsbereiche und Live-Betrieb in eine ruhige, klare Einstiegsebene.</p>
@@ -117,7 +125,15 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       </div>
     </section>
 
-    <section class="grid split showcase-band">
+    <section class="platform-sticky-nav" aria-label="Seitenabschnitte">
+      <a href="#auftakt">Auftakt</a>
+      <a href="#featured">Featured</a>
+      <a href="#kategorien">Kategorien</a>
+      <a href="#leitlinien">Leitlinien</a>
+      <a href="#module">Module</a>
+    </section>
+
+    <section class="grid split showcase-band" id="featured">
       <article class="card showcase-panel">
         <span class="card-label">Featured View</span>
         <h3>Ein Startpunkt, der eher nach Portfolio als nach Werkzeugkasten aussieht</h3>
@@ -130,7 +146,7 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       </article>
     </section>
 
-    <section class="grid three-up">
+    <section class="grid three-up" id="kategorien">
       <?php foreach ($overviewCategories as $category): ?>
         <article class="card category-card">
           <div class="category-preview <?= app_h($category['preview']) ?>">
@@ -163,7 +179,7 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       <?php endforeach; ?>
     </section>
 
-    <section class="grid split">
+    <section class="grid split" id="leitlinien">
       <article class="card">
         <span class="card-label">Kernpunkte</span>
         <h3>Die wichtigsten Leitlinien in einer kuratierten Reihenfolge</h3>
@@ -198,7 +214,7 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       </article>
     </section>
 
-    <section class="card">
+    <section class="card" id="module">
       <span class="card-label">Kategorien</span>
       <h3>Bereiche zuerst als Uebersichtskarten lesen</h3>
       <div class="module-list">

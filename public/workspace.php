@@ -11,7 +11,15 @@ render_page('Zentrale', 'Struktur', static function (): void {
     $tools = app_workspace_tools();
     $hallenbergStory = app_hallenberg_story();
     ?>
-    <section class="card overview-hero">
+    <section class="platform-shell-header">
+      <a class="platform-shell-anchor" href="<?= app_h(app_url('index.php')) ?>">Zur Startseite</a>
+      <div class="platform-shell-copy">
+        <span class="card-label">Operations Layer</span>
+        <strong>Projektfokus, Infrastruktur und Live-Kontext in einer dunklen Arbeitsansicht</strong>
+      </div>
+    </section>
+
+    <section class="card overview-hero" id="auftakt">
       <div class="overview-hero-copy">
         <span class="card-label">Zentrale</span>
         <p class="hero-intro-line">Die Zentrale verbindet Projektkontext, Werkzeuge und Live-Betrieb in einer lesbaren, gefuehrten Arbeitsansicht.</p>
@@ -41,7 +49,16 @@ render_page('Zentrale', 'Struktur', static function (): void {
       </div>
     </section>
 
-    <section class="grid split showcase-band">
+    <section class="platform-sticky-nav" aria-label="Seitenabschnitte">
+      <a href="#auftakt">Auftakt</a>
+      <a href="#fokus">Fokus</a>
+      <a href="#projekte">Projekte</a>
+      <a href="#struktur">Struktur</a>
+      <a href="#zugriff">Zugriff</a>
+      <a href="#kontext">Kontext</a>
+    </section>
+
+    <section class="grid split showcase-band" id="fokus">
       <article class="card showcase-panel">
         <span class="card-label">Projektfokus</span>
         <h3>Die Zentrale braucht ein sichtbares Leitprojekt, nicht nur eine Liste von Bereichen</h3>
@@ -54,7 +71,7 @@ render_page('Zentrale', 'Struktur', static function (): void {
       </article>
     </section>
 
-    <section class="grid split">
+    <section class="grid split" id="projekte">
       <article class="card">
         <span class="card-label">Projekte</span>
         <h3>Aktive Referenzen im Ueberblick</h3>
@@ -97,7 +114,7 @@ render_page('Zentrale', 'Struktur', static function (): void {
       </article>
     </section>
 
-    <section class="grid split">
+    <section class="grid split" id="struktur">
       <article class="card">
         <span class="card-label">Grundstruktur</span>
         <h3>Technik nur als geordneter Unterbau zeigen</h3>
@@ -131,7 +148,7 @@ render_page('Zentrale', 'Struktur', static function (): void {
       </article>
     </section>
 
-    <section class="grid two-up">
+    <section class="grid two-up" id="zugriff">
       <article class="card">
         <span class="card-label">Zugriff</span>
         <h3>Wichtige Live-Ziele</h3>
@@ -153,7 +170,7 @@ render_page('Zentrale', 'Struktur', static function (): void {
       </article>
     </section>
 
-    <section class="card project-context-card">
+    <section class="card project-context-card" id="kontext">
       <span class="card-label">Projektkontext</span>
       <h3>Kurztext fuer Neustart und Tester</h3>
       <p>Wenn Codex oder der Browser neu startet, kannst du diesen Block direkt kopieren und wieder einfuegen. Der Text wird aus dem aktuellen Projektstand erzeugt und bleibt damit naeher am Live-Zustand.</p>

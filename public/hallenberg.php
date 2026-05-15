@@ -42,7 +42,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
       <section class="chapter-pager card" aria-label="Kapitelsteuerung">
         <div class="chapter-pager-meta">
           <span class="card-label">Kapitelmodus</span>
-          <strong id="chapter-current-title">Projekt</strong>
+          <strong id="chapter-current-title">Auftakt</strong>
           <p id="chapter-current-position">Kapitel 1 von <?= count($sections) ?></p>
         </div>
         <div class="chapter-pager-actions">
@@ -332,7 +332,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
           <span class="card-label">Gesamtwirkung</span>
           <h3><?= app_h($story['finale']['title']) ?></h3>
           <p><?= app_h($story['finale']['text']) ?></p>
-          <a class="btn btn-primary" href="#hero">Zurueck zur Titelbuehne</a>
+          <a class="btn btn-primary" href="#hero">Zurueck zum Auftakt</a>
         </div>
         <div class="hallenberg-finale-media">
           <?php foreach ($story['finale']['media'] as $media): ?>
@@ -459,7 +459,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
           });
 
           if (chapterCurrentTitle) {
-            chapterCurrentTitle.textContent = chapterLookup[chapterId] || 'Projekt';
+            chapterCurrentTitle.textContent = chapterLookup[chapterId] || 'Auftakt';
           }
 
           if (chapterCurrentPosition) {

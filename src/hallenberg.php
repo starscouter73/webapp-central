@@ -96,7 +96,7 @@ if (!function_exists('app_hallenberg_sections')) {
     function app_hallenberg_sections(): array
     {
         return [
-            ['id' => 'hero', 'label' => 'Projekt'],
+            ['id' => 'hero', 'label' => 'Auftakt'],
             ['id' => 'overview', 'label' => 'Uebersicht'],
             ['id' => 'documents', 'label' => 'Unterlagen'],
             ['id' => 'situation', 'label' => 'Ausgangssituation'],
@@ -220,7 +220,7 @@ if (!function_exists('app_hallenberg_story')) {
         // angepasst werden; die Seitenlogik selbst bleibt davon unberuehrt.
         return [
             'hero' => [
-                'eyebrow' => 'Premium-Projekt',
+                'eyebrow' => 'Projektauftakt',
                 'title' => 'Photovoltaik- & Modernisierungsprojekt Hallenberg',
                 'subtitle' => 'Energetische Modernisierung eines Fachwerkhauses',
                 'text' => 'Historische Bausubstanz trifft moderne Energietechnik. Die Seite dokumentiert Planung, Montage, Kabelwege und die kuenftige Smart-Energy-Architektur als Referenzprojekt fuer webapp-central.de.',

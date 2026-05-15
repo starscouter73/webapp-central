@@ -14,6 +14,7 @@ if (!function_exists('render_page')) {
         $showBreadcrumb = (bool)($options['show_breadcrumb'] ?? true);
         $showFooter = (bool)($options['show_footer'] ?? true);
         $bodyClass = trim((string)($options['body_class'] ?? ''));
+        $bodyClasses = trim('app-body ' . $bodyClass);
         $shellClass = trim((string)($options['shell_class'] ?? ''));
         $contentShellClass = trim((string)($options['content_shell_class'] ?? ''));
         $headerClass = '';
@@ -45,57 +46,8 @@ if (!function_exists('render_page')) {
   <meta name="description" content="<?= app_h($description) ?>">
   <title><?= app_h($title) ?> | <?= app_h(app_site_title()) ?></title>
   <link rel="stylesheet" href="<?= app_h(app_asset_url('assets/app.css')) ?>">
-  <style>
-    .site-header {
-      margin-bottom: 10px;
-    }
-
-    .global-live-ticker {
-      position: relative;
-      overflow: hidden;
-      width: calc(100% - 4px);
-      margin: 0 auto 18px;
-      border: 1px solid rgba(124,156,255,.24);
-      background: rgba(124,156,255,.08);
-      border-radius: 999px;
-      padding: 9px 0;
-      white-space: nowrap;
-      box-shadow: 0 12px 28px rgba(15,23,42,.08);
-    }
-
-    .global-live-ticker-track {
-      display: inline-block;
-      min-width: 100%;
-      padding-left: 100%;
-      animation: globalTickerMove 42s linear infinite;
-      color: var(--text);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .01em;
-    }
-
-    .global-live-ticker:hover .global-live-ticker-track {
-      animation-play-state: paused;
-    }
-
-    .global-live-dot {
-      display: inline-block;
-      width: 9px;
-      height: 9px;
-      border-radius: 999px;
-      background: #3ddc97;
-      margin: 0 8px 0 16px;
-      box-shadow: 0 0 0 5px rgba(61,220,151,.12);
-      vertical-align: middle;
-    }
-
-    @keyframes globalTickerMove {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-100%); }
-    }
-  </style>
 </head>
-<body<?= $bodyClass !== '' ? ' class="' . app_h($bodyClass) . '"' : '' ?>>
+<body class="<?= app_h($bodyClasses) ?>">
   <div class="page-shell<?= $shellClass !== '' ? ' ' . app_h($shellClass) : '' ?>">
     <?php if ($showHeader): ?>
       <header class="site-header<?= $headerClass ?>">
