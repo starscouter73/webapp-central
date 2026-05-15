@@ -31,14 +31,21 @@ if (!function_exists('render_page')) {
   <title><?= app_h($title) ?> | <?= app_h(app_site_title()) ?></title>
   <link rel="stylesheet" href="<?= app_h(app_asset_url('assets/app.css')) ?>">
   <style>
+    .site-header {
+      margin-bottom: 10px;
+    }
+
     .global-live-ticker {
       position: relative;
       overflow: hidden;
-      border-top: 1px solid rgba(255,255,255,.08);
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(90deg,#111827 0%,#172033 50%,#111827 100%);
-      padding: 10px 0;
+      width: calc(100% - 4px);
+      margin: 0 auto 18px;
+      border: 1px solid rgba(124,156,255,.24);
+      background: rgba(124,156,255,.08);
+      border-radius: 999px;
+      padding: 9px 0;
       white-space: nowrap;
+      box-shadow: 0 12px 28px rgba(15,23,42,.08);
     }
 
     .global-live-ticker-track {
@@ -46,10 +53,10 @@ if (!function_exists('render_page')) {
       min-width: 100%;
       padding-left: 100%;
       animation: globalTickerMove 42s linear infinite;
-      color: #eef4ff;
+      color: var(--text);
       font-size: 13px;
       font-weight: 700;
-      letter-spacing: .02em;
+      letter-spacing: .01em;
     }
 
     .global-live-ticker:hover .global-live-ticker-track {
@@ -61,9 +68,9 @@ if (!function_exists('render_page')) {
       width: 9px;
       height: 9px;
       border-radius: 999px;
-      background: #39d98a;
-      margin: 0 10px 0 18px;
-      box-shadow: 0 0 0 5px rgba(57,217,138,.16);
+      background: #3ddc97;
+      margin: 0 8px 0 16px;
+      box-shadow: 0 0 0 5px rgba(61,220,151,.12);
       vertical-align: middle;
     }
 
