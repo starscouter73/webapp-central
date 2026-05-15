@@ -1,13 +1,13 @@
 :root {
-  --bg: #09111a;
-  --surface: rgba(10, 18, 30, 0.72);
-  --surface-strong: rgba(17, 27, 40, 0.9);
-  --ink: #edf3fb;
-  --muted: #9fb3c8;
-  --line: rgba(148, 177, 212, 0.18);
-  --accent: #f0a33a;
-  --accent-2: #62c7bf;
-  --shadow: 0 28px 80px rgba(3, 8, 15, 0.38);
+  --bg: #f5f1e8;
+  --surface: rgba(255, 251, 245, 0.9);
+  --surface-strong: rgba(255, 255, 255, 0.96);
+  --ink: #23312b;
+  --muted: #5f6f67;
+  --line: rgba(101, 126, 112, 0.18);
+  --accent: #b99256;
+  --accent-2: #6f8f7c;
+  --shadow: 0 16px 38px rgba(98, 88, 68, 0.1);
 }
 
 * {
@@ -23,9 +23,9 @@ body {
 body {
   font-family: Georgia, "Times New Roman", serif;
   background:
-    radial-gradient(circle at top left, rgba(240, 163, 58, 0.2), transparent 22%),
-    radial-gradient(circle at top right, rgba(98, 199, 191, 0.16), transparent 20%),
-    radial-gradient(circle at bottom, rgba(84, 122, 255, 0.14), transparent 28%),
+    radial-gradient(circle at top left, rgba(221, 202, 162, 0.28), transparent 24%),
+    radial-gradient(circle at top right, rgba(175, 202, 190, 0.16), transparent 22%),
+    radial-gradient(circle at bottom, rgba(255, 255, 255, 0.35), transparent 32%),
     var(--bg);
   color: var(--ink);
 }
@@ -51,18 +51,16 @@ a {
   padding: 24px;
   border: 1px solid var(--line);
   border-radius: 28px;
-  background:
-    linear-gradient(145deg, rgba(16, 27, 40, 0.9), rgba(10, 18, 30, 0.78)),
-    var(--surface);
+  background: var(--surface-strong);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(8px);
 }
 
 .site-header-accent {
   background:
-    linear-gradient(140deg, rgba(47, 108, 98, 0.9), rgba(23, 33, 38, 0.94)),
+    linear-gradient(140deg, rgba(121, 153, 136, 0.92), rgba(101, 131, 116, 0.92)),
     var(--surface);
-  border-color: rgba(47, 108, 98, 0.2);
+  border-color: rgba(111, 143, 124, 0.26);
   color: #fff;
 }
 
@@ -75,8 +73,8 @@ a {
 }
 
 .site-header-accent .site-nav a {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.14);
   color: rgba(255, 255, 255, 0.9);
 }
 
@@ -124,7 +122,7 @@ a {
   width: fit-content;
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(240, 163, 58, 0.16);
+  background: rgba(185, 146, 86, 0.14);
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -154,18 +152,19 @@ a {
 
 .site-nav a.is-active,
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), #ffcb7a);
-  border-color: rgba(240, 163, 58, 0.5);
-  color: #101820;
+  background: linear-gradient(135deg, #d7c095, var(--accent));
+  border-color: rgba(185, 146, 86, 0.42);
+  color: #2a2b24;
 }
 
 .btn-secondary {
-  background: rgba(98, 199, 191, 0.14);
-  border-color: rgba(98, 199, 191, 0.22);
+  background: rgba(111, 143, 124, 0.12);
+  border-color: rgba(111, 143, 124, 0.24);
+  color: #2f4538;
 }
 
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.58);
 }
 
 .site-nav a:hover,
@@ -215,8 +214,7 @@ a {
   padding: 14px 18px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background:
-    linear-gradient(135deg, rgba(12, 20, 32, 0.94), rgba(18, 27, 43, 0.9));
+  background: rgba(255, 250, 243, 0.92);
   color: var(--ink);
   box-shadow: var(--shadow);
 }
@@ -233,7 +231,7 @@ a {
   display: grid;
   place-items: center;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.58);
+  border: 2px solid rgba(111, 143, 124, 0.28);
   font: 700 1rem/1 Georgia, "Times New Roman", serif;
 }
 
@@ -244,7 +242,7 @@ a {
 
 .footer-copy p {
   margin: 4px 0 0;
-  color: rgba(237, 243, 251, 0.72);
+  color: var(--muted);
   font-size: 0.94rem;
 }
 
@@ -260,8 +258,8 @@ a {
   min-height: 34px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid rgba(148, 177, 212, 0.18);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(111, 143, 124, 0.18);
+  background: rgba(255, 255, 255, 0.72);
   color: var(--ink);
   text-decoration: none;
 }
@@ -270,11 +268,9 @@ a {
   padding: 24px;
   border: 1px solid var(--line);
   border-radius: 28px;
-  background:
-    linear-gradient(155deg, rgba(17, 27, 40, 0.84), rgba(10, 18, 30, 0.72)),
-    var(--surface);
+  background: var(--surface);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
 }
 
 .grid {
@@ -346,7 +342,7 @@ a {
   padding: 16px 18px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .overview-chip strong {
@@ -365,7 +361,7 @@ a {
   padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(252, 249, 243, 0.88);
 }
 
 .readmore-card summary {
@@ -404,7 +400,7 @@ a {
 
 .accent-card {
   background:
-    linear-gradient(140deg, rgba(78, 179, 172, 0.82), rgba(14, 24, 38, 0.94)),
+    linear-gradient(140deg, rgba(129, 160, 143, 0.92), rgba(104, 132, 116, 0.88)),
     var(--surface);
   color: #fff;
 }
@@ -456,14 +452,14 @@ a {
 .legal-notice {
   margin-top: 8px;
   padding: 16px 18px;
-  border: 1px solid rgba(240, 163, 58, 0.28);
+  border: 1px solid rgba(185, 146, 86, 0.28);
   border-radius: 20px;
-  background: rgba(240, 163, 58, 0.08);
+  background: rgba(185, 146, 86, 0.08);
 }
 
 .legal-notice-ready {
-  border-color: rgba(98, 199, 191, 0.22);
-  background: rgba(98, 199, 191, 0.08);
+  border-color: rgba(111, 143, 124, 0.22);
+  background: rgba(111, 143, 124, 0.08);
 }
 
 .button-row,
@@ -494,7 +490,7 @@ a {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.66);
 }
 
 .project-context-box pre {
@@ -549,7 +545,7 @@ a {
   padding: 16px 18px;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .status-icon-item p {
@@ -569,10 +565,10 @@ a {
   height: 16px;
   margin-top: 2px;
   border-radius: 999px;
-  background: rgba(237, 243, 251, 0.12);
+  background: rgba(111, 143, 124, 0.12);
   box-shadow:
-    0 0 0 6px rgba(98, 199, 191, 0.08),
-    0 0 18px rgba(98, 199, 191, 0.14);
+    0 0 0 6px rgba(111, 143, 124, 0.08),
+    0 0 14px rgba(111, 143, 124, 0.12);
 }
 
 .status-icon.is-online {
@@ -602,7 +598,7 @@ a {
   min-width: 140px;
   padding: 14px 16px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .metric-tile strong {
@@ -621,14 +617,14 @@ a {
   padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.7);
   text-decoration: none;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
 .module-link:hover {
-  border-color: rgba(98, 199, 191, 0.34);
-  background: rgba(98, 199, 191, 0.08);
+  border-color: rgba(111, 143, 124, 0.3);
+  background: rgba(244, 248, 244, 0.92);
 }
 
 .workspace-card-list {
@@ -648,15 +644,15 @@ a {
   padding: 16px 18px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.74);
   text-decoration: none;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
 .workspace-link-card:hover {
   transform: translateY(-1px);
-  border-color: rgba(98, 199, 191, 0.34);
-  background: rgba(98, 199, 191, 0.08);
+  border-color: rgba(111, 143, 124, 0.3);
+  background: rgba(246, 249, 245, 0.94);
 }
 
 .workspace-link-card strong {
@@ -827,7 +823,7 @@ body.calendar-composer-open {
   padding: 22px;
   border: 1px solid var(--line);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .calendar-grid-viewport {
@@ -870,7 +866,7 @@ body.calendar-composer-open {
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.74);
   overflow: hidden;
   text-align: left;
   cursor: pointer;
@@ -892,7 +888,7 @@ body.calendar-composer-open {
 
 .calendar-day:hover {
   transform: translateY(-1px);
-  border-color: rgba(240, 163, 58, 0.4);
+  border-color: rgba(185, 146, 86, 0.34);
 }
 
 .calendar-day-week {
@@ -906,12 +902,12 @@ body.calendar-composer-open {
 }
 
 .calendar-day.is-selected {
-  border-color: rgba(240, 163, 58, 0.55);
-  background: rgba(240, 163, 58, 0.12);
+  border-color: rgba(185, 146, 86, 0.48);
+  background: rgba(185, 146, 86, 0.12);
 }
 
 .calendar-day.is-today {
-  box-shadow: inset 0 0 0 1px rgba(98, 199, 191, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(111, 143, 124, 0.42);
 }
 
 .calendar-dots {
@@ -938,7 +934,7 @@ body.calendar-composer-open {
   display: block;
   padding: 8px 10px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(246, 241, 233, 0.9);
   color: var(--ink);
   font-size: 0.86rem;
   overflow: hidden;
@@ -970,7 +966,7 @@ body.calendar-composer-open {
   padding: 13px 14px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.94);
   color: var(--ink);
   font: inherit;
 }
@@ -993,7 +989,7 @@ body.calendar-composer-open {
   margin: 0;
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(247, 243, 236, 0.92);
 }
 
 .calendar-note {
@@ -1001,7 +997,7 @@ body.calendar-composer-open {
   gap: 6px;
   padding: 16px 18px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(247, 243, 236, 0.92);
 }
 
 .calendar-note p {
@@ -1014,7 +1010,7 @@ body.calendar-composer-open {
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.74);
 }
 
 .map-preview iframe,
@@ -1035,7 +1031,7 @@ body.calendar-composer-open {
   padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.76);
   cursor: pointer;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
@@ -1085,8 +1081,8 @@ body.calendar-composer-open {
 .agenda-item:hover,
 .agenda-item.is-active {
   transform: translateY(-1px);
-  border-color: rgba(240, 163, 58, 0.4);
-  background: rgba(240, 163, 58, 0.08);
+  border-color: rgba(185, 146, 86, 0.36);
+  background: rgba(247, 241, 231, 0.94);
 }
 
 .agenda-inline-map {
@@ -1107,7 +1103,7 @@ body.calendar-composer-open {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .calendar-overview-list {
@@ -1132,7 +1128,7 @@ body.calendar-composer-open {
   padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.78);
   min-height: 124px;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
@@ -1272,8 +1268,8 @@ body.calendar-composer-open {
 
 .overview-item:hover {
   transform: translateY(-1px);
-  border-color: rgba(98, 199, 191, 0.35);
-  background: rgba(98, 199, 191, 0.08);
+  border-color: rgba(111, 143, 124, 0.3);
+  background: rgba(245, 249, 244, 0.96);
 }
 
 .overview-item-map {
@@ -1323,7 +1319,8 @@ body.calendar-composer-open {
   align-items: center;
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(111, 143, 124, 0.12);
+  color: #31463a;
   font: 600 0.84rem/1 Arial, sans-serif;
 }
 
@@ -1334,7 +1331,7 @@ body.calendar-composer-open {
 .code-block code {
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(247, 243, 236, 0.94);
 }
 
 .swatch {
@@ -1350,10 +1347,10 @@ body.calendar-composer-open {
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.swatch-1 { background: #172126; }
-.swatch-2 { background: #b85c38; }
-.swatch-3 { background: #dce6e0; }
-.swatch-4 { background: #f6f1e8; }
+.swatch-1 { background: #23312b; }
+.swatch-2 { background: #b99256; }
+.swatch-3 { background: #d7e0d9; }
+.swatch-4 { background: #f5f1e8; }
 
 .hallenberg-page,
 .chapter-pager,
