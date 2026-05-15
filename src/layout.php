@@ -162,6 +162,8 @@ if (!function_exists('render_page')) {
     }());
   </script>
 
+  <script src="<?= app_h(app_asset_url('assets/calendar-priority.js')) ?>"></script>
+
   <?php if (app_is_local()): ?>
     <script>
       (function () {
