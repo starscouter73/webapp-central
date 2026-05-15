@@ -2,10 +2,12 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
+require_once dirname(__DIR__) . '/src/hallenberg.php';
 
 render_page(app_site_title(), 'Startseite', static function (): void {
     $modules = app_modules();
     $highlights = app_highlights();
+    $hallenbergStory = app_hallenberg_story();
     $statusCheckedAt = (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->format('d.m.Y H:i');
     $infrastructureOverviewHtml = app_render_markdown(app_infrastructure_overview_markdown());
     $overviewCategories = [
@@ -20,6 +22,7 @@ render_page(app_site_title(), 'Startseite', static function (): void {
                 'Hallenberg steht als Referenzprojekt bereit.',
                 'Weitere Showcases koennen spaeter unter derselben Logik einsortiert werden.',
             ],
+            'preview' => 'is-photo',
         ],
         [
             'index' => '02',
@@ -32,6 +35,7 @@ render_page(app_site_title(), 'Startseite', static function (): void {
                 'Jede Kategorie erhaelt erst einen Kurzueberblick und dann einen Weiterlesen-Bereich.',
                 'So bleibt die Seite visuell ruhig und trotzdem informationsreich.',
             ],
+            'preview' => 'is-grid',
         ],
         [
             'index' => '03',
@@ -44,6 +48,7 @@ render_page(app_site_title(), 'Startseite', static function (): void {
                 'Der Live-Stand wird zuerst knapp visualisiert.',
                 'Technische Details liegen in aufklappbaren Kontextbloecken.',
             ],
+            'preview' => 'is-signal',
         ],
     ];
     ?>
@@ -69,6 +74,23 @@ render_page(app_site_title(), 'Startseite', static function (): void {
         </div>
       </div>
       <div class="overview-hero-aside">
+        <div class="portfolio-hero-media">
+          <figure class="portfolio-hero-photo">
+            <img src="<?= app_h($hallenbergStory['hero']['media'][0]['src']) ?>" alt="<?= app_h($hallenbergStory['hero']['media'][0]['alt']) ?>" loading="lazy">
+          </figure>
+          <div class="portfolio-hero-stack">
+            <article class="portfolio-mini-panel">
+              <span class="card-label">Projektbild</span>
+              <strong>Hallenberg als visuelle Referenz</strong>
+              <p>Ein reales Showcase zieht die Startseite weg vom Tool-Look und hin zu einem kuratierten Einstieg.</p>
+            </article>
+            <div class="portfolio-swatch-row">
+              <span class="portfolio-swatch is-dark"></span>
+              <span class="portfolio-swatch is-sand"></span>
+              <span class="portfolio-swatch is-sage"></span>
+            </div>
+          </div>
+        </div>
         <div class="overview-chip-grid">
           <div class="overview-chip">
             <strong><?= count($modules) ?></strong>
@@ -111,6 +133,15 @@ render_page(app_site_title(), 'Startseite', static function (): void {
     <section class="grid three-up">
       <?php foreach ($overviewCategories as $category): ?>
         <article class="card category-card">
+          <div class="category-preview <?= app_h($category['preview']) ?>">
+            <?php if ($category['preview'] === 'is-photo'): ?>
+              <img src="<?= app_h($hallenbergStory['drone']['media'][0]['src']) ?>" alt="<?= app_h($hallenbergStory['drone']['media'][0]['alt']) ?>" loading="lazy">
+            <?php else: ?>
+              <span class="preview-bar is-1"></span>
+              <span class="preview-bar is-2"></span>
+              <span class="preview-bar is-3"></span>
+            <?php endif; ?>
+          </div>
           <div class="category-card-topline">
             <span class="category-index"><?= app_h($category['index']) ?></span>
             <span class="card-label"><?= app_h($category['label']) ?></span>
