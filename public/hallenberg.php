@@ -10,8 +10,25 @@ $overviewCards = app_hallenberg_overview_cards();
 $timeline = app_hallenberg_timeline();
 $futureProducts = app_hallenberg_future_products();
 $initialFutureProduct = $futureProducts[0];
+$projectDocuments = [
+    [
+        'label' => 'PDF-Dokumentation',
+        'file' => 'hallenberg-projektdokumentation-modern.pdf',
+        'summary' => 'Druck- und Freigabefassung fuer Weitergabe, Review und Ablage.',
+    ],
+    [
+        'label' => 'DOCX-Arbeitsfassung',
+        'file' => 'hallenberg-projektdokumentation.docx',
+        'summary' => 'Bearbeitbare Version fuer redaktionelle Anpassungen und Fortschreibung.',
+    ],
+    [
+        'label' => 'Markdown-Quelle',
+        'file' => 'hallenberg-projektdokumentation.md',
+        'summary' => 'Textuelle Projektbasis fuer Repo-Pflege, Versionierung und inhaltliche Ableitung.',
+    ],
+];
 
-render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $sections, $overviewCards, $timeline, $futureProducts, $initialFutureProduct): void {
+render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $sections, $overviewCards, $timeline, $futureProducts, $initialFutureProduct, $projectDocuments): void {
     ?>
     <section class="hallenberg-page">
       <section class="project-shell-header">
@@ -37,6 +54,7 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
           <p class="hallenberg-lead"><?= app_h($story['hero']['text']) ?></p>
           <div class="button-row hallenberg-hero-actions">
             <a class="btn btn-primary" href="#overview">Projektdokumentation ansehen</a>
+            <a class="btn btn-secondary" href="#documents">Unterlagen</a>
             <a class="btn btn-secondary" href="#engineering">Technische Details</a>
             <a class="btn btn-ghost" href="#timeline">Baufortschritt</a>
           </div>
@@ -62,6 +80,26 @@ render_page('Hallenberg', 'Referenzprojekt', static function () use ($story, $se
               <div>
                 <strong><?= app_h($card['title']) ?></strong>
                 <p><?= app_h($card['text']) ?></p>
+              </div>
+            </article>
+          <?php endforeach; ?>
+        </div>
+      </section>
+
+      <section class="hallenberg-section" id="documents">
+        <div class="section-heading">
+          <span class="card-label">Projektunterlagen</span>
+          <h3>Direkte Downloads fuer Review, Ablage und Weiterbearbeitung</h3>
+          <p>Die Hallenberg-Dokumentation liegt zusaetzlich als PDF, DOCX und Markdown direkt im Projekt. So bleiben Freigabefassung, bearbeitbare Version und Repo-Quelle synchron verfuegbar.</p>
+        </div>
+        <div class="grid three-up">
+          <?php foreach ($projectDocuments as $document): ?>
+            <article class="card">
+              <span class="card-label">Download</span>
+              <h3><?= app_h($document['label']) ?></h3>
+              <p><?= app_h($document['summary']) ?></p>
+              <div class="button-row">
+                <a class="btn btn-primary" href="<?= app_h(app_url($document['file'])) ?>" target="_blank" rel="noreferrer">Oeffnen</a>
               </div>
             </article>
           <?php endforeach; ?>
