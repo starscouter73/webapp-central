@@ -601,6 +601,23 @@ a {
   margin: 0;
 }
 
+.calendar-primary-layout,
+.calendar-visual-panel,
+.calendar-overview-panel,
+.overview-item-actions {
+  display: grid;
+  gap: 18px;
+}
+
+.calendar-primary-layout {
+  grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+  align-items: start;
+}
+
+.calendar-visual-panel[hidden] {
+  display: none;
+}
+
 .calendar-detail-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
@@ -620,6 +637,11 @@ a {
 
 .calendar-search-field {
   margin-bottom: 18px;
+}
+
+.calendar-toolbar p,
+.calendar-overview-toolbar p {
+  margin: 6px 0 0;
 }
 
 .calendar-subpanel {
@@ -910,21 +932,28 @@ a {
 }
 
 .calendar-overview-list {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .overview-item {
+  display: grid;
+  gap: 12px;
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.72);
-  cursor: pointer;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
 .overview-item p,
 .overview-item-heading {
   margin: 0;
+}
+
+.overview-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .overview-item:hover {
@@ -1564,6 +1593,7 @@ body.lightbox-open {
   }
 
   .calendar-toolbar,
+  .calendar-primary-layout,
   .calendar-form-row,
   .calendar-detail-layout,
   .calendar-overview-toolbar,

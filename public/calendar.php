@@ -114,45 +114,43 @@ render_page('Kalender', 'Termine', static function (): void {
       <article class="card calendar-board calendar-board-full">
         <div class="calendar-toolbar">
           <div>
-            <h3 id="calendar-month">Monat wird geladen</h3>
+            <span class="card-label">Terminverwaltung</span>
+            <h3 id="calendar-month">Chronologische Terminliste</h3>
+            <p id="calendar-view-summary">Bestehende Termine zuerst, Monats- und Wochenansicht nur bei Bedarf.</p>
           </div>
           <div class="calendar-toolbar-actions">
-            <a class="btn btn-ghost" href="<?= app_h(app_url('calendar-overview.php')) ?>">Uebersicht</a>
             <div class="calendar-view-toggle" role="tablist" aria-label="Ansicht wechseln">
-              <button class="btn btn-secondary is-active" id="view-month" type="button">Monat</button>
+              <button class="btn btn-secondary is-active" id="view-list" type="button">Liste</button>
+              <button class="btn btn-ghost" id="view-month" type="button">Monat</button>
               <button class="btn btn-ghost" id="view-week" type="button">Woche</button>
             </div>
-            <div class="button-row">
+            <div class="button-row" id="calendar-range-actions">
             <button class="btn btn-ghost" id="calendar-prev" type="button">Zurueck</button>
             <button class="btn btn-secondary" id="calendar-today" type="button">Heute</button>
             <button class="btn btn-ghost" id="calendar-next" type="button">Weiter</button>
             </div>
           </div>
         </div>
-        <div class="calendar-grid-viewport" id="calendar-grid-viewport">
-          <div class="calendar-weekdays" aria-hidden="true">
-            <span>Mo</span>
-            <span>Di</span>
-            <span>Mi</span>
-            <span>Do</span>
-            <span>Fr</span>
-            <span>Sa</span>
-            <span>So</span>
-          </div>
-          <div class="calendar-grid" id="calendar-grid"></div>
-        </div>
-
-        <div class="calendar-detail-layout">
-          <article class="calendar-subpanel" id="selected-panel">
-            <span class="card-label">Auswahl</span>
-            <h3 id="selected-date-label">Keine Auswahl</h3>
-            <div class="calendar-subpanel-stack">
-              <div class="calendar-agenda" id="selected-events">
-                <p class="empty-state">Waehle einen Tag im Kalender oder lege direkt einen neuen Termin an.</p>
+        <div class="calendar-primary-layout">
+          <article class="calendar-subpanel calendar-overview-panel">
+            <div class="calendar-overview-toolbar">
+              <div>
+                <span class="card-label">Termine</span>
+                <h3 id="overview-title">Anstehende Termine</h3>
+                <p id="overview-summary">Die naechsten Termine werden geladen.</p>
               </div>
-              <div class="calendar-event-focus" id="selected-event-focus" hidden>
-                <p class="empty-state">Waehle in der Terminliste einen Eintrag fuer die Detailansicht.</p>
+              <div class="button-row">
+                <button class="btn btn-secondary" id="overview-pdf" type="button">PDF exportieren</button>
+                <button class="btn btn-secondary" id="overview-print" type="button">Uebersicht drucken</button>
               </div>
+            </div>
+            <label class="field calendar-search-field">
+              <span>Termin-Suche</span>
+              <input id="overview-search" type="search" placeholder="Nach Titel, Adresse, Notiz oder Datum suchen">
+            </label>
+            <div class="calendar-overview-metrics" id="overview-metrics"></div>
+            <div class="calendar-overview-list" id="overview-list">
+              <p class="empty-state">Noch keine Termine vorhanden.</p>
             </div>
           </article>
 
@@ -213,6 +211,34 @@ render_page('Kalender', 'Termine', static function (): void {
             </div>
           </article>
         </div>
+
+        <section class="calendar-visual-panel" id="calendar-visual-panel" hidden>
+          <div class="calendar-grid-viewport" id="calendar-grid-viewport">
+            <div class="calendar-weekdays" aria-hidden="true">
+              <span>Mo</span>
+              <span>Di</span>
+              <span>Mi</span>
+              <span>Do</span>
+              <span>Fr</span>
+              <span>Sa</span>
+              <span>So</span>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+          </div>
+
+          <article class="calendar-subpanel" id="selected-panel">
+            <span class="card-label">Auswahl</span>
+            <h3 id="selected-date-label">Keine Auswahl</h3>
+            <div class="calendar-subpanel-stack">
+              <div class="calendar-agenda" id="selected-events">
+                <p class="empty-state">Waehle einen Tag im Kalender oder lege direkt einen neuen Termin an.</p>
+              </div>
+              <div class="calendar-event-focus" id="selected-event-focus" hidden>
+                <p class="empty-state">Waehle in der Terminliste einen Eintrag fuer die Detailansicht.</p>
+              </div>
+            </div>
+          </article>
+        </section>
       </article>
 
     </section>
@@ -231,7 +257,9 @@ render_page('Kalender', 'Termine', static function (): void {
         var queuedVoicePrompt = '';
         var persistTimer = null;
         var editingEventId = '';
-        var activeView = 'month';
+        var activeView = ['list', 'month', 'week'].indexOf(String(query.get('view') || 'list')) !== -1
+          ? String(query.get('view') || 'list')
+          : 'list';
         var selectedEventId = query.get('event') || '';
         var detailArmed = selectedEventId !== '';
         var events = loadEvents();
@@ -243,10 +271,17 @@ render_page('Kalender', 'Termine', static function (): void {
         var monthLabel = document.getElementById('calendar-month');
         var grid = document.getElementById('calendar-grid');
         var gridViewport = document.getElementById('calendar-grid-viewport');
+        var visualPanel = document.getElementById('calendar-visual-panel');
+        var viewSummary = document.getElementById('calendar-view-summary');
         var selectedPanel = document.getElementById('selected-panel');
         var selectedLabel = document.getElementById('selected-date-label');
         var selectedEvents = document.getElementById('selected-events');
         var selectedEventFocus = document.getElementById('selected-event-focus');
+        var overviewTitle = document.getElementById('overview-title');
+        var overviewSummary = document.getElementById('overview-summary');
+        var overviewMetrics = document.getElementById('overview-metrics');
+        var overviewList = document.getElementById('overview-list');
+        var overviewSearch = document.getElementById('overview-search');
         var formLabel = document.getElementById('event-form-label');
         var formTitle = document.getElementById('event-form-title');
         var editIdInput = document.getElementById('event-edit-id');
@@ -264,10 +299,28 @@ render_page('Kalender', 'Termine', static function (): void {
         var cancelButton = document.getElementById('event-cancel');
         var status = document.getElementById('voice-status');
         var transcript = document.getElementById('voice-transcript');
+        var listViewButton = document.getElementById('view-list');
         var monthViewButton = document.getElementById('view-month');
         var weekViewButton = document.getElementById('view-week');
+        var rangeActions = document.getElementById('calendar-range-actions');
+
+        document.getElementById('overview-print').addEventListener('click', function () {
+          printAgendaOverview('overview');
+        });
+
+        document.getElementById('overview-pdf').addEventListener('click', function () {
+          exportAgendaPdf('overview');
+        });
+
+        overviewSearch.addEventListener('input', function () {
+          renderOverview();
+        });
 
         document.getElementById('calendar-prev').addEventListener('click', function () {
+          if (activeView === 'list') {
+            return;
+          }
+
           if (activeView === 'week') {
             selectDate(shiftIsoDate(selectedDate, -7));
             return;
@@ -282,6 +335,10 @@ render_page('Kalender', 'Termine', static function (): void {
         });
 
         document.getElementById('calendar-next').addEventListener('click', function () {
+          if (activeView === 'list') {
+            return;
+          }
+
           if (activeView === 'week') {
             selectDate(shiftIsoDate(selectedDate, 7));
             return;
@@ -300,6 +357,9 @@ render_page('Kalender', 'Termine', static function (): void {
           viewYear = today.getFullYear();
           viewMonth = today.getMonth();
           selectDate(toIsoDate(today));
+          if (activeView === 'list') {
+            renderOverview();
+          }
         });
 
         saveButton.addEventListener('click', function () {
@@ -325,6 +385,9 @@ render_page('Kalender', 'Termine', static function (): void {
         stopVoiceButton.addEventListener('click', function () {
           stopVoiceCapture('Sprachmodus beendet.');
         });
+        listViewButton.addEventListener('click', function () {
+          setActiveView('list');
+        });
         monthViewButton.addEventListener('click', function () {
           setActiveView('month');
         });
@@ -334,6 +397,7 @@ render_page('Kalender', 'Termine', static function (): void {
         });
 
         dateInput.value = selectedDate;
+        renderOverview();
         renderCalendar();
         renderSelectedDay();
         syncEventsFromServer();
@@ -478,6 +542,7 @@ render_page('Kalender', 'Termine', static function (): void {
 
               events = mergedEvents;
               window.localStorage.setItem(storageKey, JSON.stringify(events));
+              renderOverview();
               renderCalendar();
               renderSelectedDay();
 
@@ -493,12 +558,22 @@ render_page('Kalender', 'Termine', static function (): void {
         function renderCalendar() {
           syncViewToggle();
 
+          if (activeView === 'list') {
+            monthLabel.textContent = 'Chronologische Terminliste';
+            viewSummary.textContent = 'Bestehende Termine zuerst, Monats- und Wochenansicht nur bei Bedarf.';
+            visualPanel.hidden = true;
+            return;
+          }
+
+          visualPanel.hidden = false;
+
           if (activeView === 'week') {
             renderWeekCalendar();
             return;
           }
 
           monthLabel.textContent = monthNames[viewMonth] + ' ' + viewYear;
+          viewSummary.textContent = 'Monatsansicht zur Orientierung. Die Verwaltung bleibt in der Terminliste.';
           grid.innerHTML = '';
 
           var firstDay = new Date(viewYear, viewMonth, 1);
@@ -552,6 +627,7 @@ render_page('Kalender', 'Termine', static function (): void {
           var weekDates = getWeekDates(selectedDate);
 
           monthLabel.textContent = buildWeekLabel(weekDates);
+          viewSummary.textContent = 'Wochenansicht zur Orientierung. Die Verwaltung bleibt in der Terminliste.';
           grid.innerHTML = '';
 
           weekDates.forEach(function (isoDate) {
@@ -731,6 +807,7 @@ render_page('Kalender', 'Termine', static function (): void {
             return eventItem.id !== eventId;
           });
           persistEvents();
+          renderOverview();
           if (selectedEventId === eventId) {
             selectedEventId = '';
           }
@@ -783,6 +860,7 @@ render_page('Kalender', 'Termine', static function (): void {
           }
 
           persistEvents();
+          renderOverview();
           selectDate(dateValue);
           selectedEventId = payload.id;
           clearEditMode('');
@@ -1013,6 +1091,9 @@ render_page('Kalender', 'Termine', static function (): void {
             var title = document.createElement('strong');
             var meta = document.createElement('span');
             var note = document.createElement('p');
+            var actions = document.createElement('div');
+            var editButton = document.createElement('button');
+            var visualizeButton = document.createElement('button');
 
             article.className = 'overview-item';
             heading.className = 'overview-item-heading';
@@ -1020,29 +1101,60 @@ render_page('Kalender', 'Termine', static function (): void {
             meta.className = 'agenda-meta';
             meta.textContent = formatEventStamp(eventItem);
             note.textContent = eventItem.address || eventItem.note || 'Ohne weitere Details';
+            actions.className = 'overview-item-actions';
 
-            article.addEventListener('click', function () {
+            editButton.className = 'btn btn-secondary btn-small';
+            editButton.type = 'button';
+            editButton.textContent = 'Bearbeiten';
+            editButton.addEventListener('click', function () {
               selectDate(eventItem.date);
               selectedEventId = eventItem.id;
+              detailArmed = true;
+              loadEventIntoForm(eventItem);
               renderSelectedDay();
+            });
+
+            visualizeButton.className = 'btn btn-ghost btn-small';
+            visualizeButton.type = 'button';
+            visualizeButton.textContent = 'Im Kalender zeigen';
+            visualizeButton.addEventListener('click', function () {
+              selectDate(eventItem.date);
+              selectedEventId = eventItem.id;
+              detailArmed = true;
+              setActiveView('month');
+              openEventFocus(eventItem.id);
             });
 
             heading.appendChild(title);
             heading.appendChild(meta);
             article.appendChild(heading);
             article.appendChild(note);
+            actions.appendChild(editButton);
+            actions.appendChild(visualizeButton);
+            article.appendChild(actions);
             overviewList.appendChild(article);
           });
         }
 
         function setActiveView(nextView) {
-          activeView = nextView === 'week' ? 'week' : 'month';
+          if (nextView === 'week') {
+            activeView = 'week';
+          } else if (nextView === 'month') {
+            activeView = 'month';
+          } else {
+            activeView = 'list';
+          }
           renderCalendar();
+          if (activeView !== 'list') {
+            renderSelectedDay();
+          }
         }
 
         function syncViewToggle() {
+          listViewButton.className = activeView === 'list' ? 'btn btn-secondary is-active' : 'btn btn-ghost';
           monthViewButton.className = activeView === 'month' ? 'btn btn-secondary is-active' : 'btn btn-ghost';
           weekViewButton.className = activeView === 'week' ? 'btn btn-secondary is-active' : 'btn btn-ghost';
+          rangeActions.hidden = activeView === 'list';
           gridViewport.className = activeView === 'week'
             ? 'calendar-grid-viewport is-week-view'
             : 'calendar-grid-viewport';
