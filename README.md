@@ -19,6 +19,24 @@ docker/      bestehende Server-/Container-Konfiguration
 .github/     GitHub Actions
 ```
 
+## Benutzerbereich (Basis)
+
+Es gibt jetzt einen ersten geschuetzten Bereich mit:
+
+- `public/register.php` fuer Registrierung
+- `public/login.php` fuer Login
+- `public/logout.php` fuer Logout
+- `public/account.php` als geschuetzte Einstiegsseite
+
+Technische Basis:
+
+- PHP Sessions
+- CSRF-Token fuer Login/Registrierung
+- Passwort-Hashing mit `password_hash()` und `password_verify()`
+- Userspeicher via SQLite (falls verfuegbar), sonst JSON-Fallback unter `data/`
+
+Produktive Nutzerdaten sind per `.gitignore` ausgeschlossen (`data/*.sqlite`, `data/*.db`, `data/users.json`).
+
 ## Arbeitsquelle
 
 Dieses Repository auf GitHub ist die fuehrende Projektquelle.

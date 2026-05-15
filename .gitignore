@@ -11,3 +11,6 @@ php_errors.log
 src/server_ssh.png
 src/ssh_server_zugang.txt
 public/media/hallenberg_vids/*.mp4
+data/*.sqlite
+data/*.db
+data/users.json

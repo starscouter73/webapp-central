@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/auth/auth.php';
 
 if (!function_exists('render_page')) {
     function render_page(string $title, string $eyebrow, callable $content, array $options = []): void
@@ -19,6 +20,10 @@ if (!function_exists('render_page')) {
         $contentShellClass = trim((string)($options['content_shell_class'] ?? ''));
         $headerLinks = $options['header_links'] ?? [];
         $headerClass = '';
+        auth_session_start();
+        $authUser = auth_current_user();
+        $authLoggedIn = $authUser !== null;
+        $liveStatusInitial = app_live_status_line();
 
         if (!headers_sent()) {
             header('X-Frame-Options: SAMEORIGIN');
@@ -62,6 +67,13 @@ if (!function_exists('render_page')) {
               <?= app_h($page['label']) ?>
             </a>
           <?php endforeach; ?>
+          <?php if ($authLoggedIn): ?>
+            <a class="<?= $currentPage === 'account.php' ? 'is-active' : '' ?>" href="<?= app_h(app_url('account.php')) ?>">Mein Bereich</a>
+            <a href="<?= app_h(app_url('logout.php')) ?>">Logout</a>
+          <?php else: ?>
+            <a class="<?= $currentPage === 'login.php' ? 'is-active' : '' ?>" href="<?= app_h(app_url('login.php')) ?>">Login</a>
+            <a class="<?= $currentPage === 'register.php' ? 'is-active' : '' ?>" href="<?= app_h(app_url('register.php')) ?>">Registrieren</a>
+          <?php endif; ?>
         </nav>
         <?php if (is_array($headerLinks) && $headerLinks !== []): ?>
           <div class="site-header-links" aria-label="Seitenabschnitte">
@@ -76,7 +88,7 @@ if (!function_exists('render_page')) {
       <div class="global-live-ticker" aria-label="Projektstatus Live">
         <div class="global-live-ticker-track" id="global-live-ticker-track">
           <span class="global-live-dot"></span>
-          LIVE STATUS • webapp-central.de aktiv • Kalendermodul in Entwicklung • Listenansicht priorisiert • Voice-to-Text aktiv • Hallenberg Showcase online • Live-/Lokal-Sync aktiv • Letzte Projektphase 15.05.2026 • Serverstatus OK
+          <?= app_h($liveStatusInitial) ?>
         </div>
       </div>
     <?php endif; ?>
@@ -116,6 +128,7 @@ if (!function_exists('render_page')) {
   <script>
     (function () {
       var ticker = document.getElementById('global-live-ticker-track');
+      var isLoggedIn = <?= $authLoggedIn ? 'true' : 'false' ?>;
 
       if (!ticker) {
         return;
@@ -128,20 +141,22 @@ if (!function_exists('render_page')) {
           minute: '2-digit'
         });
 
-        ticker.innerHTML = '<span class="global-live-dot"></span>'
-          + 'LIVE STATUS ' + time
-          + ' • webapp-central.de aktiv'
-          + ' • Kalendermodul wird erweitert'
-          + ' • Chronologische Listenansicht priorisiert'
-          + ' • Formularlogik wird umgebaut'
-          + ' • Voice-to-Text aktiv'
-          + ' • Hallenberg Medienmodule online'
-          + ' • Lokaler und Live-Sync aktiv'
-          + ' • Serverstatus OK';
+        var authLine = isLoggedIn ? 'Nutzerbereich: Session aktiv' : 'Nutzerbereich: Login bereit';
+        var segments = [
+          'LIVE STATUS ' + time,
+          'webapp-central.de aktiv',
+          'Repository- und Server-Sync aktiv',
+          'Chronologische Listenansicht priorisiert',
+          authLine,
+          'Hallenberg Medienmodule online',
+          'Serverstatus OK'
+        ];
+
+        ticker.innerHTML = '<span class="global-live-dot"></span>' + segments.join(' • ');
       }
 
       updateTicker();
-      window.setInterval(updateTicker, 300000);
+      window.setInterval(updateTicker, 180000);
     }());
   </script>
 

@@ -343,6 +343,30 @@ if (!function_exists('app_pages')) {
                 'nav' => false,
                 'nav_parent' => 'workspace.php',
             ],
+            [
+                'file' => 'login.php',
+                'label' => 'Login',
+                'title' => 'Login',
+                'eyebrow' => 'Zugang',
+                'description' => 'Login fuer den geschuetzten Benutzerbereich.',
+                'nav' => false,
+            ],
+            [
+                'file' => 'register.php',
+                'label' => 'Registrieren',
+                'title' => 'Registrieren',
+                'eyebrow' => 'Zugang',
+                'description' => 'Registrierung fuer den geschuetzten Benutzerbereich.',
+                'nav' => false,
+            ],
+            [
+                'file' => 'account.php',
+                'label' => 'Mein Bereich',
+                'title' => 'Mein Bereich',
+                'eyebrow' => 'Benutzerbereich',
+                'description' => 'Geschuetzter Benutzerbereich fuer persoenliche und projektbezogene Inhalte.',
+                'nav' => false,
+            ],
         ];
     }
 }
@@ -703,5 +727,32 @@ if (!function_exists('app_copyright_line')) {
     function app_copyright_line(): string
     {
         return sprintf('Copyright %s Mark Dorth.', date('Y'));
+    }
+}
+
+if (!function_exists('app_live_status_segments')) {
+    function app_live_status_segments(string $time): array
+    {
+        $authState = function_exists('auth_is_logged_in') && auth_is_logged_in()
+            ? 'Nutzerbereich: Session aktiv'
+            : 'Nutzerbereich: Login bereit';
+
+        return [
+            'LIVE STATUS ' . $time,
+            'webapp-central.de aktiv',
+            'Repository- und Server-Sync aktiv',
+            'Chronologische Listenansicht priorisiert',
+            $authState,
+            'Hallenberg Medienmodule online',
+            'Serverstatus OK',
+        ];
+    }
+}
+
+if (!function_exists('app_live_status_line')) {
+    function app_live_status_line(?DateTimeImmutable $now = null): string
+    {
+        $time = ($now ?? new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->format('H:i');
+        return implode(' • ', app_live_status_segments($time));
     }
 }
