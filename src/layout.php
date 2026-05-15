@@ -17,6 +17,7 @@ if (!function_exists('render_page')) {
         $bodyClasses = trim('app-body ' . $bodyClass);
         $shellClass = trim((string)($options['shell_class'] ?? ''));
         $contentShellClass = trim((string)($options['content_shell_class'] ?? ''));
+        $headerLinks = $options['header_links'] ?? [];
         $headerClass = '';
 
         if (!headers_sent()) {
@@ -62,6 +63,14 @@ if (!function_exists('render_page')) {
             </a>
           <?php endforeach; ?>
         </nav>
+        <?php if (is_array($headerLinks) && $headerLinks !== []): ?>
+          <div class="site-header-links" aria-label="Seitenabschnitte">
+            <?php foreach ($headerLinks as $link): ?>
+              <?php if (!is_array($link)) { continue; } ?>
+              <a href="<?= app_h((string)($link['href'] ?? '#')) ?>"><?= app_h((string)($link['label'] ?? 'Link')) ?></a>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
       </header>
 
       <div class="global-live-ticker" aria-label="Projektstatus Live">

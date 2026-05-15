@@ -4,6 +4,15 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/src/layout.php';
 require_once dirname(__DIR__) . '/src/hallenberg.php';
 
+$_headerLinks = [
+    ['href' => '#auftakt', 'label' => 'Auftakt'],
+    ['href' => '#fokus', 'label' => 'Fokus'],
+    ['href' => '#projekte', 'label' => 'Projekte'],
+    ['href' => '#struktur', 'label' => 'Struktur'],
+    ['href' => '#zugriff', 'label' => 'Zugriff'],
+    ['href' => '#kontext', 'label' => 'Kontext'],
+];
+
 render_page('Zentrale', 'Struktur', static function (): void {
     $steps = app_workspace_steps();
     $resumePrompt = app_project_resume_prompt_live();
@@ -16,14 +25,6 @@ render_page('Zentrale', 'Struktur', static function (): void {
       <div class="platform-shell-copy">
         <span class="card-label">Operations Layer</span>
         <strong>Projektfokus, Infrastruktur und Live-Kontext in einer dunklen Arbeitsansicht</strong>
-        <div class="platform-shell-links">
-          <a href="#auftakt">Auftakt</a>
-          <a href="#fokus">Fokus</a>
-          <a href="#projekte">Projekte</a>
-          <a href="#struktur">Struktur</a>
-          <a href="#zugriff">Zugriff</a>
-          <a href="#kontext">Kontext</a>
-        </div>
       </div>
     </section>
 
@@ -214,4 +215,6 @@ render_page('Zentrale', 'Struktur', static function (): void {
       }());
     </script>
     <?php
-});
+}, [
+    'header_links' => $_headerLinks,
+]);

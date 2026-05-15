@@ -4,6 +4,13 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/src/layout.php';
 require_once dirname(__DIR__) . '/src/hallenberg.php';
 
+$_headerLinks = [
+    ['href' => '#auftakt', 'label' => 'Auftakt'],
+    ['href' => '#fokus', 'label' => 'Fokus'],
+    ['href' => '#katalog', 'label' => 'Katalog'],
+    ['href' => '#ausbau', 'label' => 'Ausbau'],
+];
+
 render_page('Module', 'Bausteine', static function (): void {
     $modules = app_modules();
     $hallenbergStory = app_hallenberg_story();
@@ -13,12 +20,6 @@ render_page('Module', 'Bausteine', static function (): void {
       <div class="platform-shell-copy">
         <span class="card-label">Module Catalog</span>
         <strong>Jede Kategorie wirkt wie ein eigener Produktbaustein statt wie ein bloßer Menüpunkt</strong>
-        <div class="platform-shell-links">
-          <a href="#auftakt">Auftakt</a>
-          <a href="#fokus">Fokus</a>
-          <a href="#katalog">Katalog</a>
-          <a href="#ausbau">Ausbau</a>
-        </div>
       </div>
     </section>
 
@@ -107,4 +108,6 @@ render_page('Module', 'Bausteine', static function (): void {
       </ul>
     </section>
     <?php
-});
+}, [
+    'header_links' => $_headerLinks,
+]);

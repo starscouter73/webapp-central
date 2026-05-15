@@ -4,6 +4,14 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/src/layout.php';
 require_once dirname(__DIR__) . '/src/hallenberg.php';
 
+$_headerLinks = [
+    ['href' => '#auftakt', 'label' => 'Auftakt'],
+    ['href' => '#featured', 'label' => 'Featured'],
+    ['href' => '#kategorien', 'label' => 'Kategorien'],
+    ['href' => '#leitlinien', 'label' => 'Leitlinien'],
+    ['href' => '#module', 'label' => 'Module'],
+];
+
 render_page(app_site_title(), 'Startseite', static function (): void {
     $modules = app_modules();
     $highlights = app_highlights();
@@ -57,13 +65,6 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       <div class="platform-shell-copy">
         <span class="card-label">Platform System</span>
         <strong>Webapp Central als direkte Erweiterung der Hallenberg-Sprache</strong>
-        <div class="platform-shell-links">
-          <a href="#auftakt">Auftakt</a>
-          <a href="#featured">Featured</a>
-          <a href="#kategorien">Kategorien</a>
-          <a href="#leitlinien">Leitlinien</a>
-          <a href="#module">Module</a>
-        </div>
       </div>
     </section>
 
@@ -229,4 +230,6 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       </div>
     </section>
     <?php
-});
+}, [
+    'header_links' => $_headerLinks,
+]);

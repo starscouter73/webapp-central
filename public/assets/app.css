@@ -147,6 +147,12 @@ a {
   gap: 8px;
 }
 
+.site-header-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .site-nav a,
 .btn {
   display: inline-flex;
@@ -164,6 +170,29 @@ a {
 
 .site-nav a {
   font-size: 0.94rem;
+}
+
+.site-header-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(245, 245, 245, 0.74);
+  text-decoration: none;
+  font: 700 0.76rem/1 Arial, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.site-header-links a:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 180, 0, 0.22);
+  background: rgba(255, 180, 0, 0.1);
+  color: #fff;
 }
 
 .site-nav a.is-active,
@@ -2517,6 +2546,10 @@ body.lightbox-open {
   .site-footer {
     flex-direction: column;
     align-items: start;
+  }
+
+  .site-header-links {
+    justify-content: flex-start;
   }
 
   .platform-shell-header {
