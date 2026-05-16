@@ -395,6 +395,14 @@ if (!function_exists('app_pages')) {
                 'description' => 'Geschuetzte Projektseite aus dem Benutzerbereich.',
                 'nav' => false,
             ],
+            [
+                'file' => 'account-category.php',
+                'label' => 'Projektkategorie',
+                'title' => 'Projektkategorie',
+                'eyebrow' => 'Benutzerbereich',
+                'description' => 'Geschuetzte Kategorieansicht aus dem Benutzerbereich.',
+                'nav' => false,
+            ],
         ];
     }
 }

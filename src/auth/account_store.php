@@ -272,7 +272,7 @@ if (!function_exists('account_page_slugify')) {
 }
 
 if (!function_exists('account_page_save')) {
-    function account_page_save(string $email, string $title, string $content, bool $published): array
+    function account_page_save(string $email, string $title, string $content, bool $published, string $categoryId = ''): array
     {
         $title = trim($title);
         $content = trim($content);
@@ -300,6 +300,7 @@ if (!function_exists('account_page_save')) {
             'slug' => $slug,
             'content' => $content,
             'published' => $published,
+            'category_id' => trim($categoryId),
             'updated_at' => (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->format(DateTimeInterface::ATOM),
         ];
         $data['pages'] = $pages;
@@ -368,6 +369,7 @@ if (!function_exists('account_category_add')) {
         $categories[] = [
             'id' => bin2hex(random_bytes(6)),
             'name' => $name,
+            'sort_order' => count($categories) + 1,
             'created_at' => (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->format(DateTimeInterface::ATOM),
         ];
         $data['modules']['categories'] = $categories;
@@ -402,5 +404,69 @@ if (!function_exists('account_category_delete')) {
         }
 
         return $deleted;
+    }
+}
+
+if (!function_exists('account_categories_list')) {
+    function account_categories_list(string $email): array
+    {
+        $data = account_data_read($email);
+        $categories = is_array($data['modules']['categories'] ?? null) ? $data['modules']['categories'] : [];
+        usort($categories, static function (array $a, array $b): int {
+            return (int)($a['sort_order'] ?? 9999) <=> (int)($b['sort_order'] ?? 9999);
+        });
+        return $categories;
+    }
+}
+
+if (!function_exists('account_categories_reorder')) {
+    function account_categories_reorder(string $email, array $orderedIds): bool
+    {
+        $data = account_data_read($email);
+        $categories = is_array($data['modules']['categories'] ?? null) ? $data['modules']['categories'] : [];
+        if ($categories === []) {
+            return false;
+        }
+
+        $orderMap = [];
+        $pos = 1;
+        foreach ($orderedIds as $id) {
+            $id = trim((string)$id);
+            if ($id === '') {
+                continue;
+            }
+            $orderMap[$id] = $pos;
+            $pos++;
+        }
+
+        foreach ($categories as &$category) {
+            $id = (string)($category['id'] ?? '');
+            if ($id !== '' && isset($orderMap[$id])) {
+                $category['sort_order'] = $orderMap[$id];
+            } else {
+                $category['sort_order'] = $pos++;
+            }
+        }
+        unset($category);
+
+        usort($categories, static function (array $a, array $b): int {
+            return (int)($a['sort_order'] ?? 9999) <=> (int)($b['sort_order'] ?? 9999);
+        });
+
+        $data['modules']['categories'] = $categories;
+        account_data_write($email, $data);
+        return true;
+    }
+}
+
+if (!function_exists('account_category_find')) {
+    function account_category_find(string $email, string $categoryId): ?array
+    {
+        foreach (account_categories_list($email) as $category) {
+            if ((string)($category['id'] ?? '') === $categoryId) {
+                return $category;
+            }
+        }
+        return null;
     }
 }

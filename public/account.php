@@ -75,7 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $userEmail,
                 (string)($_POST['page_title'] ?? ''),
                 (string)($_POST['page_content'] ?? ''),
-                isset($_POST['page_published'])
+                isset($_POST['page_published']),
+                (string)($_POST['page_category_id'] ?? '')
             );
             if (($result['ok'] ?? false) === true) {
                 $messages[] = 'Projektseite wurde angelegt.';
@@ -103,6 +104,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $messages[] = 'Kategorie wurde geloescht.';
             }
+        } elseif ($action === 'reorder_categories') {
+            $order = trim((string)($_POST['category_order'] ?? ''));
+            $ids = $order === '' ? [] : array_filter(array_map('trim', explode(',', $order)));
+            if (account_categories_reorder($userEmail, $ids)) {
+                $messages[] = 'Kategorienreihenfolge gespeichert.';
+            }
         }
     }
 }
@@ -110,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $accountData = account_data_read($userEmail);
 $documents = is_array($accountData['documents'] ?? null) ? $accountData['documents'] : [];
 $projectPages = account_pages_list($userEmail);
-$moduleCategories = is_array($accountData['modules']['categories'] ?? null) ? $accountData['modules']['categories'] : [];
+$moduleCategories = account_categories_list($userEmail);
 $moduleCount = 0;
 foreach (['workspace', 'calendar', 'hallenberg'] as $moduleKey) {
     if (!empty($accountData['modules'][$moduleKey])) {
@@ -151,9 +158,10 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
             <p class="auth-hint">Noch keine Kategorien vorhanden.</p>
           <?php endif; ?>
           <?php foreach ($moduleCategories as $category): ?>
-            <article class="account-doc-item">
+            <article class="account-doc-item account-category-item" draggable="true" data-category-id="<?= app_h((string)($category['id'] ?? '')) ?>">
               <strong><?= app_h((string)($category['name'] ?? 'Kategorie')) ?></strong>
               <div class="auth-actions">
+                <a class="btn btn-ghost" href="<?= app_h(app_url('account-category.php?id=' . rawurlencode((string)($category['id'] ?? '')))) ?>">Oeffnen</a>
                 <form method="post" action="<?= app_h(app_url('account.php')) ?>">
                   <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
                   <input type="hidden" name="action" value="delete_category">
@@ -164,6 +172,14 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
             </article>
           <?php endforeach; ?>
         </div>
+        <form method="post" action="<?= app_h(app_url('account.php')) ?>" id="category-order-form">
+          <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+          <input type="hidden" name="action" value="reorder_categories">
+          <input type="hidden" name="category_order" id="category_order" value="">
+          <div class="auth-actions">
+            <button class="btn btn-ghost" type="submit">Reihenfolge speichern</button>
+          </div>
+        </form>
       </article>
       <article class="card">
         <span class="card-label">Schnellanlage</span>
@@ -244,6 +260,13 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
           <input id="page_title" name="page_title" type="text" placeholder="z. B. Projekt Hallenberg Q2">
           <label for="page_content">Inhalt</label>
           <textarea id="page_content" name="page_content" rows="4" placeholder="Kurze Projektseite mit den wichtigsten Infos."></textarea>
+          <label for="page_category_id">Kategorie</label>
+          <select id="page_category_id" name="page_category_id">
+            <option value="">Ohne Kategorie</option>
+            <?php foreach ($moduleCategories as $category): ?>
+              <option value="<?= app_h((string)($category['id'] ?? '')) ?>"><?= app_h((string)($category['name'] ?? 'Kategorie')) ?></option>
+            <?php endforeach; ?>
+          </select>
           <label><input type="checkbox" name="page_published" checked> Seite direkt freigeben</label>
           <div class="auth-actions">
             <button class="btn btn-secondary" type="submit">Seite anlegen</button>
@@ -256,7 +279,12 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
           <?php foreach ($projectPages as $page): ?>
             <article class="account-doc-item">
               <strong><?= app_h((string)($page['title'] ?? 'Seite')) ?></strong>
-              <span>Slug: <?= app_h((string)($page['slug'] ?? '')) ?> · <?= !empty($page['published']) ? 'veroeffentlicht' : 'entwurf' ?></span>
+              <span>
+                Slug: <?= app_h((string)($page['slug'] ?? '')) ?> · <?= !empty($page['published']) ? 'veroeffentlicht' : 'entwurf' ?>
+                <?php if ((string)($page['category_id'] ?? '') !== ''): ?>
+                  · Kategorie gesetzt
+                <?php endif; ?>
+              </span>
               <div class="auth-actions">
                 <?php if (!empty($page['published'])): ?>
                   <a class="btn btn-ghost" href="<?= app_h(app_url('account-page.php?slug=' . rawurlencode((string)($page['slug'] ?? '')))) ?>">Oeffnen</a>
@@ -332,6 +360,51 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
         </form>
       </article>
     </section>
+    <script>
+      (function () {
+        var list = document.querySelector('.account-page-list');
+        var orderInput = document.getElementById('category_order');
+        if (!list || !orderInput) {
+          return;
+        }
+
+        var dragItem = null;
+        list.querySelectorAll('.account-category-item').forEach(function (item) {
+          item.addEventListener('dragstart', function () {
+            dragItem = item;
+            item.classList.add('is-dragging');
+          });
+          item.addEventListener('dragend', function () {
+            item.classList.remove('is-dragging');
+            dragItem = null;
+            updateOrder();
+          });
+          item.addEventListener('dragover', function (event) {
+            event.preventDefault();
+            if (!dragItem || dragItem === item) {
+              return;
+            }
+            var rect = item.getBoundingClientRect();
+            var before = event.clientY < rect.top + rect.height / 2;
+            if (before) {
+              list.insertBefore(dragItem, item);
+            } else {
+              list.insertBefore(dragItem, item.nextSibling);
+            }
+          });
+        });
+
+        function updateOrder() {
+          var ids = [];
+          list.querySelectorAll('.account-category-item').forEach(function (item) {
+            ids.push(item.getAttribute('data-category-id') || '');
+          });
+          orderInput.value = ids.filter(Boolean).join(',');
+        }
+
+        updateOrder();
+      }());
+    </script>
     <?php
 }, [
     'show_breadcrumb' => false,

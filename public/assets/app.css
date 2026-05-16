@@ -463,6 +463,16 @@ a {
   resize: vertical;
 }
 
+.auth-form select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+}
+
 .auth-form input:focus {
   outline: none;
   border-color: rgba(77, 163, 255, 0.5);
@@ -470,6 +480,12 @@ a {
 }
 
 .auth-form textarea:focus {
+  outline: none;
+  border-color: rgba(77, 163, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.15);
+}
+
+.auth-form select:focus {
   outline: none;
   border-color: rgba(77, 163, 255, 0.5);
   box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.15);
@@ -544,6 +560,14 @@ a {
   color: var(--muted);
   font-size: 0.84rem;
   margin-top: 3px;
+}
+
+.account-category-item {
+  cursor: move;
+}
+
+.account-category-item.is-dragging {
+  opacity: 0.5;
 }
 
 .account-page-view {
