@@ -89,6 +89,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $messages[] = 'Projektseite wurde geloescht.';
             }
+        } elseif ($action === 'add_category') {
+            $result = account_category_add($userEmail, (string)($_POST['category_name'] ?? ''));
+            if (($result['ok'] ?? false) === true) {
+                $messages[] = 'Kategorie wurde angelegt.';
+            } else {
+                $errors[] = (string)($result['error'] ?? 'Kategorie konnte nicht angelegt werden.');
+            }
+        } elseif ($action === 'delete_category') {
+            $categoryId = trim((string)($_POST['category_id'] ?? ''));
+            if ($categoryId === '' || !account_category_delete($userEmail, $categoryId)) {
+                $errors[] = 'Kategorie konnte nicht geloescht werden.';
+            } else {
+                $messages[] = 'Kategorie wurde geloescht.';
+            }
         }
     }
 }
@@ -96,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $accountData = account_data_read($userEmail);
 $documents = is_array($accountData['documents'] ?? null) ? $accountData['documents'] : [];
 $projectPages = account_pages_list($userEmail);
+$moduleCategories = is_array($accountData['modules']['categories'] ?? null) ? $accountData['modules']['categories'] : [];
 $moduleCount = 0;
 foreach (['workspace', 'calendar', 'hallenberg'] as $moduleKey) {
     if (!empty($accountData['modules'][$moduleKey])) {
@@ -103,7 +118,7 @@ foreach (['workspace', 'calendar', 'hallenberg'] as $moduleKey) {
     }
 }
 
-render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $accountData, $documents, $projectPages, $moduleCount, $messages, $errors): void {
+render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $accountData, $documents, $projectPages, $moduleCategories, $moduleCount, $messages, $errors): void {
     ?>
     <section class="account-topbar">
       <div class="account-topbar-meta">
@@ -126,6 +141,44 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
     <?php foreach ($errors as $error): ?>
       <div class="auth-message is-error"><?= app_h($error) ?></div>
     <?php endforeach; ?>
+
+    <section class="grid two-up">
+      <article class="card">
+        <span class="card-label">Kategorien</span>
+        <h3>Deine Bereiche im Fokus</h3>
+        <div class="account-page-list">
+          <?php if ($moduleCategories === []): ?>
+            <p class="auth-hint">Noch keine Kategorien vorhanden.</p>
+          <?php endif; ?>
+          <?php foreach ($moduleCategories as $category): ?>
+            <article class="account-doc-item">
+              <strong><?= app_h((string)($category['name'] ?? 'Kategorie')) ?></strong>
+              <div class="auth-actions">
+                <form method="post" action="<?= app_h(app_url('account.php')) ?>">
+                  <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+                  <input type="hidden" name="action" value="delete_category">
+                  <input type="hidden" name="category_id" value="<?= app_h((string)($category['id'] ?? '')) ?>">
+                  <button class="btn btn-ghost" type="submit">Loeschen</button>
+                </form>
+              </div>
+            </article>
+          <?php endforeach; ?>
+        </div>
+      </article>
+      <article class="card">
+        <span class="card-label">Schnellanlage</span>
+        <h3>Neue Kategorie anlegen</h3>
+        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
+          <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+          <input type="hidden" name="action" value="add_category">
+          <label for="category_name">Kategoriename</label>
+          <input id="category_name" name="category_name" type="text" placeholder="z. B. Kundenprojekte, Planung, Reports">
+          <div class="auth-actions">
+            <button class="btn btn-secondary" type="submit">Kategorie anlegen</button>
+          </div>
+        </form>
+      </article>
+    </section>
 
     <section class="grid account-grid">
       <article class="card account-card">
@@ -223,7 +276,7 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
       <article class="card account-card">
         <span class="card-label">Bereich 4</span>
         <h3>Projektmodule</h3>
-        <p>Lege fest, welche Module in deinem Fokus bleiben.</p>
+        <p>Lege fest, welche Module und Kategorien in deinem Fokus bleiben.</p>
         <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
           <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
           <input type="hidden" name="action" value="save_modules">

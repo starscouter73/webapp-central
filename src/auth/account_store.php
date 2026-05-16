@@ -52,6 +52,7 @@ if (!function_exists('account_default_data')) {
                 'calendar' => true,
                 'hallenberg' => true,
                 'notes' => '',
+                'categories' => [],
             ],
             'settings' => [
                 'display_name' => '',
@@ -345,5 +346,61 @@ if (!function_exists('account_page_find_by_slug')) {
             }
         }
         return null;
+    }
+}
+
+if (!function_exists('account_category_add')) {
+    function account_category_add(string $email, string $name): array
+    {
+        $name = trim($name);
+        if ($name === '') {
+            return ['ok' => false, 'error' => 'Kategoriename fehlt.'];
+        }
+
+        $data = account_data_read($email);
+        $categories = is_array($data['modules']['categories'] ?? null) ? $data['modules']['categories'] : [];
+        foreach ($categories as $category) {
+            if (strtolower((string)($category['name'] ?? '')) === strtolower($name)) {
+                return ['ok' => false, 'error' => 'Kategorie existiert bereits.'];
+            }
+        }
+
+        $categories[] = [
+            'id' => bin2hex(random_bytes(6)),
+            'name' => $name,
+            'created_at' => (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->format(DateTimeInterface::ATOM),
+        ];
+        $data['modules']['categories'] = $categories;
+        account_data_write($email, $data);
+
+        return ['ok' => true, 'error' => ''];
+    }
+}
+
+if (!function_exists('account_category_delete')) {
+    function account_category_delete(string $email, string $categoryId): bool
+    {
+        $data = account_data_read($email);
+        $categories = is_array($data['modules']['categories'] ?? null) ? $data['modules']['categories'] : [];
+        $newCategories = [];
+        $deleted = false;
+
+        foreach ($categories as $category) {
+            if (!is_array($category)) {
+                continue;
+            }
+            if ((string)($category['id'] ?? '') === $categoryId) {
+                $deleted = true;
+                continue;
+            }
+            $newCategories[] = $category;
+        }
+
+        if ($deleted) {
+            $data['modules']['categories'] = $newCategories;
+            account_data_write($email, $data);
+        }
+
+        return $deleted;
     }
 }
