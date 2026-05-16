@@ -592,6 +592,19 @@ a {
   white-space: normal;
 }
 
+.account-accordion {
+  margin-top: 8px;
+}
+
+.account-accordion > summary {
+  font: 700 0.9rem/1.2 Arial, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.account-accordion[open] > summary {
+  margin-bottom: 10px;
+}
+
 @media (max-width: 960px) {
   .account-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

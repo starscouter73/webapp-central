@@ -153,46 +153,56 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
       <article class="card">
         <span class="card-label">Kategorien</span>
         <h3>Deine Bereiche im Fokus</h3>
-        <div class="account-page-list">
-          <?php if ($moduleCategories === []): ?>
-            <p class="auth-hint">Noch keine Kategorien vorhanden.</p>
-          <?php endif; ?>
-          <?php foreach ($moduleCategories as $category): ?>
-            <article class="account-doc-item account-category-item" draggable="true" data-category-id="<?= app_h((string)($category['id'] ?? '')) ?>">
-              <strong><?= app_h((string)($category['name'] ?? 'Kategorie')) ?></strong>
+        <details class="readmore-card account-accordion">
+          <summary>Verwalten und sortieren</summary>
+          <div class="readmore-body">
+            <div class="account-page-list">
+              <?php if ($moduleCategories === []): ?>
+                <p class="auth-hint">Noch keine Kategorien vorhanden.</p>
+              <?php endif; ?>
+              <?php foreach ($moduleCategories as $category): ?>
+                <article class="account-doc-item account-category-item" draggable="true" data-category-id="<?= app_h((string)($category['id'] ?? '')) ?>">
+                  <strong><?= app_h((string)($category['name'] ?? 'Kategorie')) ?></strong>
+                  <div class="auth-actions">
+                    <a class="btn btn-ghost" href="<?= app_h(app_url('account-category.php?id=' . rawurlencode((string)($category['id'] ?? '')))) ?>">Oeffnen</a>
+                    <form method="post" action="<?= app_h(app_url('account.php')) ?>">
+                      <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+                      <input type="hidden" name="action" value="delete_category">
+                      <input type="hidden" name="category_id" value="<?= app_h((string)($category['id'] ?? '')) ?>">
+                      <button class="btn btn-ghost" type="submit">Loeschen</button>
+                    </form>
+                  </div>
+                </article>
+              <?php endforeach; ?>
+            </div>
+            <form method="post" action="<?= app_h(app_url('account.php')) ?>" id="category-order-form">
+              <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+              <input type="hidden" name="action" value="reorder_categories">
+              <input type="hidden" name="category_order" id="category_order" value="">
               <div class="auth-actions">
-                <a class="btn btn-ghost" href="<?= app_h(app_url('account-category.php?id=' . rawurlencode((string)($category['id'] ?? '')))) ?>">Oeffnen</a>
-                <form method="post" action="<?= app_h(app_url('account.php')) ?>">
-                  <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
-                  <input type="hidden" name="action" value="delete_category">
-                  <input type="hidden" name="category_id" value="<?= app_h((string)($category['id'] ?? '')) ?>">
-                  <button class="btn btn-ghost" type="submit">Loeschen</button>
-                </form>
+                <button class="btn btn-ghost" type="submit">Reihenfolge speichern</button>
               </div>
-            </article>
-          <?php endforeach; ?>
-        </div>
-        <form method="post" action="<?= app_h(app_url('account.php')) ?>" id="category-order-form">
-          <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
-          <input type="hidden" name="action" value="reorder_categories">
-          <input type="hidden" name="category_order" id="category_order" value="">
-          <div class="auth-actions">
-            <button class="btn btn-ghost" type="submit">Reihenfolge speichern</button>
+            </form>
           </div>
-        </form>
+        </details>
       </article>
       <article class="card">
         <span class="card-label">Schnellanlage</span>
         <h3>Neue Kategorie anlegen</h3>
-        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
-          <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
-          <input type="hidden" name="action" value="add_category">
-          <label for="category_name">Kategoriename</label>
-          <input id="category_name" name="category_name" type="text" placeholder="z. B. Kundenprojekte, Planung, Reports">
-          <div class="auth-actions">
-            <button class="btn btn-secondary" type="submit">Kategorie anlegen</button>
+        <details class="readmore-card account-accordion">
+          <summary>Kategorie erfassen</summary>
+          <div class="readmore-body">
+            <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
+              <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+              <input type="hidden" name="action" value="add_category">
+              <label for="category_name">Kategoriename</label>
+              <input id="category_name" name="category_name" type="text" placeholder="z. B. Kundenprojekte, Planung, Reports">
+              <div class="auth-actions">
+                <button class="btn btn-secondary" type="submit">Kategorie anlegen</button>
+              </div>
+            </form>
           </div>
-        </form>
+        </details>
       </article>
     </section>
 
@@ -200,60 +210,70 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
       <article class="card account-card">
         <span class="card-label">Bereich 1</span>
         <h3>Persoenliches Dashboard</h3>
-        <p>Definiere Fokus und Schnellzugriff fuer deine naechsten Schritte.</p>
-        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
-          <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
-          <input type="hidden" name="action" value="save_dashboard">
-          <label for="favorite_section">Favorisierte Sektion</label>
-          <input id="favorite_section" name="favorite_section" type="text" value="<?= app_h((string)($accountData['dashboard']['favorite_section'] ?? '')) ?>" placeholder="z. B. Hallenberg oder Kalender">
-          <label for="focus_note">Aktueller Fokus</label>
-          <input id="focus_note" name="focus_note" type="text" value="<?= app_h((string)($accountData['dashboard']['focus_note'] ?? '')) ?>" placeholder="z. B. Deploy, Medien, Doku">
-          <div class="auth-actions">
-            <button class="btn btn-secondary" type="submit">Dashboard speichern</button>
+        <details class="readmore-card account-accordion">
+          <summary>Fokus und Schnellzugriff setzen</summary>
+          <div class="readmore-body">
+            <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
+              <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+              <input type="hidden" name="action" value="save_dashboard">
+              <label for="favorite_section">Favorisierte Sektion</label>
+              <input id="favorite_section" name="favorite_section" type="text" value="<?= app_h((string)($accountData['dashboard']['favorite_section'] ?? '')) ?>" placeholder="z. B. Hallenberg oder Kalender">
+              <label for="focus_note">Aktueller Fokus</label>
+              <input id="focus_note" name="focus_note" type="text" value="<?= app_h((string)($accountData['dashboard']['focus_note'] ?? '')) ?>" placeholder="z. B. Deploy, Medien, Doku">
+              <div class="auth-actions">
+                <button class="btn btn-secondary" type="submit">Dashboard speichern</button>
+              </div>
+            </form>
           </div>
-        </form>
+        </details>
       </article>
 
       <article class="card account-card">
         <span class="card-label">Bereich 2</span>
         <h3>Geschuetzte Dokumente</h3>
-        <p>Dokumente hochladen, geschuetzt listen und intern wieder abrufen.</p>
-        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>" enctype="multipart/form-data">
-          <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
-          <input type="hidden" name="action" value="upload_document">
-          <label for="document_file">Dokument hochladen (max 25 MB)</label>
-          <input id="document_file" name="document_file" type="file" required>
-          <div class="auth-actions">
-            <button class="btn btn-secondary" type="submit">Dokument hochladen</button>
-          </div>
-        </form>
-        <div class="account-doc-list">
-          <?php if ($documents === []): ?>
-            <p class="auth-hint">Noch keine Dokumente vorhanden.</p>
-          <?php endif; ?>
-          <?php foreach ($documents as $document): ?>
-            <article class="account-doc-item">
-              <strong><?= app_h((string)($document['original_name'] ?? 'Datei')) ?></strong>
-              <span><?= app_h((string)($document['uploaded_at'] ?? '')) ?></span>
+        <details class="readmore-card account-accordion">
+          <summary>Upload und Dateiliste anzeigen</summary>
+          <div class="readmore-body">
+            <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>" enctype="multipart/form-data">
+              <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+              <input type="hidden" name="action" value="upload_document">
+              <label for="document_file">Dokument hochladen (max 25 MB)</label>
+              <input id="document_file" name="document_file" type="file" required>
               <div class="auth-actions">
-                <a class="btn btn-ghost" href="<?= app_h(app_url('account-file.php?id=' . rawurlencode((string)($document['id'] ?? '')))) ?>">Oeffnen</a>
-                <form method="post" action="<?= app_h(app_url('account.php')) ?>">
-                  <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
-                  <input type="hidden" name="action" value="delete_document">
-                  <input type="hidden" name="document_id" value="<?= app_h((string)($document['id'] ?? '')) ?>">
-                  <button class="btn btn-ghost" type="submit">Loeschen</button>
-                </form>
+                <button class="btn btn-secondary" type="submit">Dokument hochladen</button>
               </div>
-            </article>
-          <?php endforeach; ?>
-        </div>
+            </form>
+            <div class="account-doc-list">
+              <?php if ($documents === []): ?>
+                <p class="auth-hint">Noch keine Dokumente vorhanden.</p>
+              <?php endif; ?>
+              <?php foreach ($documents as $document): ?>
+                <article class="account-doc-item">
+                  <strong><?= app_h((string)($document['original_name'] ?? 'Datei')) ?></strong>
+                  <span><?= app_h((string)($document['uploaded_at'] ?? '')) ?></span>
+                  <div class="auth-actions">
+                    <a class="btn btn-ghost" href="<?= app_h(app_url('account-file.php?id=' . rawurlencode((string)($document['id'] ?? '')))) ?>">Oeffnen</a>
+                    <form method="post" action="<?= app_h(app_url('account.php')) ?>">
+                      <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+                      <input type="hidden" name="action" value="delete_document">
+                      <input type="hidden" name="document_id" value="<?= app_h((string)($document['id'] ?? '')) ?>">
+                      <button class="btn btn-ghost" type="submit">Loeschen</button>
+                    </form>
+                  </div>
+                </article>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        </details>
       </article>
 
       <article class="card account-card">
         <span class="card-label">Bereich 3</span>
         <h3>Projektseiten</h3>
-        <p>Lege eigene Projektseiten an, wie im kleinen CMS: Titel, Inhalt, Freigabe.</p>
-        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
+        <details class="readmore-card account-accordion">
+          <summary>Seiten anlegen und verwalten</summary>
+          <div class="readmore-body">
+          <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
           <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
           <input type="hidden" name="action" value="save_page">
           <label for="page_title">Seitentitel</label>
@@ -299,13 +319,17 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
             </article>
           <?php endforeach; ?>
         </div>
+          </div>
+        </details>
       </article>
 
       <article class="card account-card">
         <span class="card-label">Bereich 4</span>
         <h3>Projektmodule</h3>
-        <p>Lege fest, welche Module und Kategorien in deinem Fokus bleiben.</p>
-        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
+        <details class="readmore-card account-accordion">
+          <summary>Modulfokus anpassen</summary>
+          <div class="readmore-body">
+          <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
           <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
           <input type="hidden" name="action" value="save_modules">
           <label><input type="checkbox" name="module_workspace" <?= !empty($accountData['modules']['workspace']) ? 'checked' : '' ?>> Zentrale</label>
@@ -318,13 +342,17 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
             <button class="btn btn-secondary" type="submit">Module speichern</button>
           </div>
         </form>
+          </div>
+        </details>
       </article>
 
       <article class="card account-card">
         <span class="card-label">Bereich 5</span>
         <h3>Einstellungen</h3>
-        <p>Pflege Anzeige- und Profilwerte fuer deinen Accountbereich.</p>
-        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>" enctype="multipart/form-data">
+        <details class="readmore-card account-accordion">
+          <summary>Profilwerte bearbeiten</summary>
+          <div class="readmore-body">
+          <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>" enctype="multipart/form-data">
           <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
           <input type="hidden" name="action" value="save_settings">
           <label for="display_name">Anzeigename</label>
@@ -339,13 +367,17 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
             <button class="btn btn-secondary" type="submit">Einstellungen speichern</button>
           </div>
         </form>
+          </div>
+        </details>
       </article>
 
       <article class="card account-card">
         <span class="card-label">Bereich 6</span>
         <h3>Zugang und Sicherheit</h3>
-        <p>Passwort aktualisieren und Zugang absichern.</p>
-        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
+        <details class="readmore-card account-accordion">
+          <summary>Passwort und Sicherheit</summary>
+          <div class="readmore-body">
+          <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
           <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
           <input type="hidden" name="action" value="change_password">
           <label for="current_password">Aktuelles Passwort</label>
@@ -358,6 +390,8 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
             <button class="btn btn-secondary" type="submit">Passwort aendern</button>
           </div>
         </form>
+          </div>
+        </details>
       </article>
     </section>
     <script>
