@@ -12,6 +12,7 @@ if (!function_exists('render_page')) {
         $currentNavParent = (string)($currentMeta['nav_parent'] ?? $currentPage);
         $description = trim((string)($options['description'] ?? $currentMeta['description'] ?? app_tagline()));
         $showHeader = (bool)($options['show_header'] ?? true);
+        $showTicker = (bool)($options['show_ticker'] ?? true);
         $showBreadcrumb = (bool)($options['show_breadcrumb'] ?? true);
         $showFooter = (bool)($options['show_footer'] ?? true);
         $bodyClass = trim((string)($options['body_class'] ?? ''));
@@ -85,12 +86,14 @@ if (!function_exists('render_page')) {
         <?php endif; ?>
       </header>
 
-      <div class="global-live-ticker" aria-label="Projektstatus Live">
-        <div class="global-live-ticker-track" id="global-live-ticker-track">
-          <span class="global-live-dot"></span>
-          <?= app_h($liveStatusInitial) ?>
+      <?php if ($showTicker): ?>
+        <div class="global-live-ticker" aria-label="Projektstatus Live">
+          <div class="global-live-ticker-track" id="global-live-ticker-track">
+            <span class="global-live-dot"></span>
+            <?= app_h($liveStatusInitial) ?>
+          </div>
         </div>
-      </div>
+      <?php endif; ?>
     <?php endif; ?>
 
     <main class="content-shell<?= $contentShellClass !== '' ? ' ' . app_h($contentShellClass) : '' ?>">
@@ -145,11 +148,9 @@ if (!function_exists('render_page')) {
         var segments = [
           'LIVE STATUS ' + time,
           'webapp-central.de aktiv',
-          'Repository- und Server-Sync aktiv',
-          'Chronologische Listenansicht priorisiert',
+          'Sync aktiv',
           authLine,
-          'Hallenberg Medienmodule online',
-          'Serverstatus OK'
+          'Server OK'
         ];
 
         ticker.innerHTML = '<span class="global-live-dot"></span>' + segments.join(' • ');

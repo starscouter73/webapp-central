@@ -80,26 +80,23 @@ foreach (['workspace', 'calendar', 'hallenberg'] as $moduleKey) {
 
 render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $accountData, $documents, $moduleCount, $messages, $errors): void {
     ?>
-    <section class="auth-shell">
-      <article class="card auth-card">
+    <section class="account-topbar">
+      <div class="account-topbar-meta">
         <span class="card-label">Mein Bereich</span>
-        <h3>Geschuetzter Nutzerzugang</h3>
-        <p>Hier steuerst du persoenliche Inhalte, geschuetzte Dokumente, Moduleinstellungen und Sicherheit zentral an einer Stelle.</p>
-        <div class="auth-message is-success">
-          Eingeloggt als <?= app_h((string)($user['email'] ?? '')) ?> (Rolle: <?= app_h((string)($user['role'] ?? 'user')) ?>)
-        </div>
-        <?php foreach ($messages as $message): ?>
-          <div class="auth-message is-success"><?= app_h($message) ?></div>
-        <?php endforeach; ?>
-        <?php foreach ($errors as $error): ?>
-          <div class="auth-message is-error"><?= app_h($error) ?></div>
-        <?php endforeach; ?>
-        <div class="auth-actions">
-          <a class="btn btn-primary" href="<?= app_h(app_url('workspace.php')) ?>">Zur Zentrale</a>
-          <a class="btn btn-ghost" href="<?= app_h(app_url('logout.php')) ?>">Logout</a>
-        </div>
-      </article>
+        <strong><?= app_h((string)($accountData['settings']['display_name'] ?? '') !== '' ? (string)$accountData['settings']['display_name'] : (string)($user['email'] ?? '')) ?></strong>
+        <span class="auth-hint">Rolle: <?= app_h((string)($user['role'] ?? 'user')) ?></span>
+      </div>
+      <div class="auth-actions">
+        <a class="btn btn-primary" href="<?= app_h(app_url('workspace.php')) ?>">Zur Zentrale</a>
+        <a class="btn btn-ghost" href="<?= app_h(app_url('logout.php')) ?>">Logout</a>
+      </div>
     </section>
+    <?php foreach ($messages as $message): ?>
+      <div class="auth-message is-success"><?= app_h($message) ?></div>
+    <?php endforeach; ?>
+    <?php foreach ($errors as $error): ?>
+      <div class="auth-message is-error"><?= app_h($error) ?></div>
+    <?php endforeach; ?>
 
     <section class="grid account-grid">
       <article class="card account-card">
@@ -210,5 +207,7 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
       </article>
     </section>
     <?php
-});
-
+}, [
+    'show_breadcrumb' => false,
+    'content_shell_class' => 'account-content-compact',
+]);

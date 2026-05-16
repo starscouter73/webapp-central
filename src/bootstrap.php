@@ -750,11 +750,9 @@ if (!function_exists('app_live_status_segments')) {
         return [
             'LIVE STATUS ' . $time,
             'webapp-central.de aktiv',
-            'Repository- und Server-Sync aktiv',
-            'Chronologische Listenansicht priorisiert',
+            'Sync aktiv',
             $authState,
-            'Hallenberg Medienmodule online',
-            'Serverstatus OK',
+            'Server OK',
         ];
     }
 }

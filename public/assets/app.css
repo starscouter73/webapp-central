@@ -50,8 +50,8 @@ a {
 .site-header {
   display: grid;
   gap: 10px;
-  margin-bottom: 10px;
-  padding: 12px 16px;
+  margin-bottom: 6px;
+  padding: 10px 14px;
   border: 1px solid var(--line);
   border-radius: 20px;
   background:
@@ -223,7 +223,7 @@ a {
   position: relative;
   overflow: hidden;
   width: calc(100% - 4px);
-  margin: 0 auto 18px;
+  margin: 0 auto 8px;
   border: 1px solid rgba(77, 163, 255, 0.2);
   background:
     linear-gradient(90deg, rgba(255, 180, 0, 0.08), rgba(77, 163, 255, 0.08)),
@@ -269,7 +269,7 @@ a {
 .content-shell {
   display: grid;
   gap: 22px;
-  margin-top: 22px;
+  margin-top: 8px;
 }
 
 .page-intro,
@@ -280,7 +280,7 @@ a {
 
 .page-intro {
   gap: 10px;
-  padding: 2px 2px 0;
+  padding: 0;
 }
 
 .page-breadcrumb {
@@ -362,7 +362,34 @@ a {
 
 .auth-shell {
   display: grid;
-  gap: 18px;
+  gap: 10px;
+}
+
+.account-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 2px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.account-topbar-meta {
+  display: grid;
+  gap: 3px;
+}
+
+.account-topbar-meta strong {
+  font-size: 1.02rem;
+  line-height: 1.2;
+}
+
+.content-shell.account-content-compact {
+  margin-top: 2px;
+  gap: 14px;
 }
 
 .auth-card {
