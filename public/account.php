@@ -134,7 +134,21 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
         </span>
         <span class="card-label">Mein Bereich</span>
         <strong><?= app_h((string)($accountData['settings']['display_name'] ?? '') !== '' ? (string)$accountData['settings']['display_name'] : (string)($user['email'] ?? '')) ?></strong>
-        <p class="account-bio-preview"><?= app_h((string)($accountData['settings']['bio'] ?? '')) ?></p>
+        <?php
+        $bioText = trim((string)($accountData['settings']['bio'] ?? ''));
+        $bioPreview = mb_strlen($bioText) > 260 ? mb_substr($bioText, 0, 260) . ' …' : $bioText;
+        ?>
+        <?php if ($bioText !== ''): ?>
+          <p class="account-bio-preview"><?= app_h($bioPreview) ?></p>
+          <?php if ($bioPreview !== $bioText): ?>
+            <details class="readmore-card account-bio-readmore">
+              <summary>Mehr lesen</summary>
+              <div class="readmore-body">
+                <p class="account-bio-full"><?= nl2br(app_h($bioText)) ?></p>
+              </div>
+            </details>
+          <?php endif; ?>
+        <?php endif; ?>
         <span class="auth-hint">Rolle: <?= app_h((string)($user['role'] ?? 'user')) ?></span>
       </div>
       <div class="auth-actions">
