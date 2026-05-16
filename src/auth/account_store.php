@@ -56,8 +56,11 @@ if (!function_exists('account_default_data')) {
             'settings' => [
                 'display_name' => '',
                 'timezone' => 'Europe/Berlin',
+                'bio' => '',
+                'avatar_file' => '',
             ],
             'documents' => [],
+            'pages' => [],
         ];
     }
 }
@@ -195,3 +198,152 @@ if (!function_exists('account_document_find')) {
     }
 }
 
+if (!function_exists('account_avatar_upload')) {
+    function account_avatar_upload(string $email, array $uploaded): array
+    {
+        if (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            return ['ok' => true, 'error' => ''];
+        }
+        if (($uploaded['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            return ['ok' => false, 'error' => 'Avatar konnte nicht hochgeladen werden.'];
+        }
+
+        $tmp = (string)($uploaded['tmp_name'] ?? '');
+        $name = (string)($uploaded['name'] ?? '');
+        $size = (int)($uploaded['size'] ?? 0);
+        if ($tmp === '' || $name === '' || $size <= 0) {
+            return ['ok' => false, 'error' => 'Avatar ist ungueltig.'];
+        }
+        if ($size > 8 * 1024 * 1024) {
+            return ['ok' => false, 'error' => 'Avatar ist zu gross (maximal 8 MB).'];
+        }
+
+        $extension = strtolower((string)pathinfo($name, PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+        if (!in_array($extension, $allowed, true)) {
+            return ['ok' => false, 'error' => 'Avatar-Dateityp ist nicht erlaubt.'];
+        }
+
+        $fileName = 'avatar.' . $extension;
+        $path = account_user_dir($email) . '/' . $fileName;
+        if (!@move_uploaded_file($tmp, $path)) {
+            return ['ok' => false, 'error' => 'Avatar konnte nicht gespeichert werden.'];
+        }
+
+        $data = account_data_read($email);
+        $data['settings']['avatar_file'] = $fileName;
+        account_data_write($email, $data);
+
+        return ['ok' => true, 'error' => ''];
+    }
+}
+
+if (!function_exists('account_avatar_path')) {
+    function account_avatar_path(string $email): ?string
+    {
+        $data = account_data_read($email);
+        $file = (string)($data['settings']['avatar_file'] ?? '');
+        if ($file === '') {
+            return null;
+        }
+        $path = account_user_dir($email) . '/' . $file;
+        return is_file($path) ? $path : null;
+    }
+}
+
+if (!function_exists('account_pages_list')) {
+    function account_pages_list(string $email): array
+    {
+        $data = account_data_read($email);
+        $pages = $data['pages'] ?? [];
+        return is_array($pages) ? $pages : [];
+    }
+}
+
+if (!function_exists('account_page_slugify')) {
+    function account_page_slugify(string $value): string
+    {
+        $value = strtolower(trim($value));
+        $value = preg_replace('/[^a-z0-9]+/', '-', $value) ?? '';
+        $value = trim($value, '-');
+        return $value !== '' ? $value : 'seite-' . date('YmdHis');
+    }
+}
+
+if (!function_exists('account_page_save')) {
+    function account_page_save(string $email, string $title, string $content, bool $published): array
+    {
+        $title = trim($title);
+        $content = trim($content);
+        if ($title === '') {
+            return ['ok' => false, 'error' => 'Seitentitel fehlt.'];
+        }
+        if (mb_strlen($content) < 20) {
+            return ['ok' => false, 'error' => 'Seiteninhalt ist zu kurz (mind. 20 Zeichen).'];
+        }
+
+        $data = account_data_read($email);
+        $pages = is_array($data['pages'] ?? null) ? $data['pages'] : [];
+        $slug = account_page_slugify($title);
+        $baseSlug = $slug;
+        $idx = 1;
+        $existingSlugs = array_map(static fn(array $p): string => (string)($p['slug'] ?? ''), $pages);
+        while (in_array($slug, $existingSlugs, true)) {
+            $slug = $baseSlug . '-' . $idx;
+            $idx++;
+        }
+
+        $pages[] = [
+            'id' => bin2hex(random_bytes(8)),
+            'title' => $title,
+            'slug' => $slug,
+            'content' => $content,
+            'published' => $published,
+            'updated_at' => (new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin')))->format(DateTimeInterface::ATOM),
+        ];
+        $data['pages'] = $pages;
+        account_data_write($email, $data);
+
+        return ['ok' => true, 'error' => '', 'slug' => $slug];
+    }
+}
+
+if (!function_exists('account_page_delete')) {
+    function account_page_delete(string $email, string $pageId): bool
+    {
+        $data = account_data_read($email);
+        $pages = is_array($data['pages'] ?? null) ? $data['pages'] : [];
+        $newPages = [];
+        $deleted = false;
+        foreach ($pages as $page) {
+            if (!is_array($page)) {
+                continue;
+            }
+            if ((string)($page['id'] ?? '') === $pageId) {
+                $deleted = true;
+                continue;
+            }
+            $newPages[] = $page;
+        }
+        if ($deleted) {
+            $data['pages'] = $newPages;
+            account_data_write($email, $data);
+        }
+        return $deleted;
+    }
+}
+
+if (!function_exists('account_page_find_by_slug')) {
+    function account_page_find_by_slug(string $email, string $slug): ?array
+    {
+        foreach (account_pages_list($email) as $page) {
+            if (!is_array($page)) {
+                continue;
+            }
+            if ((string)($page['slug'] ?? '') === $slug) {
+                return $page;
+            }
+        }
+        return null;
+    }
+}

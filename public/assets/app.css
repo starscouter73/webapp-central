@@ -382,6 +382,30 @@ a {
   gap: 3px;
 }
 
+.account-avatar-frame {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  display: grid;
+  place-items: center;
+  margin-bottom: 2px;
+}
+
+.account-avatar-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.account-avatar-frame.is-empty::before {
+  content: 'A';
+  font: 700 0.92rem/1 Arial, sans-serif;
+  color: rgba(245, 245, 245, 0.68);
+}
+
 .account-topbar-meta strong {
   font-size: 1.02rem;
   line-height: 1.2;
@@ -428,7 +452,24 @@ a {
   color: var(--ink);
 }
 
+.auth-form textarea {
+  width: 100%;
+  min-height: 92px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  resize: vertical;
+}
+
 .auth-form input:focus {
+  outline: none;
+  border-color: rgba(77, 163, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.15);
+}
+
+.auth-form textarea:focus {
   outline: none;
   border-color: rgba(77, 163, 255, 0.5);
   box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.15);
@@ -481,6 +522,12 @@ a {
   gap: 10px;
 }
 
+.account-page-list {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
 .account-doc-item {
   padding: 10px 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -497,6 +544,19 @@ a {
   color: var(--muted);
   font-size: 0.84rem;
   margin-top: 3px;
+}
+
+.account-page-view {
+  max-width: 920px;
+}
+
+.account-page-content {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  white-space: normal;
 }
 
 @media (max-width: 960px) {

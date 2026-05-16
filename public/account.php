@@ -49,7 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($action === 'save_settings') {
             $data['settings']['display_name'] = trim((string)($_POST['display_name'] ?? ''));
             $data['settings']['timezone'] = trim((string)($_POST['timezone'] ?? 'Europe/Berlin'));
+            $data['settings']['bio'] = trim((string)($_POST['bio'] ?? ''));
             account_data_write($userEmail, $data);
+            $avatarResult = account_avatar_upload($userEmail, $_FILES['avatar_file'] ?? []);
+            if (($avatarResult['ok'] ?? false) !== true) {
+                $errors[] = (string)($avatarResult['error'] ?? 'Avatar konnte nicht gespeichert werden.');
+            }
             $messages[] = 'Einstellungen gespeichert.';
         } elseif ($action === 'change_password') {
             $result = auth_change_password(
@@ -65,12 +70,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $errors[] = (string)$error;
                 }
             }
+        } elseif ($action === 'save_page') {
+            $result = account_page_save(
+                $userEmail,
+                (string)($_POST['page_title'] ?? ''),
+                (string)($_POST['page_content'] ?? ''),
+                isset($_POST['page_published'])
+            );
+            if (($result['ok'] ?? false) === true) {
+                $messages[] = 'Projektseite wurde angelegt.';
+            } else {
+                $errors[] = (string)($result['error'] ?? 'Projektseite konnte nicht angelegt werden.');
+            }
+        } elseif ($action === 'delete_page') {
+            $pageId = trim((string)($_POST['page_id'] ?? ''));
+            if ($pageId === '' || !account_page_delete($userEmail, $pageId)) {
+                $errors[] = 'Projektseite konnte nicht geloescht werden.';
+            } else {
+                $messages[] = 'Projektseite wurde geloescht.';
+            }
         }
     }
 }
 
 $accountData = account_data_read($userEmail);
 $documents = is_array($accountData['documents'] ?? null) ? $accountData['documents'] : [];
+$projectPages = account_pages_list($userEmail);
 $moduleCount = 0;
 foreach (['workspace', 'calendar', 'hallenberg'] as $moduleKey) {
     if (!empty($accountData['modules'][$moduleKey])) {
@@ -78,12 +103,16 @@ foreach (['workspace', 'calendar', 'hallenberg'] as $moduleKey) {
     }
 }
 
-render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $accountData, $documents, $moduleCount, $messages, $errors): void {
+render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $accountData, $documents, $projectPages, $moduleCount, $messages, $errors): void {
     ?>
     <section class="account-topbar">
       <div class="account-topbar-meta">
+        <span class="account-avatar-frame">
+          <img src="<?= app_h(app_url('account-avatar.php')) ?>" alt="Avatar" loading="lazy" onerror="this.style.display='none'; this.parentNode.classList.add('is-empty');">
+        </span>
         <span class="card-label">Mein Bereich</span>
         <strong><?= app_h((string)($accountData['settings']['display_name'] ?? '') !== '' ? (string)$accountData['settings']['display_name'] : (string)($user['email'] ?? '')) ?></strong>
+        <span class="auth-hint"><?= app_h((string)($accountData['settings']['bio'] ?? '')) ?></span>
         <span class="auth-hint">Rolle: <?= app_h((string)($user['role'] ?? 'user')) ?></span>
       </div>
       <div class="auth-actions">
@@ -153,6 +182,46 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
 
       <article class="card account-card">
         <span class="card-label">Bereich 3</span>
+        <h3>Projektseiten</h3>
+        <p>Lege eigene Projektseiten an, wie im kleinen CMS: Titel, Inhalt, Freigabe.</p>
+        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
+          <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+          <input type="hidden" name="action" value="save_page">
+          <label for="page_title">Seitentitel</label>
+          <input id="page_title" name="page_title" type="text" placeholder="z. B. Projekt Hallenberg Q2">
+          <label for="page_content">Inhalt</label>
+          <textarea id="page_content" name="page_content" rows="4" placeholder="Kurze Projektseite mit den wichtigsten Infos."></textarea>
+          <label><input type="checkbox" name="page_published" checked> Seite direkt freigeben</label>
+          <div class="auth-actions">
+            <button class="btn btn-secondary" type="submit">Seite anlegen</button>
+          </div>
+        </form>
+        <div class="account-page-list">
+          <?php if ($projectPages === []): ?>
+            <p class="auth-hint">Noch keine Projektseiten vorhanden.</p>
+          <?php endif; ?>
+          <?php foreach ($projectPages as $page): ?>
+            <article class="account-doc-item">
+              <strong><?= app_h((string)($page['title'] ?? 'Seite')) ?></strong>
+              <span>Slug: <?= app_h((string)($page['slug'] ?? '')) ?> · <?= !empty($page['published']) ? 'veroeffentlicht' : 'entwurf' ?></span>
+              <div class="auth-actions">
+                <?php if (!empty($page['published'])): ?>
+                  <a class="btn btn-ghost" href="<?= app_h(app_url('account-page.php?slug=' . rawurlencode((string)($page['slug'] ?? '')))) ?>">Oeffnen</a>
+                <?php endif; ?>
+                <form method="post" action="<?= app_h(app_url('account.php')) ?>">
+                  <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
+                  <input type="hidden" name="action" value="delete_page">
+                  <input type="hidden" name="page_id" value="<?= app_h((string)($page['id'] ?? '')) ?>">
+                  <button class="btn btn-ghost" type="submit">Loeschen</button>
+                </form>
+              </div>
+            </article>
+          <?php endforeach; ?>
+        </div>
+      </article>
+
+      <article class="card account-card">
+        <span class="card-label">Bereich 4</span>
         <h3>Projektmodule</h3>
         <p>Lege fest, welche Module in deinem Fokus bleiben.</p>
         <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
@@ -171,14 +240,18 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
       </article>
 
       <article class="card account-card">
-        <span class="card-label">Bereich 4</span>
+        <span class="card-label">Bereich 5</span>
         <h3>Einstellungen</h3>
         <p>Pflege Anzeige- und Profilwerte fuer deinen Accountbereich.</p>
-        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">
+        <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>" enctype="multipart/form-data">
           <input type="hidden" name="csrf_token" value="<?= app_h(auth_csrf_token('account_actions')) ?>">
           <input type="hidden" name="action" value="save_settings">
           <label for="display_name">Anzeigename</label>
           <input id="display_name" name="display_name" type="text" value="<?= app_h((string)($accountData['settings']['display_name'] ?? '')) ?>" placeholder="z. B. Mark Dorth">
+          <label for="bio">Bio</label>
+          <textarea id="bio" name="bio" rows="3" placeholder="Kurzer Profiltext fuer deinen Bereich"><?= app_h((string)($accountData['settings']['bio'] ?? '')) ?></textarea>
+          <label for="avatar_file">Avatar / Profilbild</label>
+          <input id="avatar_file" name="avatar_file" type="file" accept=".jpg,.jpeg,.png,.webp">
           <label for="timezone">Zeitzone</label>
           <input id="timezone" name="timezone" type="text" value="<?= app_h((string)($accountData['settings']['timezone'] ?? 'Europe/Berlin')) ?>" placeholder="Europe/Berlin">
           <div class="auth-actions">
@@ -188,7 +261,7 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
       </article>
 
       <article class="card account-card">
-        <span class="card-label">Bereich 5</span>
+        <span class="card-label">Bereich 6</span>
         <h3>Zugang und Sicherheit</h3>
         <p>Passwort aktualisieren und Zugang absichern.</p>
         <form class="auth-form" method="post" action="<?= app_h(app_url('account.php')) ?>">

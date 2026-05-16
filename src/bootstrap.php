@@ -377,6 +377,24 @@ if (!function_exists('app_pages')) {
                 'show_header' => false,
                 'show_footer' => false,
             ],
+            [
+                'file' => 'account-avatar.php',
+                'label' => 'Avatar',
+                'title' => 'Avatar',
+                'eyebrow' => 'Benutzerbereich',
+                'description' => 'Geschuetzte Avatar-Ausgabe aus dem Benutzerbereich.',
+                'nav' => false,
+                'show_header' => false,
+                'show_footer' => false,
+            ],
+            [
+                'file' => 'account-page.php',
+                'label' => 'Projektseite',
+                'title' => 'Projektseite',
+                'eyebrow' => 'Benutzerbereich',
+                'description' => 'Geschuetzte Projektseite aus dem Benutzerbereich.',
+                'nav' => false,
+            ],
         ];
     }
 }
