@@ -620,6 +620,38 @@ a {
   margin-bottom: 10px;
 }
 
+.account-matrix-shell {
+  padding-top: 20px;
+}
+
+.account-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.account-matrix-item {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 12px;
+}
+
+.account-matrix-title {
+  display: block;
+  font: 700 0.8rem/1.2 Arial, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 245, 0.76);
+}
+
+@media (max-width: 860px) {
+  .account-matrix-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 960px) {
   .account-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
