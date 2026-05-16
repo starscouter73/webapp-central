@@ -411,6 +411,15 @@ a {
   line-height: 1.2;
 }
 
+.account-bio-preview {
+  margin: 1px 0 0;
+  max-width: min(72ch, 100%);
+  color: rgba(245, 245, 245, 0.78);
+  line-height: 1.45;
+  font-size: 0.92rem;
+  white-space: pre-line;
+}
+
 .content-shell.account-content-compact {
   margin-top: 2px;
   gap: 14px;

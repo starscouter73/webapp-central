@@ -134,7 +134,7 @@ render_page('Mein Bereich', 'Benutzerbereich', static function () use ($user, $a
         </span>
         <span class="card-label">Mein Bereich</span>
         <strong><?= app_h((string)($accountData['settings']['display_name'] ?? '') !== '' ? (string)$accountData['settings']['display_name'] : (string)($user['email'] ?? '')) ?></strong>
-        <span class="auth-hint"><?= app_h((string)($accountData['settings']['bio'] ?? '')) ?></span>
+        <p class="account-bio-preview"><?= app_h((string)($accountData['settings']['bio'] ?? '')) ?></p>
         <span class="auth-hint">Rolle: <?= app_h((string)($user['role'] ?? 'user')) ?></span>
       </div>
       <div class="auth-actions">
