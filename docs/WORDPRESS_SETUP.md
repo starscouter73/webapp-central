@@ -25,3 +25,7 @@ Die PHP-Upload-Konfiguration wird projektseitig ueber `docker/php/uploads.ini` e
 - `upload_max_filesize = 1024M`
 - `post_max_size = 1024M`
 - `memory_limit = 512M`
+
+## Produktionshinweis
+
+Fuer Produktionsbetrieb muss `WORDPRESS_DEBUG=0` gesetzt sein. Der String `false` ist in der offiziellen Docker-WordPress-Logik nicht ausreichend, weil er als nicht-leerer Wert dennoch als wahr ausgewertet werden kann.

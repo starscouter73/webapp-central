@@ -7,3 +7,4 @@
 - GitHub-Regel auf steuerbare Projektbestandteile begrenzt
 - Vorbereitung auf WordPress-Installationsseite unter `webapp-central.de`
 - PHP-Upload-Limit projektseitig auf 1 GB angehoben
+- WordPress-Debug-Schalter fuer Produktion auf den Docker-kompatiblen Wert `0` umgestellt
