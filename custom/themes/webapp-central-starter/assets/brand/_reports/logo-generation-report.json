@@ -1,0 +1,75 @@
+{
+  "moved_previous_assets": [],
+  "reports": {
+    "fresh-blue": {
+      "header": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\header\\webapp-central-header-fresh-blue-1800x360.png",
+        "left": 136,
+        "right": 790,
+        "top": 105,
+        "bottom": 104
+      },
+      "hero": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\main\\webapp-central-main-fresh-blue-2400x720.png",
+        "left": 166,
+        "right": 540,
+        "top": 209,
+        "bottom": 208
+      },
+      "icon": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-fresh-blue-512x512.png",
+        "left": 105,
+        "right": 105,
+        "top": 81,
+        "bottom": 81
+      }
+    },
+    "soft-cyan": {
+      "header": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\header\\webapp-central-header-soft-cyan-1800x360.png",
+        "left": 136,
+        "right": 790,
+        "top": 105,
+        "bottom": 104
+      },
+      "hero": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\main\\webapp-central-main-soft-cyan-2400x720.png",
+        "left": 166,
+        "right": 540,
+        "top": 209,
+        "bottom": 208
+      },
+      "icon": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-soft-cyan-512x512.png",
+        "left": 105,
+        "right": 105,
+        "top": 81,
+        "bottom": 81
+      }
+    },
+    "mint-glass": {
+      "header": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\header\\webapp-central-header-mint-glass-1800x360.png",
+        "left": 136,
+        "right": 790,
+        "top": 105,
+        "bottom": 104
+      },
+      "hero": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\main\\webapp-central-main-mint-glass-2400x720.png",
+        "left": 166,
+        "right": 540,
+        "top": 209,
+        "bottom": 208
+      },
+      "icon": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-mint-glass-512x512.png",
+        "left": 105,
+        "right": 105,
+        "top": 81,
+        "bottom": 81
+      }
+    }
+  },
+  "svg_master": "custom\\themes\\webapp-central-starter\\assets\\brand\\svg\\webapp-central-header-master.svg"
+}

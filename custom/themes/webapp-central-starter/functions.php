@@ -43,12 +43,12 @@ add_action('widgets_init', static function (): void {
 });
 
 add_action('wp_head', static function (): void {
-    $favicon = webapp_central_starter_asset_url('brand/icons/webapp-central-favicon-light-32x32.png');
-    $apple = webapp_central_starter_asset_url('brand/icons/webapp-central-apple-touch-icon-light-180x180.png');
-    $site_icon = webapp_central_starter_asset_url('brand/icons/webapp-central-site-icon-light-512x512.png');
+    $favicon = webapp_central_starter_asset_url('brand/icons/webapp-central-icon-fresh-blue-32x32.png');
+    $apple = webapp_central_starter_asset_url('brand/icons/webapp-central-icon-fresh-blue-192x192.png');
+    $site_icon = webapp_central_starter_asset_url('brand/icons/webapp-central-icon-fresh-blue-512x512.png');
 
     echo '<link rel="icon" type="image/png" sizes="32x32" href="' . esc_url($favicon) . '">' . PHP_EOL;
-    echo '<link rel="apple-touch-icon" sizes="180x180" href="' . esc_url($apple) . '">' . PHP_EOL;
+    echo '<link rel="apple-touch-icon" sizes="192x192" href="' . esc_url($apple) . '">' . PHP_EOL;
     echo '<meta name="msapplication-TileImage" content="' . esc_url($site_icon) . '">' . PHP_EOL;
 }, 5);
 
@@ -75,26 +75,26 @@ function webapp_central_starter_asset_path(string $relative_path): string
 
 function webapp_central_starter_render_header_branding(): void
 {
-    $relative_path = 'brand/header/webapp-central-header-logo-light-600x160.png';
+    $relative_path = 'brand/header/webapp-central-header-fresh-blue-1800x360.png';
     $logo_path = webapp_central_starter_asset_path($relative_path);
     $logo_url = webapp_central_starter_asset_url($relative_path);
 
     if (file_exists($logo_path)) {
         echo '<a class="site-logo" href="' . esc_url(home_url('/')) . '" aria-label="' . esc_attr__('webapp-central.de Startseite', 'webapp-central-starter') . '" title="' . esc_attr__('Zur Startseite von webapp-central.de', 'webapp-central-starter') . '">';
-        echo '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr__('Webapp Central Header-Logo fuer Projekte, Module und Tutorials', 'webapp-central-starter') . '" width="300" height="80">';
+        echo '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr__('Webapp Central Wortmarke fuer Projekte, Module und Tutorials', 'webapp-central-starter') . '" width="460" height="92">';
         echo '</a>';
     }
 
     echo '<div class="site-branding__text">';
     echo '<p class="site-title' . (file_exists($logo_path) ? ' screen-reader-text' : '') . '"><span>' . esc_html(get_bloginfo('name')) . '</span></p>';
-    echo '<p class="site-kicker">' . esc_html__('Offizielles Header-Logo', 'webapp-central-starter') . '</p>';
+    echo '<p class="site-kicker">' . esc_html__('Offizielle Wortmarke', 'webapp-central-starter') . '</p>';
     echo '<p class="site-caption">' . esc_html__('Projektzentrale fuer Inhalte, Module und Tutorials', 'webapp-central-starter') . '</p>';
     echo '</div>';
 }
 
 function webapp_central_starter_render_main_brand(): void
 {
-    $relative_path = 'brand/main/webapp-central-main-logo-light-1200x400.png';
+    $relative_path = 'brand/main/webapp-central-main-fresh-blue-2400x720.png';
     $main_logo_path = webapp_central_starter_asset_path($relative_path);
     $main_logo = webapp_central_starter_asset_url($relative_path);
 
@@ -103,9 +103,9 @@ function webapp_central_starter_render_main_brand(): void
     }
 
     echo '<figure class="hero-brandmark">';
-    echo '<p class="hero-brandmark__label">' . esc_html__('Hauptlogo', 'webapp-central-starter') . '</p>';
-    echo '<img src="' . esc_url($main_logo) . '" alt="' . esc_attr__('Webapp Central Hauptlogo fuer die Projektzentrale', 'webapp-central-starter') . '" width="600" height="200">';
-    echo '<figcaption class="hero-brandmark__caption">' . esc_html__('Offizielles WordPress-Branding fuer webapp-central.de', 'webapp-central-starter') . '</figcaption>';
+    echo '<p class="hero-brandmark__label">' . esc_html__('Wortmarke', 'webapp-central-starter') . '</p>';
+    echo '<img src="' . esc_url($main_logo) . '" alt="' . esc_attr__('Webapp Central Wortmarke fuer die Projektzentrale', 'webapp-central-starter') . '" width="780" height="234">';
+    echo '<figcaption class="hero-brandmark__caption">' . esc_html__('Neues frisches Branding fuer webapp-central.de ohne beschnittene Schrift', 'webapp-central-starter') . '</figcaption>';
     echo '</figure>';
 }
 
