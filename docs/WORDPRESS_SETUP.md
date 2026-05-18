@@ -2,7 +2,7 @@
 
 ## Zielbild
 
-WordPress wird über Docker betrieben. Core und Uploads liegen in Volumes, versioniert werden nur steuerbare Projektdateien und eigener Custom-Code.
+WordPress wird ueber Docker betrieben. Core und Uploads liegen in Volumes, versioniert werden nur steuerbare Projektdateien und eigener Custom-Code.
 
 ## Setup-Ablauf
 
@@ -14,7 +14,14 @@ WordPress wird über Docker betrieben. Core und Uploads liegen in Volumes, versi
 
 ## Custom-Code
 
-- `custom/themes/` für eigene Themes
-- `custom/plugins/` für eigene Plugins
-- `custom/snippets/` für MU-Plugins / Bootstrap-Snippets
+- `custom/themes/` fuer eigene Themes
+- `custom/plugins/` fuer eigene Plugins
+- `custom/snippets/` fuer MU-Plugins / Bootstrap-Snippets
 
+## PHP-Upload-Limits
+
+Die PHP-Upload-Konfiguration wird projektseitig ueber `docker/php/uploads.ini` eingebunden.
+
+- `upload_max_filesize = 1024M`
+- `post_max_size = 1024M`
+- `memory_limit = 512M`

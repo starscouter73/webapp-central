@@ -8,7 +8,8 @@ get_header();
         <section class="glass-panel archive-shell">
             <header class="entry-header">
                 <span class="eyebrow"><?php esc_html_e('Archiv', 'webapp-central-starter'); ?></span>
-                <h1 class="entry-title"><?php bloginfo('name'); ?></h1>
+                <h1 class="entry-title"><?php the_archive_title(); ?></h1>
+                <?php the_archive_description('<div class="entry-summary">', '</div>'); ?>
             </header>
             <?php if (have_posts()) : ?>
                 <div class="post-grid">
@@ -18,7 +19,7 @@ get_header();
                 </div>
                 <div class="pagination"><?php the_posts_pagination(); ?></div>
             <?php else : ?>
-                <p class="empty-state"><?php esc_html_e('Noch keine Inhalte verfuegbar.', 'webapp-central-starter'); ?></p>
+                <p class="empty-state"><?php esc_html_e('Keine Inhalte in diesem Archiv gefunden.', 'webapp-central-starter'); ?></p>
             <?php endif; ?>
         </section>
     </main>
