@@ -1,0 +1,70 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Pflegekueche Wochenplaner//DE
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:4c888e73-e4a5-4156-b107-57df3ec58408@pflegekueche
+DTSTAMP:20260517T120000Z
+DTSTART;TZID=Europe/Berlin:20260518T100000
+DTEND;TZID=Europe/Berlin:20260518T103000
+SUMMARY:Vorbereitung: Gemüse schneiden & Dip anrühren
+DESCRIPTION:Kartoffeln/Gemüse vorbereiten\, Joghurt-Dip anrühren.
+END:VEVENT
+BEGIN:VEVENT
+UID:80e4982c-8ba8-47f9-b4f9-ded8398ce8fc@pflegekueche
+DTSTAMP:20260517T120000Z
+DTSTART;TZID=Europe/Berlin:20260518T170000
+DTEND;TZID=Europe/Berlin:20260518T180000
+SUMMARY:Kochen: Hähnchen-Kartoffel-Gemüse-Blech
+DESCRIPTION:Ofengericht zubereiten.
+END:VEVENT
+BEGIN:VEVENT
+UID:96b75dd8-774c-4db9-b5f5-f6ed116540c4@pflegekueche
+DTSTAMP:20260517T120000Z
+DTSTART;TZID=Europe/Berlin:20260519T170000
+DTEND;TZID=Europe/Berlin:20260519T181500
+SUMMARY:Kochen/Vorkochen: Hack-Gemüse-Nudelauflauf
+DESCRIPTION:Große Menge kochen\, Reste für Mittwoch/Reserve abfüllen.
+END:VEVENT
+BEGIN:VEVENT
+UID:ca52ce3d-ca71-422a-9a42-b1395dc29e10@pflegekueche
+DTSTAMP:20260517T120000Z
+DTSTART;TZID=Europe/Berlin:20260520T170000
+DTEND;TZID=Europe/Berlin:20260520T180000
+SUMMARY:Kochen: Fisch mit Reis\, Spinat und Gurkensalat
+DESCRIPTION:Gast: Frau Muster. Für 4 Personen kochen.
+END:VEVENT
+BEGIN:VEVENT
+UID:491585af-35de-4b72-bb10-582941216e6d@pflegekueche
+DTSTAMP:20260517T120000Z
+DTSTART;TZID=Europe/Berlin:20260521T163000
+DTEND;TZID=Europe/Berlin:20260521T180000
+SUMMARY:Vorkochen: Kartoffel-Möhren-Eintopf
+DESCRIPTION:Große Menge für Donnerstag und Freitag kochen.
+END:VEVENT
+BEGIN:VEVENT
+UID:1dd0aaf7-5c7d-4507-a73d-d6f0cbbe640a@pflegekueche
+DTSTAMP:20260517T120000Z
+DTSTART;TZID=Europe/Berlin:20260522T173000
+DTEND;TZID=Europe/Berlin:20260522T180000
+SUMMARY:Kochen: Reste-Eintopf + Rührei-Brot-Teller
+DESCRIPTION:Eintopf erwärmen\, Rührei frisch machen.
+END:VEVENT
+BEGIN:VEVENT
+UID:3e81bc94-7137-4e4e-92bd-44adeebe6892@pflegekueche
+DTSTAMP:20260517T120000Z
+DTSTART;TZID=Europe/Berlin:20260523T160000
+DTEND;TZID=Europe/Berlin:20260523T180000
+SUMMARY:Kochen/Vorkochen: Gesündere Lasagne
+DESCRIPTION:Große Menge kochen\, Reste für Sonntag/Montag einplanen.
+END:VEVENT
+BEGIN:VEVENT
+UID:d3a65613-8232-47ee-ac56-4f06cae19983@pflegekueche
+DTSTAMP:20260517T120000Z
+DTSTART;TZID=Europe/Berlin:20260524T170000
+DTEND;TZID=Europe/Berlin:20260524T181500
+SUMMARY:Kochen: Milde Teriyaki-Hähnchen-Bowl
+DESCRIPTION:Reis\, Gemüse und Hähnchen mit milder Sauce.
+END:VEVENT
+END:VCALENDAR
