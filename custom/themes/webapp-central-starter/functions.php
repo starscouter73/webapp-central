@@ -92,7 +92,7 @@ function webapp_central_starter_module_cards(): array
         ],
         [
             'title' => __('Designbasis', 'webapp-central-starter'),
-            'description' => __('Dark-Glass-Theme mit responsiver Basis, geeignet fuer Hallenberg, Module und zentrale Projektseiten.', 'webapp-central-starter'),
+            'description' => __('Frischer Glass-Look mit responsiver Basis, geeignet fuer Hallenberg, Module und zentrale Projektseiten.', 'webapp-central-starter'),
             'url' => admin_url('customize.php'),
             'label' => __('Design pruefen', 'webapp-central-starter'),
         ],

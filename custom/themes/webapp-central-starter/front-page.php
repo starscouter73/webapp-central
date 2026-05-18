@@ -15,7 +15,7 @@ $recent_posts = get_posts([
         <span class="eyebrow"><?php esc_html_e('Projektzentrale', 'webapp-central-starter'); ?></span>
         <h1><?php bloginfo('name'); ?></h1>
         <p class="hero__lead">
-            <?php esc_html_e('Dieses Theme liefert eine minimale, stabile Basis fuer webapp-central.de: dunkel, modular, responsiv und bewusst schlank versionierbar.', 'webapp-central-starter'); ?>
+            <?php esc_html_e('Dieses Theme liefert eine minimale, stabile Basis fuer webapp-central.de: hell, freundlich, modular, responsiv und bewusst schlank versionierbar.', 'webapp-central-starter'); ?>
         </p>
         <div class="hero__actions">
             <a class="button-link" href="<?php echo esc_url(admin_url()); ?>"><?php esc_html_e('WordPress Dashboard', 'webapp-central-starter'); ?></a>
@@ -39,7 +39,7 @@ $recent_posts = get_posts([
     <aside class="hero__aside glass-panel">
         <h2><?php esc_html_e('Naechste Schritte', 'webapp-central-starter'); ?></h2>
         <ul>
-            <li><?php esc_html_e('Theme pruefen, aber erst nach Abschluss der Installation aktivieren.', 'webapp-central-starter'); ?></li>
+            <li><?php esc_html_e('Theme ist jetzt aktiv und kann als Basis fuer die Projektzentrale weiter ausgebaut werden.', 'webapp-central-starter'); ?></li>
             <li><?php esc_html_e('Startseite, Module und Projektbereiche als Seitenstruktur aufbauen.', 'webapp-central-starter'); ?></li>
             <li><?php esc_html_e('Eigene Plugins und Snippets weiter im versionierten custom/-Bereich pflegen.', 'webapp-central-starter'); ?></li>
         </ul>
