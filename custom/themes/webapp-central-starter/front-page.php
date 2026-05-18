@@ -13,6 +13,7 @@ $recent_posts = get_posts([
 <section class="hero">
     <div class="hero__intro glass-panel">
         <span class="eyebrow"><?php esc_html_e('Projektzentrale', 'webapp-central-starter'); ?></span>
+        <?php webapp_central_starter_render_main_brand(); ?>
         <h1><?php bloginfo('name'); ?></h1>
         <p class="hero__lead">
             <?php esc_html_e('Dieses Theme liefert eine minimale, stabile Basis fuer webapp-central.de: hell, freundlich, modular, responsiv und bewusst schlank versionierbar.', 'webapp-central-starter'); ?>

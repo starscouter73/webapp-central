@@ -13,10 +13,7 @@ declare(strict_types=1);
     <header class="site-header">
         <div class="site-header__inner">
             <div class="site-branding">
-                <p class="site-title"><a href="<?php echo esc_url(home_url('/')); ?>"><?php bloginfo('name'); ?></a></p>
-                <?php if (get_bloginfo('description') !== '') : ?>
-                    <p class="site-description"><?php bloginfo('description'); ?></p>
-                <?php endif; ?>
+                <?php webapp_central_starter_render_header_branding(); ?>
             </div>
             <?php webapp_central_starter_render_menu(); ?>
         </div>

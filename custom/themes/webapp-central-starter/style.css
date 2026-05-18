@@ -3,9 +3,9 @@ Theme Name: Webapp Central Starter
 Theme URI: https://webapp-central.de/
 Author: Mark Dorth
 Description: Minimal stabiles WordPress-Theme fuer webapp-central.de als modulare Projektzentrale mit frischem Glass-Look.
-Version: 0.2.1
+Version: 0.2.2
 Requires at least: 6.5
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 8.2
 Text Domain: webapp-central-starter
 */
@@ -158,8 +158,9 @@ img {
 
 .site-branding {
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 0;
 }
 
 .site-title {
@@ -167,6 +168,41 @@ img {
     font-size: clamp(1.1rem, 1rem + 0.8vw, 1.55rem);
     letter-spacing: 0.02em;
     max-width: 100%;
+}
+
+.site-branding__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.site-logo {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.site-logo img {
+    display: block;
+    width: min(300px, 100%);
+    height: auto;
+}
+
+.site-caption {
+    margin: 0;
+    color: var(--wc-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.35;
+}
+
+.site-kicker {
+    margin: 0;
+    color: var(--wc-accent-strong);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .site-title a {
@@ -259,6 +295,30 @@ img {
 
 .hero__lead {
     max-width: 62ch;
+}
+
+.hero-brandmark {
+    margin: 0 0 1.2rem;
+}
+
+.hero-brandmark__label {
+    margin: 0 0 0.45rem;
+    color: var(--wc-accent-strong);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hero-brandmark img {
+    width: min(100%, 560px);
+    height: auto;
+}
+
+.hero-brandmark__caption {
+    margin-top: 0.5rem;
+    color: var(--wc-text-muted);
+    font-size: 0.92rem;
 }
 
 .hero__actions {
@@ -572,6 +632,11 @@ select:focus {
         flex-direction: column;
     }
 
+    .site-branding {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
     .hero__stats {
         grid-template-columns: 1fr;
     }
@@ -599,5 +664,9 @@ select:focus {
     .error-shell {
         padding-left: 1rem;
         padding-right: 1rem;
+    }
+
+    .site-logo img {
+        width: min(240px, 100%);
     }
 }
