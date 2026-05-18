@@ -16,9 +16,9 @@ vendor/
 backups/
 tmp/
 cache/
+__pycache__/
 wp-admin/
 wp-includes/
 wp-content/uploads/
 wordpress/
 docker-data/
-

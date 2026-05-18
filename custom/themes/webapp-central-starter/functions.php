@@ -43,6 +43,10 @@ add_action('widgets_init', static function (): void {
 });
 
 add_action('wp_head', static function (): void {
+    if (has_site_icon()) {
+        return;
+    }
+
     $favicon = webapp_central_starter_asset_url('brand/icons/webapp-central-icon-fresh-blue-32x32.png');
     $apple = webapp_central_starter_asset_url('brand/icons/webapp-central-icon-fresh-blue-192x192.png');
     $site_icon = webapp_central_starter_asset_url('brand/icons/webapp-central-icon-fresh-blue-512x512.png');
@@ -75,18 +79,26 @@ function webapp_central_starter_asset_path(string $relative_path): string
 
 function webapp_central_starter_render_header_branding(): void
 {
-    $relative_path = 'brand/header/webapp-central-header-fresh-blue-1800x360.png';
+    $logo = null;
+    $relative_path = 'brand/header/webapp-central-header-fresh-blue-display.png';
     $logo_path = webapp_central_starter_asset_path($relative_path);
-    $logo_url = webapp_central_starter_asset_url($relative_path);
-
     if (file_exists($logo_path)) {
+        $logo = [
+            'url' => webapp_central_starter_asset_url($relative_path),
+            'width' => 460,
+            'height' => 92,
+            'alt' => __('Webapp Central Wortmarke fuer Projekte, Module und Tutorials', 'webapp-central-starter'),
+        ];
+    }
+
+    if ($logo !== null) {
         echo '<a class="site-logo" href="' . esc_url(home_url('/')) . '" aria-label="' . esc_attr__('webapp-central.de Startseite', 'webapp-central-starter') . '" title="' . esc_attr__('Zur Startseite von webapp-central.de', 'webapp-central-starter') . '">';
-        echo '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr__('Webapp Central Wortmarke fuer Projekte, Module und Tutorials', 'webapp-central-starter') . '" width="460" height="92">';
+        echo '<img src="' . esc_url($logo['url']) . '" alt="' . esc_attr((string) $logo['alt']) . '" width="' . esc_attr((string) $logo['width']) . '" height="' . esc_attr((string) $logo['height']) . '">';
         echo '</a>';
     }
 
     echo '<div class="site-branding__text">';
-    echo '<p class="site-title' . (file_exists($logo_path) ? ' screen-reader-text' : '') . '"><span>' . esc_html(get_bloginfo('name')) . '</span></p>';
+    echo '<p class="site-title' . ($logo !== null ? ' screen-reader-text' : '') . '"><span>' . esc_html(get_bloginfo('name')) . '</span></p>';
     echo '<p class="site-kicker">' . esc_html__('Offizielle Wortmarke', 'webapp-central-starter') . '</p>';
     echo '<p class="site-caption">' . esc_html__('Projektzentrale fuer Inhalte, Module und Tutorials', 'webapp-central-starter') . '</p>';
     echo '</div>';
@@ -94,17 +106,25 @@ function webapp_central_starter_render_header_branding(): void
 
 function webapp_central_starter_render_main_brand(): void
 {
-    $relative_path = 'brand/main/webapp-central-main-fresh-blue-2400x720.png';
+    $main_logo = null;
+    $relative_path = 'brand/main/webapp-central-main-fresh-blue-display.png';
     $main_logo_path = webapp_central_starter_asset_path($relative_path);
-    $main_logo = webapp_central_starter_asset_url($relative_path);
+    if (file_exists($main_logo_path)) {
+        $main_logo = [
+            'url' => webapp_central_starter_asset_url($relative_path),
+            'width' => 780,
+            'height' => 234,
+            'alt' => __('Webapp Central Wortmarke fuer die Projektzentrale', 'webapp-central-starter'),
+        ];
+    }
 
-    if (!file_exists($main_logo_path)) {
+    if ($main_logo === null) {
         return;
     }
 
     echo '<figure class="hero-brandmark">';
     echo '<p class="hero-brandmark__label">' . esc_html__('Wortmarke', 'webapp-central-starter') . '</p>';
-    echo '<img src="' . esc_url($main_logo) . '" alt="' . esc_attr__('Webapp Central Wortmarke fuer die Projektzentrale', 'webapp-central-starter') . '" width="780" height="234">';
+    echo '<img src="' . esc_url($main_logo['url']) . '" alt="' . esc_attr((string) $main_logo['alt']) . '" width="' . esc_attr((string) $main_logo['width']) . '" height="' . esc_attr((string) $main_logo['height']) . '">';
     echo '<figcaption class="hero-brandmark__caption">' . esc_html__('Neues frisches Branding fuer webapp-central.de ohne beschnittene Schrift', 'webapp-central-starter') . '</figcaption>';
     echo '</figure>';
 }

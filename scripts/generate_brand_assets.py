@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -169,6 +168,13 @@ def validate_bbox(image: Image.Image, *, min_left: int, min_right: int, min_top:
     return result
 
 
+def crop_vertical_with_padding(image: Image.Image, top_pad: int, bottom_pad: int) -> Image.Image:
+    left, top, right, bottom = alpha_bbox(image)
+    y0 = max(0, top - top_pad)
+    y1 = min(image.height, bottom + bottom_pad)
+    return image.crop((0, y0, image.width, y1))
+
+
 def save_svg() -> str:
     svg_path = ASSET_ROOT / "svg" / "webapp-central-header-master.svg"
     svg_path.write_text(
@@ -203,12 +209,16 @@ def main() -> None:
 
         header_path = ASSET_ROOT / "header" / f"webapp-central-header-{variant.slug}-1800x360.png"
         hero_path = ASSET_ROOT / "main" / f"webapp-central-main-{variant.slug}-2400x720.png"
+        header_display_path = ASSET_ROOT / "header" / f"webapp-central-header-{variant.slug}-display.png"
+        hero_display_path = ASSET_ROOT / "main" / f"webapp-central-main-{variant.slug}-display.png"
         icon_512_path = ASSET_ROOT / "icons" / f"webapp-central-icon-{variant.slug}-512x512.png"
         icon_192_path = ASSET_ROOT / "icons" / f"webapp-central-icon-{variant.slug}-192x192.png"
         icon_32_path = ASSET_ROOT / "icons" / f"webapp-central-icon-{variant.slug}-32x32.png"
 
         header.save(header_path)
         hero.save(hero_path)
+        crop_vertical_with_padding(header, top_pad=18, bottom_pad=18).save(header_display_path)
+        crop_vertical_with_padding(hero, top_pad=24, bottom_pad=24).save(hero_display_path)
         icon_512.save(icon_512_path)
         icon_192.save(icon_192_path)
         icon_32.save(icon_32_path)
@@ -216,6 +226,8 @@ def main() -> None:
         reports[variant.slug] = {
             "header": {"file": str(header_path.relative_to(ROOT)), **header_box},
             "hero": {"file": str(hero_path.relative_to(ROOT)), **hero_box},
+            "header_display": {"file": str(header_display_path.relative_to(ROOT)), **validate_bbox(crop_vertical_with_padding(header, 18, 18), min_left=80, min_right=240, min_top=18, min_bottom=18)},
+            "hero_display": {"file": str(hero_display_path.relative_to(ROOT)), **validate_bbox(crop_vertical_with_padding(hero, 24, 24), min_left=100, min_right=360, min_top=18, min_bottom=18)},
             "icon": {"file": str(icon_512_path.relative_to(ROOT)), **icon_box},
         }
 

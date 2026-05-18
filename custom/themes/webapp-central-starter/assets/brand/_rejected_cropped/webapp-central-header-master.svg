@@ -1,8 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="320" viewBox="0 0 1400 320" fill="none">
-  <rect x="18" y="18" width="1364" height="284" rx="120" stroke="#67C9EC" stroke-width="4"/>
-  <path d="M185.5 69L249.853 106.5V181.5L185.5 219L121.147 181.5V106.5L185.5 69Z" fill="#60C3E9" stroke="#2E87D2" stroke-width="4"/>
-  <path d="M185.5 93L229.466 118.75V168.25L185.5 194L141.534 168.25V118.75L185.5 93Z" stroke="white" stroke-opacity=".85" stroke-width="2"/>
-  <text x="141" y="160" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="62" font-weight="700">wc</text>
-  <text x="310" y="144" fill="#1E3C5A" font-family="Segoe UI, Arial, sans-serif" font-size="92" font-weight="700">webapp-central.de</text>
-  <text x="310" y="212" fill="#3D7492" font-family="Segoe UI, Arial, sans-serif" font-size="40" font-weight="700">Projekte  |  Module  |  Tutorials</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="360" viewBox="0 0 1800 360" fill="none">
+  <path d="M246 98L311.82 136V212L246 250L180.18 212V136L246 98Z" fill="#60C3E9" stroke="#2E87D2" stroke-width="4"/>
+  <path d="M246 122L291.03 148V200L246 226L200.97 200V148L246 122Z" stroke="white" stroke-opacity=".85" stroke-width="2"/>
+  <text x="201" y="191" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="54" font-weight="700">wc</text>
+  <text x="390" y="173" fill="#1E3C5A" font-family="Segoe UI, Arial, sans-serif" font-size="96" font-weight="700">webapp-central.de</text>
+  <text x="390" y="232" fill="#3D7492" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Projekte  |  Module  |  Tutorials</text>
 </svg>

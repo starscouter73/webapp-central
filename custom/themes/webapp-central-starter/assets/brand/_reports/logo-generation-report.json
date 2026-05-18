@@ -1,5 +1,22 @@
 {
-  "moved_previous_assets": [],
+  "moved_previous_assets": [
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\_rejected_cropped\\webapp-central-header-fresh-blue-1800x360.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\_rejected_cropped\\webapp-central-header-mint-glass-1800x360.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\_rejected_cropped\\webapp-central-header-soft-cyan-1800x360.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\_rejected_cropped\\webapp-central-main-fresh-blue-2400x720.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\_rejected_cropped\\webapp-central-main-mint-glass-2400x720.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\_rejected_cropped\\webapp-central-main-soft-cyan-2400x720.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\_rejected_cropped\\webapp-central-header-master.svg",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-fresh-blue-192x192.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-fresh-blue-32x32.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-fresh-blue-512x512.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-mint-glass-192x192.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-mint-glass-32x32.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-mint-glass-512x512.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-soft-cyan-192x192.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-soft-cyan-32x32.png",
+    "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-soft-cyan-512x512.png"
+  ],
   "reports": {
     "fresh-blue": {
       "header": {
@@ -15,6 +32,20 @@
         "right": 540,
         "top": 209,
         "bottom": 208
+      },
+      "header_display": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\header\\webapp-central-header-fresh-blue-display.png",
+        "left": 136,
+        "right": 790,
+        "top": 18,
+        "bottom": 18
+      },
+      "hero_display": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\main\\webapp-central-main-fresh-blue-display.png",
+        "left": 166,
+        "right": 540,
+        "top": 24,
+        "bottom": 24
       },
       "icon": {
         "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-fresh-blue-512x512.png",
@@ -39,6 +70,20 @@
         "top": 209,
         "bottom": 208
       },
+      "header_display": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\header\\webapp-central-header-soft-cyan-display.png",
+        "left": 136,
+        "right": 790,
+        "top": 18,
+        "bottom": 18
+      },
+      "hero_display": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\main\\webapp-central-main-soft-cyan-display.png",
+        "left": 166,
+        "right": 540,
+        "top": 24,
+        "bottom": 24
+      },
       "icon": {
         "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-soft-cyan-512x512.png",
         "left": 105,
@@ -61,6 +106,20 @@
         "right": 540,
         "top": 209,
         "bottom": 208
+      },
+      "header_display": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\header\\webapp-central-header-mint-glass-display.png",
+        "left": 136,
+        "right": 790,
+        "top": 18,
+        "bottom": 18
+      },
+      "hero_display": {
+        "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\main\\webapp-central-main-mint-glass-display.png",
+        "left": 166,
+        "right": 540,
+        "top": 24,
+        "bottom": 24
       },
       "icon": {
         "file": "custom\\themes\\webapp-central-starter\\assets\\brand\\icons\\webapp-central-icon-mint-glass-512x512.png",
