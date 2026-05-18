@@ -515,6 +515,28 @@ input[type="submit"]:focus-visible {
     margin: 0;
 }
 
+.site-footer__links {
+    margin-top: 0.9rem;
+}
+
+.site-footer__links ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.site-footer__links a {
+    color: var(--wc-text-muted);
+}
+
+.site-footer__links a:hover,
+.site-footer__links a:focus-visible {
+    color: var(--wc-accent);
+}
+
 input[type="text"],
 input[type="email"],
 input[type="url"],
