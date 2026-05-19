@@ -3,7 +3,7 @@ Theme Name: Webapp Central Starter
 Theme URI: https://webapp-central.de/
 Author: Mark Dorth
 Description: Minimal stabiles WordPress-Theme fuer webapp-central.de als modulare Projektzentrale mit frischem Glass-Look.
-Version: 0.2.8
+Version: 0.3.0
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 8.2
@@ -673,6 +673,199 @@ input[type="submit"]:focus-visible {
     color: var(--wc-accent);
 }
 
+.portal-shell {
+    width: min(calc(100% - 2rem), 1320px);
+    margin: 0 auto;
+    padding: 2.25rem 0 4rem;
+}
+
+.portal-shell--overview,
+.portal-shell--project {
+    color: #d8e6f6;
+}
+
+.portal-shell--overview .portal-panel,
+.portal-shell--project .portal-panel,
+.portal-shell--overview .portal-card,
+.portal-shell--project .portal-card {
+    background:
+        linear-gradient(180deg, rgba(16, 28, 45, 0.94), rgba(11, 21, 36, 0.96)),
+        radial-gradient(circle at top right, rgba(72, 196, 255, 0.18), transparent 28%);
+    border: 1px solid rgba(141, 193, 241, 0.14);
+    box-shadow: 0 24px 80px rgba(5, 9, 18, 0.42);
+}
+
+.portal-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(19rem, 0.9fr);
+    gap: 1.35rem;
+    margin-bottom: 1.5rem;
+}
+
+.portal-panel {
+    padding: clamp(1.4rem, 1rem + 1vw, 2.2rem);
+    border-radius: 28px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.portal-title,
+.portal-shell .entry-content h2,
+.portal-shell .entry-content h3 {
+    color: #f3f8ff;
+}
+
+.portal-title {
+    margin: 0 0 0.85rem;
+    font-size: clamp(2.2rem, 1.8rem + 2vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    max-width: 11ch;
+}
+
+.portal-lead,
+.portal-shell .entry-content p,
+.portal-shell .entry-content li,
+.portal-card p,
+.portal-activity-list li,
+.portal-timestamp {
+    color: #9db4cc;
+}
+
+.portal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+}
+
+.portal-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(82, 190, 255, 0.16);
+    border: 1px solid rgba(108, 202, 255, 0.24);
+    color: #8dd6ff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.portal-badge--soft {
+    background: rgba(255, 255, 255, 0.08);
+    color: #c8d9ec;
+}
+
+.portal-section {
+    margin-top: 1.5rem;
+}
+
+.portal-section__heading {
+    margin-bottom: 1rem;
+}
+
+.portal-section__heading h2 {
+    margin: 0.45rem 0 0;
+    color: #f3f8ff;
+    font-size: clamp(1.45rem, 1.2rem + 0.8vw, 2rem);
+}
+
+.portal-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.portal-grid--areas {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.portal-grid--featured,
+.portal-grid--projects {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.portal-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding: 1.25rem;
+    border-radius: 22px;
+}
+
+.portal-card h3 {
+    margin: 0.85rem 0 0.55rem;
+    color: #f3f8ff;
+    font-size: 1.18rem;
+}
+
+.portal-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.6rem;
+}
+
+.portal-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.85rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(126, 255, 196, 0.12);
+    border: 1px solid rgba(126, 255, 196, 0.18);
+    color: #9ce7bf;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.portal-card__visual {
+    display: flex;
+    align-items: flex-end;
+    min-height: 9rem;
+    padding: 1rem;
+    border-radius: 18px;
+    background:
+        linear-gradient(135deg, rgba(84, 201, 255, 0.18), rgba(0, 0, 0, 0)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(151, 208, 255, 0.12);
+}
+
+.portal-card__visual span {
+    color: #8edcff;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.portal-card__link {
+    margin-top: auto;
+    padding-top: 1rem;
+    color: #7fd5ff;
+    font-weight: 700;
+}
+
+.portal-intro {
+    margin-bottom: 1.25rem;
+}
+
+.portal-activity-list {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+}
+
+.portal-activity-list li {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(145, 184, 220, 0.12);
+}
+
+.portal-activity-list li:last-child {
+    border-bottom: 0;
+}
+
 input[type="text"],
 input[type="email"],
 input[type="url"],
@@ -700,6 +893,13 @@ select:focus {
     .content-wrap,
     .module-grid,
     .post-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .portal-hero,
+    .portal-grid--areas,
+    .portal-grid--featured,
+    .portal-grid--projects {
         grid-template-columns: 1fr;
     }
 
@@ -732,6 +932,7 @@ select:focus {
     .site-footer__inner,
     .hero__intro,
     .hero__aside,
+    .portal-panel,
     .content-main > article,
     .content-sidebar > section,
     .archive-shell,

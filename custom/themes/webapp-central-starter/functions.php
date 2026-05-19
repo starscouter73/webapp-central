@@ -179,3 +179,138 @@ function webapp_central_starter_module_cards(): array
         ],
     ];
 }
+
+function webapp_central_starter_portal_page_url(string $path, string $fallback = '/'): string
+{
+    $page = get_page_by_path($path);
+
+    if ($page instanceof WP_Post) {
+        return (string) get_permalink($page);
+    }
+
+    return home_url($fallback);
+}
+
+function webapp_central_starter_portal_sections(): array
+{
+    return [
+        [
+            'title' => __('Dashboard', 'webapp-central-starter'),
+            'description' => __('Zentrale Einstiegsseite fuer den aktuellen Projekt- und Systemueberblick.', 'webapp-central-starter'),
+            'url' => home_url('/'),
+            'badge' => __('Live', 'webapp-central-starter'),
+        ],
+        [
+            'title' => __('Projekte', 'webapp-central-starter'),
+            'description' => __('Projekt-Hubs, Themenkarten und strukturierte Arbeitsbereiche.', 'webapp-central-starter'),
+            'url' => webapp_central_starter_portal_page_url('projekte'),
+            'badge' => __('Aktiv', 'webapp-central-starter'),
+        ],
+        [
+            'title' => __('Dokumentationen', 'webapp-central-starter'),
+            'description' => __('Langfristig fuer Handbuecher, technische Wege und nachvollziehbare Ablagen.', 'webapp-central-starter'),
+            'url' => webapp_central_starter_portal_page_url('dokumentationen'),
+            'badge' => __('Basis', 'webapp-central-starter'),
+        ],
+        [
+            'title' => __('Medien', 'webapp-central-starter'),
+            'description' => __('Platz fuer Bilder, Berichte, spaetere Galerien und visuelle Nachweise.', 'webapp-central-starter'),
+            'url' => webapp_central_starter_portal_page_url('medien'),
+            'badge' => __('Basis', 'webapp-central-starter'),
+        ],
+        [
+            'title' => __('Analyse', 'webapp-central-starter'),
+            'description' => __('Vorbereitung fuer spaetere KI-Auswertungen, Reports und Dashboards.', 'webapp-central-starter'),
+            'url' => webapp_central_starter_portal_page_url('analyse'),
+            'badge' => __('Roadmap', 'webapp-central-starter'),
+        ],
+        [
+            'title' => __('System', 'webapp-central-starter'),
+            'description' => __('Bereich fuer Strukturhinweise, Betriebslogik und technische Leitplanken.', 'webapp-central-starter'),
+            'url' => webapp_central_starter_portal_page_url('system'),
+            'badge' => __('Intern', 'webapp-central-starter'),
+        ],
+    ];
+}
+
+function webapp_central_starter_featured_project_hubs(): array
+{
+    return [
+        [
+            'title' => __('Pfarrer Matthias Genster', 'webapp-central-starter'),
+            'description' => __('Zentrale Hub-Seite fuer Betreuung, Aufenthalte, Fahrten, Infrastruktur und begleitende Dokumentation.', 'webapp-central-starter'),
+            'url' => webapp_central_starter_portal_page_url('projekte/pfarrer-matthias-genster'),
+            'status' => __('Aktiv', 'webapp-central-starter'),
+            'activity' => __('Heute aktualisiert', 'webapp-central-starter'),
+            'visual' => __('Projekt-Hub', 'webapp-central-starter'),
+        ],
+    ];
+}
+
+function webapp_central_starter_project_hub_cards(string $slug): array
+{
+    if ($slug !== 'pfarrer-matthias-genster') {
+        return [];
+    }
+
+    return [
+        [
+            'title' => __('Enpal Hallenberg', 'webapp-central-starter'),
+            'description' => __('Statusbild zur PV- und Energieumsetzung, Termine, Unterlagen und Nachverfolgung.', 'webapp-central-starter'),
+            'status' => __('In Arbeit', 'webapp-central-starter'),
+            'activity' => __('Letzte Aktivitaet: heute', 'webapp-central-starter'),
+            'visual' => __('PV / Energie', 'webapp-central-starter'),
+            'button' => __('Oeffnen', 'webapp-central-starter'),
+            'url' => '#enpal-hallenberg',
+        ],
+        [
+            'title' => __('Pflege & Betreuung', 'webapp-central-starter'),
+            'description' => __('Organisatorische Themen, Betreuungslinien und dokumentierte Hinweise fuer den Alltag.', 'webapp-central-starter'),
+            'status' => __('Laufend', 'webapp-central-starter'),
+            'activity' => __('Letzte Aktivitaet: diese Woche', 'webapp-central-starter'),
+            'visual' => __('Betreuung', 'webapp-central-starter'),
+            'button' => __('Oeffnen', 'webapp-central-starter'),
+            'url' => '#pflege-betreuung',
+        ],
+        [
+            'title' => __('Fahrten & Organisation', 'webapp-central-starter'),
+            'description' => __('Fahrten, Abstimmungen, Routinen und organisatorische Uebersichten kompakt gebuendelt.', 'webapp-central-starter'),
+            'status' => __('Strukturiert', 'webapp-central-starter'),
+            'activity' => __('Letzte Aktivitaet: gestern', 'webapp-central-starter'),
+            'visual' => __('Mobilitaet', 'webapp-central-starter'),
+            'button' => __('Oeffnen', 'webapp-central-starter'),
+            'url' => '#fahrten-organisation',
+        ],
+        [
+            'title' => __('Infrastruktur', 'webapp-central-starter'),
+            'description' => __('Technische, bauliche und betriebliche Punkte fuer eine spaetere tiefe Dokumentationsspur.', 'webapp-central-starter'),
+            'status' => __('Vorbereitet', 'webapp-central-starter'),
+            'activity' => __('Letzte Aktivitaet: diese Woche', 'webapp-central-starter'),
+            'visual' => __('Technik', 'webapp-central-starter'),
+            'button' => __('Oeffnen', 'webapp-central-starter'),
+            'url' => '#infrastruktur',
+        ],
+        [
+            'title' => __('PV-Dokumentation', 'webapp-central-starter'),
+            'description' => __('Sammlung fuer Nachweise, technische Fakten, Fotos und spaetere Berichte zur PV-Linie.', 'webapp-central-starter'),
+            'status' => __('Aufbau', 'webapp-central-starter'),
+            'activity' => __('Letzte Aktivitaet: offen', 'webapp-central-starter'),
+            'visual' => __('Dokumentation', 'webapp-central-starter'),
+            'button' => __('Oeffnen', 'webapp-central-starter'),
+            'url' => '#pv-dokumentation',
+        ],
+    ];
+}
+
+function webapp_central_starter_project_hub_activities(string $slug): array
+{
+    if ($slug !== 'pfarrer-matthias-genster') {
+        return [];
+    }
+
+    return [
+        __('Projekt-Hub angelegt und als zentrale Uebersichtsseite vorbereitet.', 'webapp-central-starter'),
+        __('Erste Themenkarten fuer Betreuung, Fahrten, Infrastruktur und PV gesetzt.', 'webapp-central-starter'),
+        __('Designbasis fuer spaetere Berichte, Medien und Analysen vorbereitet.', 'webapp-central-starter'),
+    ];
+}
