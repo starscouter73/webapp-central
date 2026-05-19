@@ -3,7 +3,7 @@ Theme Name: Webapp Central Starter
 Theme URI: https://webapp-central.de/
 Author: Mark Dorth
 Description: Minimal stabiles WordPress-Theme fuer webapp-central.de als modulare Projektzentrale mit frischem Glass-Look.
-Version: 0.2.6
+Version: 0.2.7
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 8.2
@@ -262,6 +262,38 @@ img {
     grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 1fr);
     gap: 1.5rem;
     padding: 4rem 0 2.5rem;
+}
+
+.front-page-content {
+    width: min(calc(100% - 2rem), var(--wc-content));
+    margin: 1.25rem auto 0;
+    padding: clamp(1.3rem, 1rem + 1vw, 2rem);
+    border: 1px solid var(--wc-border);
+    border-radius: var(--wc-radius-lg);
+    background: rgba(255, 255, 255, 0.76);
+    box-shadow: var(--wc-shadow);
+}
+
+.front-page-content__intro {
+    max-width: 48rem;
+    margin-bottom: 1rem;
+}
+
+.front-page-content__intro h2 {
+    margin: 0.25rem 0 0.5rem;
+}
+
+.front-page-content__intro p {
+    margin: 0;
+    color: var(--wc-text-muted);
+}
+
+.front-page-content__body > :first-child {
+    margin-top: 0;
+}
+
+.front-page-content__body > :last-child {
+    margin-bottom: 0;
 }
 
 .glass-panel {

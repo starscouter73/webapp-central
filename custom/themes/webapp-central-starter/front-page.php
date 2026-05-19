@@ -41,11 +41,29 @@ $recent_posts = get_posts([
         <h2><?php esc_html_e('Naechste Schritte', 'webapp-central-starter'); ?></h2>
         <ul>
             <li><?php esc_html_e('Theme ist jetzt aktiv und kann als Basis fuer die Projektzentrale weiter ausgebaut werden.', 'webapp-central-starter'); ?></li>
+            <li><?php esc_html_e('Der Inhalt der Seite "Start" wird direkt unter diesem Bereich angezeigt und kann ueber "Seite bearbeiten" gepflegt werden.', 'webapp-central-starter'); ?></li>
             <li><?php esc_html_e('Startseite, Module und Projektbereiche als Seitenstruktur aufbauen.', 'webapp-central-starter'); ?></li>
             <li><?php esc_html_e('Eigene Plugins und Snippets weiter im versionierten custom/-Bereich pflegen.', 'webapp-central-starter'); ?></li>
         </ul>
     </aside>
 </section>
+
+<?php if (have_posts()) : ?>
+    <?php while (have_posts()) : the_post(); ?>
+        <?php if (trim((string) get_the_content()) !== '') : ?>
+            <section class="front-page-content glass-panel">
+                <div class="front-page-content__intro">
+                    <span class="eyebrow"><?php esc_html_e('Startseiten-Inhalt', 'webapp-central-starter'); ?></span>
+                    <h2><?php the_title(); ?></h2>
+                    <p><?php esc_html_e('Dieser Bereich kommt direkt aus der WordPress-Seite und reagiert auf "Seite bearbeiten".', 'webapp-central-starter'); ?></p>
+                </div>
+                <div class="front-page-content__body">
+                    <?php the_content(); ?>
+                </div>
+            </section>
+        <?php endif; ?>
+    <?php endwhile; ?>
+<?php endif; ?>
 
 <section class="layout-grid">
     <div class="module-grid">
