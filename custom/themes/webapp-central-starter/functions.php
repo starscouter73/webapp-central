@@ -79,26 +79,31 @@ function webapp_central_starter_asset_path(string $relative_path): string
 
 function webapp_central_starter_render_header_branding(): void
 {
-    $logo = null;
-    $relative_path = 'brand/header/webapp-central-header-fresh-blue-display.png';
-    $logo_path = webapp_central_starter_asset_path($relative_path);
-    if (file_exists($logo_path)) {
-        $logo = [
-            'url' => webapp_central_starter_asset_url($relative_path),
-            'width' => 460,
-            'height' => 92,
-            'alt' => __('Webapp Central Wortmarke fuer Projekte, Module und Tutorials', 'webapp-central-starter'),
-        ];
+    $logo_markup = null;
+
+    if (has_custom_logo()) {
+        $custom_logo_id = (int) get_theme_mod('custom_logo');
+        $logo_alt = trim((string) get_post_meta($custom_logo_id, '_wp_attachment_image_alt', true));
+
+        $logo_markup = wp_get_attachment_image(
+            $custom_logo_id,
+            'full',
+            false,
+            [
+                'class' => 'custom-logo',
+                'alt' => $logo_alt !== '' ? $logo_alt : __('Webapp Central Header-Logo', 'webapp-central-starter'),
+            ]
+        );
     }
 
-    if ($logo !== null) {
+    if ($logo_markup !== null) {
         echo '<a class="site-logo" href="' . esc_url(home_url('/')) . '" aria-label="' . esc_attr__('webapp-central.de Startseite', 'webapp-central-starter') . '" title="' . esc_attr__('Zur Startseite von webapp-central.de', 'webapp-central-starter') . '">';
-        echo '<img src="' . esc_url($logo['url']) . '" alt="' . esc_attr((string) $logo['alt']) . '" width="' . esc_attr((string) $logo['width']) . '" height="' . esc_attr((string) $logo['height']) . '">';
+        echo $logo_markup;
         echo '</a>';
     }
 
     echo '<div class="site-branding__text">';
-    echo '<p class="site-title' . ($logo !== null ? ' screen-reader-text' : '') . '"><span>' . esc_html(get_bloginfo('name')) . '</span></p>';
+    echo '<p class="site-title' . ($logo_markup !== null ? ' screen-reader-text' : '') . '"><span>' . esc_html(get_bloginfo('name')) . '</span></p>';
     echo '<p class="site-kicker">' . esc_html__('Offizielle Wortmarke', 'webapp-central-starter') . '</p>';
     echo '<p class="site-caption">' . esc_html__('Projektzentrale fuer Inhalte, Module und Tutorials', 'webapp-central-starter') . '</p>';
     echo '</div>';

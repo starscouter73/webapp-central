@@ -3,7 +3,7 @@ Theme Name: Webapp Central Starter
 Theme URI: https://webapp-central.de/
 Author: Mark Dorth
 Description: Minimal stabiles WordPress-Theme fuer webapp-central.de als modulare Projektzentrale mit frischem Glass-Look.
-Version: 0.2.7
+Version: 0.2.8
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 8.2
@@ -149,18 +149,16 @@ img {
 }
 
 .site-header__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 0.45rem 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.5rem 1rem;
+    padding: 0.45rem 0 0.35rem;
 }
 
 .site-branding {
     display: flex;
     align-items: center;
-    flex: 1 1 26rem;
     gap: 0.65rem;
     min-width: 0;
     overflow: visible;
@@ -190,7 +188,8 @@ img {
 .site-logo img {
     display: block;
     max-width: 100%;
-    width: min(260px, 100%);
+    width: auto;
+    max-height: 54px;
     height: auto;
     object-fit: contain;
 }
@@ -199,6 +198,8 @@ img {
 .brand-logo img {
     display: block;
     max-width: 100%;
+    width: auto;
+    max-height: 54px;
     height: auto;
     object-fit: contain;
 }
@@ -232,6 +233,7 @@ img {
 .site-nav ul {
     display: flex;
     flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 0.9rem;
     list-style: none;
     margin: 0;
@@ -257,11 +259,36 @@ img {
     transform: translateY(-1px);
 }
 
+@media (max-width: 860px) {
+    .site-header__inner {
+        grid-template-columns: 1fr;
+        gap: 0.45rem;
+    }
+
+    .site-nav ul {
+        justify-content: flex-start;
+    }
+}
+
 .hero {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 1fr);
     gap: 1.5rem;
     padding: 4rem 0 2.5rem;
+}
+
+.front-page-editor {
+    width: min(calc(100% - 2rem), var(--wc-content));
+    margin: 0 auto;
+    padding-bottom: 4rem;
+}
+
+.front-page-editor__content > :first-child {
+    margin-top: 0;
+}
+
+.front-page-editor__content > :last-child {
+    margin-bottom: 0;
 }
 
 .front-page-content {

@@ -2,96 +2,13 @@
 declare(strict_types=1);
 
 get_header();
-
-$modules = webapp_central_starter_module_cards();
-$recent_posts = get_posts([
-    'post_type' => 'post',
-    'post_status' => 'publish',
-    'numberposts' => 3,
-]);
 ?>
-<section class="hero">
-    <div class="hero__intro glass-panel">
-        <span class="eyebrow"><?php esc_html_e('Projektzentrale', 'webapp-central-starter'); ?></span>
-        <?php webapp_central_starter_render_main_brand(); ?>
-        <h1><?php bloginfo('name'); ?></h1>
-        <p class="hero__lead">
-            <?php esc_html_e('Dieses Theme liefert eine minimale, stabile Basis fuer webapp-central.de: hell, freundlich, modular, responsiv und bewusst schlank versionierbar.', 'webapp-central-starter'); ?>
-        </p>
-        <div class="hero__actions">
-            <a class="button-link" href="<?php echo esc_url(admin_url()); ?>"><?php esc_html_e('WordPress Dashboard', 'webapp-central-starter'); ?></a>
-            <a class="button-link button-link--ghost" href="<?php echo esc_url(admin_url('edit.php?post_type=page')); ?>"><?php esc_html_e('Seiten bearbeiten', 'webapp-central-starter'); ?></a>
-        </div>
-        <div class="hero__stats">
-            <div class="hero__stat">
-                <strong><?php echo esc_html((string) wp_count_posts('page')->publish); ?></strong>
-                <span><?php esc_html_e('Seiten', 'webapp-central-starter'); ?></span>
-            </div>
-            <div class="hero__stat">
-                <strong><?php echo esc_html((string) wp_count_posts('post')->publish); ?></strong>
-                <span><?php esc_html_e('Beitraege', 'webapp-central-starter'); ?></span>
-            </div>
-            <div class="hero__stat">
-                <strong><?php echo esc_html((string) count(wp_get_nav_menus())); ?></strong>
-                <span><?php esc_html_e('Menues', 'webapp-central-starter'); ?></span>
-            </div>
-        </div>
-    </div>
-    <aside class="hero__aside glass-panel">
-        <h2><?php esc_html_e('Naechste Schritte', 'webapp-central-starter'); ?></h2>
-        <ul>
-            <li><?php esc_html_e('Theme ist jetzt aktiv und kann als Basis fuer die Projektzentrale weiter ausgebaut werden.', 'webapp-central-starter'); ?></li>
-            <li><?php esc_html_e('Der Inhalt der Seite "Start" wird direkt unter diesem Bereich angezeigt und kann ueber "Seite bearbeiten" gepflegt werden.', 'webapp-central-starter'); ?></li>
-            <li><?php esc_html_e('Startseite, Module und Projektbereiche als Seitenstruktur aufbauen.', 'webapp-central-starter'); ?></li>
-            <li><?php esc_html_e('Eigene Plugins und Snippets weiter im versionierten custom/-Bereich pflegen.', 'webapp-central-starter'); ?></li>
-        </ul>
-    </aside>
-</section>
-
-<?php if (have_posts()) : ?>
+<main class="front-page-editor">
     <?php while (have_posts()) : the_post(); ?>
-        <?php if (trim((string) get_the_content()) !== '') : ?>
-            <section class="front-page-content glass-panel">
-                <div class="front-page-content__intro">
-                    <span class="eyebrow"><?php esc_html_e('Startseiten-Inhalt', 'webapp-central-starter'); ?></span>
-                    <h2><?php the_title(); ?></h2>
-                    <p><?php esc_html_e('Dieser Bereich kommt direkt aus der WordPress-Seite und reagiert auf "Seite bearbeiten".', 'webapp-central-starter'); ?></p>
-                </div>
-                <div class="front-page-content__body">
-                    <?php the_content(); ?>
-                </div>
-            </section>
-        <?php endif; ?>
+        <article <?php post_class('front-page-editor__content'); ?>>
+            <?php the_content(); ?>
+        </article>
     <?php endwhile; ?>
-<?php endif; ?>
-
-<section class="layout-grid">
-    <div class="module-grid">
-        <?php foreach ($modules as $module) : ?>
-            <article class="module-card">
-                <h3><?php echo esc_html($module['title']); ?></h3>
-                <p><?php echo esc_html($module['description']); ?></p>
-                <div class="module-card__footer">
-                    <a class="button-link button-link--ghost" href="<?php echo esc_url($module['url']); ?>"><?php echo esc_html($module['label']); ?></a>
-                </div>
-            </article>
-        <?php endforeach; ?>
-    </div>
-
-    <div class="post-grid">
-        <?php if ($recent_posts !== []) : ?>
-            <?php foreach ($recent_posts as $post) : ?>
-                <?php setup_postdata($post); ?>
-                <?php get_template_part('template-parts/content', 'card'); ?>
-            <?php endforeach; ?>
-            <?php wp_reset_postdata(); ?>
-        <?php else : ?>
-            <article class="content-card">
-                <h2><?php esc_html_e('Noch keine Inhalte vorhanden', 'webapp-central-starter'); ?></h2>
-                <p class="empty-state"><?php esc_html_e('Nach der Installation kannst du hier erste Beitraege oder Projektmodule aufbauen.', 'webapp-central-starter'); ?></p>
-            </article>
-        <?php endif; ?>
-    </div>
-</section>
+</main>
 <?php
 get_footer();
