@@ -22,3 +22,6 @@ wp-includes/
 wp-content/uploads/
 wordpress/
 docker-data/
+.live-sync/
+PC-IT-DOK/
+tmp-hallenberg-*.webp
