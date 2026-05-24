@@ -67,6 +67,20 @@ function webapp_central_starter_body_classes(array $classes): array
 
 add_filter('body_class', 'webapp_central_starter_body_classes');
 
+add_filter('pre_get_document_title', static function (string $title): string {
+    if (!is_page()) {
+        return $title;
+    }
+
+    $project_slug = sanitize_key((string) ($_GET['projekt'] ?? ''));
+
+    if (!is_page('pfarrer-matthias-genster') || $project_slug !== 'enpal-hallenberg') {
+        return $title;
+    }
+
+    return __('PV-Energie · Enpal Hallenberg', 'webapp-central-starter') . ' – ' . get_bloginfo('name');
+});
+
 function webapp_central_starter_asset_url(string $relative_path): string
 {
     return get_template_directory_uri() . '/assets/' . ltrim($relative_path, '/');
@@ -191,6 +205,18 @@ function webapp_central_starter_portal_page_url(string $path, string $fallback =
     return home_url($fallback);
 }
 
+function webapp_central_starter_project_detail_url(string $hub_slug, string $project_slug): string
+{
+    $base_url = webapp_central_starter_portal_page_url('projekte/' . $hub_slug);
+
+    return (string) add_query_arg(
+        [
+            'projekt' => $project_slug,
+        ],
+        $base_url
+    );
+}
+
 function webapp_central_starter_portal_sections(): array
 {
     return [
@@ -260,8 +286,9 @@ function webapp_central_starter_project_hub_cards(string $slug): array
             'status' => __('In Arbeit', 'webapp-central-starter'),
             'activity' => __('Letzte Aktivitaet: heute', 'webapp-central-starter'),
             'visual' => __('PV / Energie', 'webapp-central-starter'),
+            'variant' => 'enpal-hallenberg',
             'button' => __('Oeffnen', 'webapp-central-starter'),
-            'url' => '#enpal-hallenberg',
+            'url' => webapp_central_starter_project_detail_url('pfarrer-matthias-genster', 'enpal-hallenberg'),
         ],
         [
             'title' => __('Pflege & Betreuung', 'webapp-central-starter'),
@@ -312,5 +339,124 @@ function webapp_central_starter_project_hub_activities(string $slug): array
         __('Projekt-Hub angelegt und als zentrale Uebersichtsseite vorbereitet.', 'webapp-central-starter'),
         __('Erste Themenkarten fuer Betreuung, Fahrten, Infrastruktur und PV gesetzt.', 'webapp-central-starter'),
         __('Designbasis fuer spaetere Berichte, Medien und Analysen vorbereitet.', 'webapp-central-starter'),
+    ];
+}
+
+function webapp_central_starter_project_detail_data(string $hub_slug, string $project_slug): ?array
+{
+    if ($hub_slug !== 'pfarrer-matthias-genster' || $project_slug !== 'enpal-hallenberg') {
+        return null;
+    }
+
+    return [
+        'title' => __('PV-Energie · Enpal Hallenberg', 'webapp-central-starter'),
+        'eyebrow' => __('Projekt-Detailseite', 'webapp-central-starter'),
+        'summary' => __('Uebersicht zu Montage, Kommunikation, Dokumentation und offenen Punkten rund um das PV-Projekt Hallenberg.', 'webapp-central-starter'),
+        'status' => __('Aktiv', 'webapp-central-starter'),
+        'updated' => __('Stand: laufende Projektdokumentation', 'webapp-central-starter'),
+        'back_url' => webapp_central_starter_portal_page_url('projekte/pfarrer-matthias-genster'),
+        'stats' => [
+            [
+                'value' => '7',
+                'label' => __('Bereiche', 'webapp-central-starter'),
+            ],
+            [
+                'value' => '42',
+                'label' => __('Eintraege', 'webapp-central-starter'),
+            ],
+            [
+                'value' => __('live', 'webapp-central-starter'),
+                'label' => __('Projektstatus', 'webapp-central-starter'),
+            ],
+        ],
+        'sections' => [
+            [
+                'title' => __('Projektueberblick', 'webapp-central-starter'),
+                'status' => __('Basis', 'webapp-central-starter'),
+                'items' => [
+                    __('Photovoltaik-Projekt Hallenberg', 'webapp-central-starter'),
+                    __('Enpal-Montage', 'webapp-central-starter'),
+                    __('Pfarrhaus / Matthias Genster', 'webapp-central-starter'),
+                    __('technische und organisatorische Begleitung', 'webapp-central-starter'),
+                    __('laufende Projektdokumentation', 'webapp-central-starter'),
+                ],
+            ],
+            [
+                'title' => __('Montage & Baustelle', 'webapp-central-starter'),
+                'status' => __('In Arbeit', 'webapp-central-starter'),
+                'items' => [
+                    __('Montagebeginn', 'webapp-central-starter'),
+                    __('Geruest / Dachzugang', 'webapp-central-starter'),
+                    __('Dachhaken', 'webapp-central-starter'),
+                    __('Schienenmontage', 'webapp-central-starter'),
+                    __('Modulmontage', 'webapp-central-starter'),
+                    __('Wechselrichter / Technikbereich', 'webapp-central-starter'),
+                    __('Stromabschaltung', 'webapp-central-starter'),
+                    __('Zaehlerwechsel', 'webapp-central-starter'),
+                ],
+            ],
+            [
+                'title' => __('Kommunikation mit Enpal', 'webapp-central-starter'),
+                'status' => __('Laufend', 'webapp-central-starter'),
+                'items' => [
+                    __('Vertragsfragen', 'webapp-central-starter'),
+                    __('Rueckrufe', 'webapp-central-starter'),
+                    __('Portal / Zugang', 'webapp-central-starter'),
+                    __('Ident-Verfahren', 'webapp-central-starter'),
+                    __('Unterlagen', 'webapp-central-starter'),
+                    __('offene Rueckfragen', 'webapp-central-starter'),
+                    __('Ansprechpartner', 'webapp-central-starter'),
+                ],
+            ],
+            [
+                'title' => __('Monteur-Kommunikation', 'webapp-central-starter'),
+                'status' => __('Abstimmung', 'webapp-central-starter'),
+                'items' => [
+                    __('Deutsch-Spanisch-Uebersetzungen', 'webapp-central-starter'),
+                    __('schriftliche Rueckfragen', 'webapp-central-starter'),
+                    __('Formular fuer Monteure', 'webapp-central-starter'),
+                    __('Fragen zur Fertigstellung', 'webapp-central-starter'),
+                    __('Fragen zur Stromabschaltung', 'webapp-central-starter'),
+                    __('Abstimmung mit Bewohnern/Mietern', 'webapp-central-starter'),
+                ],
+            ],
+            [
+                'title' => __('Dokumentation & Medien', 'webapp-central-starter'),
+                'status' => __('Sammlung', 'webapp-central-starter'),
+                'items' => [
+                    __('Baustellenfotos', 'webapp-central-starter'),
+                    __('Dachbilder', 'webapp-central-starter'),
+                    __('Modulbilder', 'webapp-central-starter'),
+                    __('Geruestbilder', 'webapp-central-starter'),
+                    __('Technikdetails', 'webapp-central-starter'),
+                    __('Drohnenbilder', 'webapp-central-starter'),
+                    __('Bildsortierung', 'webapp-central-starter'),
+                    __('spaetere Galerie', 'webapp-central-starter'),
+                ],
+            ],
+            [
+                'title' => __('Offene Punkte', 'webapp-central-starter'),
+                'status' => __('Offen', 'webapp-central-starter'),
+                'items' => [
+                    __('Fertigstellung pruefen', 'webapp-central-starter'),
+                    __('Zaehlerwechsel dokumentieren', 'webapp-central-starter'),
+                    __('Enpal-Unterlagen sichern', 'webapp-central-starter'),
+                    __('Fotomaterial sortieren', 'webapp-central-starter'),
+                    __('Statusbericht erstellen', 'webapp-central-starter'),
+                    __('rechtliche / organisatorische Punkte nachhalten', 'webapp-central-starter'),
+                ],
+            ],
+            [
+                'title' => __('Web-/Projektarchiv', 'webapp-central-starter'),
+                'status' => __('Archiv', 'webapp-central-starter'),
+                'items' => [
+                    __('Darstellung auf webapp-central.de', 'webapp-central-starter'),
+                    __('Projektkarte', 'webapp-central-starter'),
+                    __('Detailseite', 'webapp-central-starter'),
+                    __('spaetere Galerie', 'webapp-central-starter'),
+                    __('PDF-/Whitepaper-Vorbereitung', 'webapp-central-starter'),
+                ],
+            ],
+        ],
     ];
 }

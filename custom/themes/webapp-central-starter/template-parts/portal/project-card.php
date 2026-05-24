@@ -6,9 +6,15 @@ $card = $args['card'] ?? null;
 if (!is_array($card)) {
     return;
 }
+
+$visual_classes = 'portal-card__visual';
+
+if (!empty($card['variant'])) {
+    $visual_classes .= ' portal-card__visual--' . sanitize_html_class((string) $card['variant']);
+}
 ?>
 <article class="portal-card portal-card--project">
-    <div class="portal-card__visual" aria-hidden="true">
+    <div class="<?php echo esc_attr($visual_classes); ?>" aria-hidden="true">
         <span><?php echo esc_html((string) ($card['visual'] ?? 'Projekt')); ?></span>
     </div>
     <div class="portal-card__meta">

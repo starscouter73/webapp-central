@@ -3,7 +3,7 @@ Theme Name: Webapp Central Starter
 Theme URI: https://webapp-central.de/
 Author: Mark Dorth
 Description: Minimal stabiles WordPress-Theme fuer webapp-central.de als modulare Projektzentrale mit frischem Glass-Look.
-Version: 0.3.1
+Version: 0.3.5
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 8.2
@@ -11,16 +11,21 @@ Text Domain: webapp-central-starter
 */
 
 :root {
-    --wc-bg: #eef6fb;
-    --wc-bg-soft: #dcecf8;
-    --wc-surface: rgba(255, 255, 255, 0.68);
-    --wc-surface-strong: rgba(245, 251, 255, 0.9);
-    --wc-border: rgba(60, 127, 180, 0.16);
-    --wc-text: #16324a;
-    --wc-text-muted: #547089;
-    --wc-accent: #1f88c8;
-    --wc-accent-strong: #1170af;
-    --wc-shadow: 0 24px 60px rgba(44, 89, 128, 0.16);
+    --wc-bg: #eee7df;
+    --wc-bg-soft: #d9cec1;
+    --wc-surface: rgba(249, 244, 237, 0.88);
+    --wc-surface-strong: rgba(244, 237, 228, 0.97);
+    --wc-border: rgba(100, 84, 67, 0.24);
+    --wc-text: #2b221b;
+    --wc-text-muted: #615348;
+    --wc-accent: #6f5e4e;
+    --wc-accent-strong: #514233;
+    --wc-shadow: 0 24px 60px rgba(53, 38, 26, 0.13);
+    --wc-shadow-soft: 0 18px 42px rgba(53, 38, 26, 0.11);
+    --wc-shadow-card: 0 22px 52px rgba(46, 34, 24, 0.11);
+    --wc-surface-glass: linear-gradient(180deg, rgba(250, 246, 240, 0.94), rgba(239, 232, 223, 0.97));
+    --wc-surface-layer: radial-gradient(circle at top right, rgba(125, 108, 90, 0.12), transparent 36%);
+    --wc-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.72);
     --wc-radius-lg: 28px;
     --wc-radius-md: 18px;
     --wc-radius-sm: 12px;
@@ -41,12 +46,13 @@ body {
     margin: 0;
     color: var(--wc-text);
     background:
-        radial-gradient(circle at top left, rgba(117, 201, 255, 0.5), transparent 34%),
-        radial-gradient(circle at top right, rgba(162, 232, 214, 0.36), transparent 26%),
-        radial-gradient(circle at bottom right, rgba(255, 215, 166, 0.24), transparent 24%),
-        linear-gradient(180deg, #f6fbff 0%, #edf5fb 52%, #e5eff8 100%);
+        radial-gradient(circle at top left, rgba(172, 153, 132, 0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(224, 214, 201, 0.22), transparent 26%),
+        radial-gradient(circle at bottom right, rgba(190, 174, 156, 0.16), transparent 24%),
+        linear-gradient(180deg, #efe8e0 0%, #e8dfd5 50%, #ddd2c6 100%);
     font-family: "Segoe UI", "Helvetica Neue", sans-serif;
-    line-height: 1.6;
+    line-height: 1.72;
+    text-rendering: optimizeLegibility;
     min-height: 100vh;
 }
 
@@ -71,7 +77,7 @@ a {
 
 a:hover,
 a:focus-visible {
-    color: #b6ecff;
+    color: #43362a;
 }
 
 img {
@@ -113,13 +119,13 @@ img {
 .site-shell::before {
     top: -10rem;
     left: -8rem;
-    background: rgba(86, 182, 240, 0.34);
+    background: rgba(156, 131, 106, 0.2);
 }
 
 .site-shell::after {
     right: -10rem;
     bottom: -10rem;
-    background: rgba(252, 183, 115, 0.18);
+    background: rgba(199, 180, 158, 0.18);
 }
 
 .site-header,
@@ -135,8 +141,9 @@ img {
     position: sticky;
     top: 0;
     z-index: 20;
-    background: rgba(248, 252, 255, 0.7);
-    border-bottom: 1px solid rgba(83, 126, 164, 0.12);
+    background: rgba(241, 234, 225, 0.92);
+    border-bottom: 1px solid rgba(101, 83, 65, 0.16);
+    box-shadow: 0 12px 32px rgba(63, 47, 33, 0.08);
 }
 
 .site-header__inner,
@@ -246,7 +253,7 @@ img {
     min-height: 2.5rem;
     padding: 0.4rem 0.85rem;
     border-radius: 999px;
-    color: var(--wc-text-muted);
+    color: #55493e;
     transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
@@ -255,7 +262,7 @@ img {
 .site-nav .current-menu-item > a,
 .site-nav .current_page_item > a {
     color: var(--wc-text);
-    background: rgba(86, 182, 240, 0.16);
+    background: rgba(181, 160, 139, 0.24);
     transform: translateY(-1px);
 }
 
@@ -297,7 +304,7 @@ img {
     padding: clamp(1.3rem, 1rem + 1vw, 2rem);
     border: 1px solid var(--wc-border);
     border-radius: var(--wc-radius-lg);
-    background: rgba(255, 255, 255, 0.76);
+    background: rgba(249, 244, 238, 0.88);
     box-shadow: var(--wc-shadow);
 }
 
@@ -324,7 +331,7 @@ img {
 }
 
 .glass-panel {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(243, 250, 255, 0.82));
+    background: linear-gradient(180deg, rgba(251, 248, 243, 0.9), rgba(239, 232, 223, 0.94));
     border: 1px solid var(--wc-border);
     border-radius: var(--wc-radius-lg);
     box-shadow: var(--wc-shadow);
@@ -342,9 +349,9 @@ img {
     margin-bottom: 1rem;
     padding: 0.45rem 0.8rem;
     border-radius: 999px;
-    background: rgba(86, 182, 240, 0.1);
-    border: 1px solid rgba(86, 182, 240, 0.18);
-    color: #1d6eaa;
+    background: rgba(174, 151, 126, 0.16);
+    border: 1px solid rgba(111, 92, 72, 0.24);
+    color: #5a4735;
     font-size: 0.9rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -368,6 +375,7 @@ img {
 
 .hero__lead {
     max-width: 62ch;
+    font-size: 1.04rem;
 }
 
 .hero-brandmark {
@@ -414,12 +422,13 @@ input[type="submit"] {
     gap: 0.45rem;
     min-height: 2.9rem;
     padding: 0.75rem 1.15rem;
-    border: 1px solid rgba(31, 136, 200, 0.22);
+    border: 1px solid rgba(97, 78, 60, 0.34);
     border-radius: 999px;
-    background: linear-gradient(180deg, rgba(167, 224, 255, 0.52), rgba(116, 198, 240, 0.42));
-    color: #11314b;
+    background: linear-gradient(180deg, rgba(135, 112, 90, 0.96), rgba(98, 79, 62, 0.94));
+    color: #fbf7f1;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 12px 28px rgba(58, 41, 27, 0.16);
+    transition: transform 0.2s ease, box-shadow 0.24s ease, border-color 0.2s ease, background-color 0.2s ease;
     text-align: center;
     white-space: normal;
 }
@@ -433,12 +442,15 @@ button:focus-visible,
 input[type="submit"]:hover,
 input[type="submit"]:focus-visible {
     transform: translateY(-1px);
-    box-shadow: 0 18px 28px rgba(79, 170, 226, 0.18);
-    border-color: rgba(31, 136, 200, 0.32);
+    box-shadow: 0 18px 28px rgba(58, 41, 27, 0.22);
+    border-color: rgba(86, 69, 54, 0.42);
 }
 
 .button-link--ghost {
-    background: rgba(255, 255, 255, 0.34);
+    background: rgba(250, 246, 240, 0.78);
+    border-color: rgba(113, 93, 73, 0.24);
+    box-shadow: none;
+    color: var(--wc-text);
 }
 
 .hero__stats {
@@ -451,14 +463,14 @@ input[type="submit"]:focus-visible {
 .hero__stat {
     padding: 0.95rem 1rem;
     border-radius: var(--wc-radius-md);
-    background: rgba(255, 255, 255, 0.42);
-    border: 1px solid rgba(96, 150, 191, 0.12);
+    background: rgba(249, 244, 238, 0.74);
+    border: 1px solid rgba(120, 99, 79, 0.16);
 }
 
 .hero__stat strong {
     display: block;
     font-size: 1.2rem;
-    color: #10324e;
+    color: #3f3125;
     overflow-wrap: break-word;
 }
 
@@ -478,7 +490,7 @@ input[type="submit"]:focus-visible {
 .hero__aside li,
 .meta-list li {
     padding: 0.8rem 0;
-    border-bottom: 1px solid rgba(85, 125, 161, 0.1);
+    border-bottom: 1px solid rgba(123, 101, 81, 0.12);
     color: var(--wc-text-muted);
 }
 
@@ -502,14 +514,135 @@ input[type="submit"]:focus-visible {
 
 .module-card,
 .content-card {
+    position: relative;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 1.3rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(241, 248, 253, 0.88));
-    border: 1px solid rgba(87, 129, 166, 0.12);
+    overflow: hidden;
+    padding: 8.2rem 1.3rem 1.3rem;
+    background: linear-gradient(180deg, rgba(250, 246, 241, 0.9), rgba(238, 231, 222, 0.96));
+    border: 1px solid rgba(111, 92, 74, 0.18);
     border-radius: var(--wc-radius-md);
     box-shadow: var(--wc-shadow);
+    transition: transform 0.22s ease, box-shadow 0.26s ease, border-color 0.22s ease;
+    --wc-card-banner-bg:
+        linear-gradient(180deg, rgba(252, 254, 255, 0.14), rgba(16, 30, 40, 0.18)),
+        linear-gradient(135deg, rgba(110, 137, 158, 0.26), rgba(223, 231, 237, 0.1)),
+        url("./assets/brand/header/webapp-central-header-fresh-blue-display.png") center center / contain no-repeat;
+    --wc-card-banner-accent: rgba(232, 240, 246, 0.92);
+}
+
+.module-card::before,
+.module-card::after,
+.content-card::before,
+.content-card::after {
+    content: "";
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    border-radius: 16px;
+    pointer-events: none;
+}
+
+.module-card::before,
+.content-card::before {
+    top: 1rem;
+    height: 5.6rem;
+    z-index: 0;
+    background: var(--wc-card-banner-bg);
+    border: 1px solid rgba(182, 199, 210, 0.2);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -16px 34px rgba(39, 60, 75, 0.16);
+    filter: saturate(0.9) contrast(1.08) brightness(1.08);
+    transition: transform 0.26s ease, filter 0.26s ease, box-shadow 0.26s ease;
+}
+
+.module-card::after,
+.content-card::after {
+    top: 1.4rem;
+    height: 4.7rem;
+    z-index: 1;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.04)),
+        radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.48), transparent 24%),
+        linear-gradient(135deg, rgba(132, 159, 177, 0.12), rgba(255, 255, 255, 0));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    opacity: 0.9;
+    transition: transform 0.26s ease, opacity 0.26s ease;
+}
+
+.module-card > *,
+.content-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+.module-grid .module-card:nth-child(1) {
+    --wc-card-banner-bg:
+        linear-gradient(180deg, rgba(252, 254, 255, 0.16), rgba(18, 33, 45, 0.16)),
+        linear-gradient(135deg, rgba(97, 126, 147, 0.24), rgba(215, 226, 234, 0.08)),
+        url("./assets/brand/header/webapp-central-header-fresh-blue-display.png") center center / contain no-repeat;
+}
+
+.module-grid .module-card:nth-child(2) {
+    --wc-card-banner-bg:
+        linear-gradient(180deg, rgba(252, 254, 255, 0.18), rgba(18, 33, 45, 0.14)),
+        linear-gradient(135deg, rgba(89, 118, 138, 0.22), rgba(219, 227, 232, 0.08)),
+        url("./assets/brand/header/webapp-central-header-soft-cyan-display.png") center center / contain no-repeat;
+}
+
+.module-grid .module-card:nth-child(3) {
+    --wc-card-banner-bg:
+        linear-gradient(180deg, rgba(252, 254, 255, 0.18), rgba(20, 34, 45, 0.14)),
+        linear-gradient(135deg, rgba(96, 120, 135, 0.2), rgba(215, 225, 229, 0.08)),
+        url("./assets/brand/header/webapp-central-header-mint-glass-display.png") center center / contain no-repeat;
+}
+
+.post-grid .content-card:nth-child(odd),
+.archive-shell .content-card:nth-child(odd) {
+    --wc-card-banner-bg:
+        linear-gradient(180deg, rgba(252, 254, 255, 0.18), rgba(18, 33, 45, 0.16)),
+        linear-gradient(135deg, rgba(95, 123, 143, 0.24), rgba(220, 229, 234, 0.08)),
+        url("./assets/brand/header/webapp-central-header-soft-cyan-display.png") center center / contain no-repeat;
+}
+
+.post-grid .content-card:nth-child(even),
+.archive-shell .content-card:nth-child(even) {
+    --wc-card-banner-bg:
+        linear-gradient(180deg, rgba(252, 254, 255, 0.18), rgba(18, 33, 45, 0.16)),
+        linear-gradient(135deg, rgba(95, 121, 138, 0.22), rgba(220, 229, 234, 0.08)),
+        url("./assets/brand/header/webapp-central-header-fresh-blue-display.png") center center / contain no-repeat;
+}
+
+.module-card:hover,
+.module-card:focus-within,
+.content-card:hover,
+.content-card:focus-within {
+    transform: translateY(-2px);
+    border-color: rgba(126, 103, 82, 0.3);
+    box-shadow: var(--wc-shadow-card);
+}
+
+.module-card:hover::before,
+.module-card:focus-within::before,
+.content-card:hover::before,
+.content-card:focus-within::before {
+    transform: translateY(-2px) scale(1.015);
+    filter: saturate(0.94) contrast(1.1) brightness(1.12);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        inset 0 -16px 34px rgba(39, 60, 75, 0.14),
+        0 10px 18px rgba(39, 60, 75, 0.1);
+}
+
+.module-card:hover::after,
+.module-card:focus-within::after,
+.content-card:hover::after,
+.content-card:focus-within::after {
+    transform: translateY(-1px);
+    opacity: 0.96;
 }
 
 .module-card h3,
@@ -538,6 +671,13 @@ input[type="submit"]:focus-visible {
     padding: 2rem 0 4rem;
 }
 
+.single-dokumentation .content-wrap {
+    width: min(calc(100% - 1.5rem), 1320px) !important;
+    grid-template-columns: minmax(0, 2.35fr) minmax(15.5rem, 0.5fr) !important;
+    gap: clamp(1rem, 0.85rem + 0.7vw, 1.55rem) !important;
+    align-items: start !important;
+}
+
 .content-main,
 .content-sidebar {
     min-width: 0;
@@ -552,8 +692,155 @@ input[type="submit"]:focus-visible {
     padding: 1.6rem;
 }
 
+.single-dokumentation .single-shell,
+.single-dokumentation .content-sidebar > section {
+    padding-left: clamp(1.2rem, 0.95rem + 0.55vw, 1.6rem) !important;
+    padding-right: clamp(1.2rem, 0.95rem + 0.55vw, 1.6rem) !important;
+}
+
+.content-main > article.glass-panel:not(.portal-panel):not(.portal-card),
+.content-sidebar > section.glass-panel,
+.archive-shell.glass-panel,
+.page-shell.glass-panel,
+.single-shell.glass-panel,
+.error-shell.glass-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-top: 8rem;
+    --wc-panel-banner-bg:
+        linear-gradient(180deg, rgba(252, 254, 255, 0.2), rgba(18, 33, 45, 0.16)),
+        linear-gradient(135deg, rgba(101, 127, 146, 0.2), rgba(225, 232, 236, 0.08)),
+        url("./assets/brand/header/webapp-central-header-soft-cyan-display.png") center center / contain no-repeat;
+}
+
+.single-dokumentation .content-main > article.single-shell.glass-panel,
+.single-dokumentation .content-sidebar > section.glass-panel {
+    padding-top: clamp(6rem, 5.55rem + 0.9vw, 6.7rem) !important;
+}
+
+.content-main > article.glass-panel:not(.portal-panel):not(.portal-card)::before,
+.content-main > article.glass-panel:not(.portal-panel):not(.portal-card)::after,
+.content-sidebar > section.glass-panel::before,
+.content-sidebar > section.glass-panel::after,
+.archive-shell.glass-panel::before,
+.archive-shell.glass-panel::after,
+.page-shell.glass-panel::before,
+.page-shell.glass-panel::after,
+.single-shell.glass-panel::before,
+.single-shell.glass-panel::after,
+.error-shell.glass-panel::before,
+.error-shell.glass-panel::after {
+    content: "";
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    border-radius: 18px;
+    pointer-events: none;
+}
+
+.content-main > article.glass-panel:not(.portal-panel):not(.portal-card)::before,
+.content-sidebar > section.glass-panel::before,
+.archive-shell.glass-panel::before,
+.page-shell.glass-panel::before,
+.single-shell.glass-panel::before,
+.error-shell.glass-panel::before {
+    top: 1rem;
+    height: 5.9rem;
+    z-index: 0;
+    background: var(--wc-panel-banner-bg);
+    border: 1px solid rgba(184, 202, 213, 0.24);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -16px 34px rgba(39, 60, 75, 0.14);
+    filter: saturate(0.9) contrast(1.08) brightness(1.1);
+    transition: transform 0.26s ease, filter 0.26s ease, box-shadow 0.26s ease;
+}
+
+.content-main > article.glass-panel:not(.portal-panel):not(.portal-card)::after,
+.content-sidebar > section.glass-panel::after,
+.archive-shell.glass-panel::after,
+.page-shell.glass-panel::after,
+.single-shell.glass-panel::after,
+.error-shell.glass-panel::after {
+    top: 1.4rem;
+    height: 5rem;
+    z-index: 1;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.04)),
+        radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.46), transparent 24%),
+        linear-gradient(135deg, rgba(132, 159, 177, 0.12), rgba(255, 255, 255, 0));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    opacity: 0.9;
+    transition: transform 0.26s ease, opacity 0.26s ease;
+}
+
+.content-main > article.glass-panel:not(.portal-panel):not(.portal-card) > *,
+.content-sidebar > section.glass-panel > *,
+.archive-shell.glass-panel > *,
+.page-shell.glass-panel > *,
+.single-shell.glass-panel > *,
+.error-shell.glass-panel > * {
+    position: relative;
+    z-index: 2;
+}
+
+.content-main > article.glass-panel:not(.portal-panel):not(.portal-card):hover::before,
+.content-main > article.glass-panel:not(.portal-panel):not(.portal-card):focus-within::before,
+.content-sidebar > section.glass-panel:hover::before,
+.content-sidebar > section.glass-panel:focus-within::before,
+.archive-shell.glass-panel:hover::before,
+.archive-shell.glass-panel:focus-within::before,
+.page-shell.glass-panel:hover::before,
+.page-shell.glass-panel:focus-within::before,
+.single-shell.glass-panel:hover::before,
+.single-shell.glass-panel:focus-within::before,
+.error-shell.glass-panel:hover::before,
+.error-shell.glass-panel:focus-within::before {
+    transform: translateY(-2px) scale(1.01);
+}
+
+.content-main > article.glass-panel:not(.portal-panel):not(.portal-card):hover::after,
+.content-main > article.glass-panel:not(.portal-panel):not(.portal-card):focus-within::after,
+.content-sidebar > section.glass-panel:hover::after,
+.content-sidebar > section.glass-panel:focus-within::after,
+.archive-shell.glass-panel:hover::after,
+.archive-shell.glass-panel:focus-within::after,
+.page-shell.glass-panel:hover::after,
+.page-shell.glass-panel:focus-within::after,
+.single-shell.glass-panel:hover::after,
+.single-shell.glass-panel:focus-within::after,
+.error-shell.glass-panel:hover::after,
+.error-shell.glass-panel:focus-within::after {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
 .entry-header {
     margin-bottom: 1.25rem;
+}
+
+.single-dokumentation .entry-header {
+    max-width: 100% !important;
+    margin-bottom: 0.8rem !important;
+}
+
+.single-dokumentation .entry-meta {
+    margin-bottom: 0.45rem !important;
+}
+
+.single-dokumentation .entry-title {
+    margin-bottom: 0.55rem !important;
+    font-size: clamp(1.72rem, 1.22rem + 1vw, 2.35rem) !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.03em !important;
+    max-width: min(100%, 29ch) !important;
+}
+
+.single-dokumentation .content-sidebar {
+    max-width: 18rem !important;
+    justify-self: end !important;
+    opacity: 0.94;
 }
 
 .entry-meta {
@@ -591,14 +878,14 @@ input[type="submit"]:focus-visible {
     overflow-x: auto;
     padding: 1rem;
     border-radius: var(--wc-radius-sm);
-    background: rgba(220, 236, 248, 0.75);
+    background: rgba(228, 233, 237, 0.78);
 }
 
 .entry-content blockquote {
     margin: 1.25rem 0;
     padding: 0.75rem 1rem;
     border-left: 3px solid var(--wc-accent);
-    background: rgba(126, 205, 248, 0.1);
+    background: rgba(186, 198, 207, 0.16);
 }
 
 .entry-content table {
@@ -627,15 +914,15 @@ input[type="submit"]:focus-visible {
     min-height: 2.5rem;
     padding: 0.3rem 0.8rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.42);
+    background: rgba(255, 255, 255, 0.56);
     color: var(--wc-text-muted);
 }
 
 .pagination .current,
 .pagination a:hover,
 .pagination a:focus-visible {
-    background: rgba(116, 198, 240, 0.22);
-    color: #10324e;
+    background: rgba(173, 191, 202, 0.3);
+    color: #233440;
 }
 
 .site-footer {
@@ -688,11 +975,9 @@ input[type="submit"]:focus-visible {
 .portal-shell--project .portal-panel,
 .portal-shell--overview .portal-card,
 .portal-shell--project .portal-card {
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(242, 249, 255, 0.9)),
-        radial-gradient(circle at top right, rgba(117, 201, 255, 0.18), transparent 30%);
-    border: 1px solid rgba(60, 127, 180, 0.14);
-    box-shadow: 0 24px 60px rgba(44, 89, 128, 0.14);
+    background: var(--wc-surface-glass), var(--wc-surface-layer);
+    border: 1px solid rgba(111, 92, 73, 0.2);
+    box-shadow: var(--wc-shadow-soft), var(--wc-highlight);
 }
 
 .portal-hero {
@@ -707,20 +992,26 @@ input[type="submit"]:focus-visible {
     border-radius: 28px;
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
+    box-shadow: var(--wc-shadow-soft), var(--wc-highlight);
 }
 
 .portal-title,
 .portal-shell .entry-content h2,
 .portal-shell .entry-content h3 {
-    color: var(--wc-text);
+    color: #2b221b;
 }
 
 .portal-title {
     margin: 0 0 0.85rem;
     font-size: clamp(2.2rem, 1.8rem + 2vw, 4rem);
-    line-height: 1;
+    line-height: 0.96;
     letter-spacing: -0.03em;
+    font-weight: 760;
     max-width: 11ch;
+}
+
+.portal-title--detail {
+    max-width: 16ch;
 }
 
 .portal-lead,
@@ -730,6 +1021,14 @@ input[type="submit"]:focus-visible {
 .portal-activity-list li,
 .portal-timestamp {
     color: var(--wc-text-muted);
+    line-height: 1.72;
+}
+
+.portal-lead,
+.portal-card p,
+.project-detail-summary p,
+.project-detail-list li {
+    font-size: 1.02rem;
 }
 
 .portal-actions {
@@ -743,28 +1042,29 @@ input[type="submit"]:focus-visible {
     display: inline-flex;
     align-items: center;
     min-height: 2rem;
-    padding: 0.35rem 0.75rem;
+    padding: 0.34rem 0.78rem;
     border-radius: 999px;
-    background: rgba(86, 182, 240, 0.1);
-    border: 1px solid rgba(86, 182, 240, 0.2);
+    background: rgba(182, 160, 137, 0.16);
+    border: 1px solid rgba(112, 92, 73, 0.24);
     color: var(--wc-accent-strong);
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .portal-badge--soft {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(247, 242, 236, 0.72);
     color: var(--wc-text-muted);
 }
 
 .portal-section {
-    margin-top: 1.5rem;
+    margin-top: 1.65rem;
 }
 
 .portal-section__heading {
-    margin-bottom: 1rem;
+    margin-bottom: 1.1rem;
 }
 
 .portal-section__heading h2 {
@@ -775,7 +1075,7 @@ input[type="submit"]:focus-visible {
 
 .portal-grid {
     display: grid;
-    gap: 1rem;
+    gap: 1.05rem;
 }
 
 .portal-grid--areas {
@@ -791,14 +1091,24 @@ input[type="submit"]:focus-visible {
     display: flex;
     flex-direction: column;
     min-height: 100%;
-    padding: 1.25rem;
+    padding: 1.3rem;
     border-radius: 22px;
+    transition: transform 0.22s ease, box-shadow 0.26s ease, border-color 0.22s ease;
+}
+
+.portal-card:hover,
+.portal-card:focus-within {
+    transform: translateY(-2px);
+    border-color: rgba(128, 106, 84, 0.28);
+    box-shadow: var(--wc-shadow-card), var(--wc-highlight);
 }
 
 .portal-card h3 {
-    margin: 0.85rem 0 0.55rem;
+    margin: 0.9rem 0 0.58rem;
     color: var(--wc-text);
     font-size: 1.18rem;
+    line-height: 1.22;
+    letter-spacing: -0.01em;
 }
 
 .portal-card__meta {
@@ -812,43 +1122,305 @@ input[type="submit"]:focus-visible {
     display: inline-flex;
     align-items: center;
     min-height: 1.85rem;
-    padding: 0.3rem 0.7rem;
+    padding: 0.28rem 0.72rem;
     border-radius: 999px;
-    background: rgba(113, 214, 173, 0.14);
-    border: 1px solid rgba(113, 214, 173, 0.24);
-    color: #1e8a63;
+    background: rgba(190, 178, 160, 0.22);
+    border: 1px solid rgba(122, 101, 82, 0.22);
+    color: #584534;
     font-size: 0.78rem;
     font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .portal-card__visual {
+    position: relative;
+    isolation: isolate;
     display: flex;
     align-items: flex-end;
     min-height: 9rem;
     padding: 1rem;
     border-radius: 18px;
     background:
-        linear-gradient(135deg, rgba(84, 201, 255, 0.18), rgba(0, 0, 0, 0)),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(235, 245, 255, 0.9));
-    border: 1px solid rgba(151, 208, 255, 0.16);
+        linear-gradient(135deg, rgba(165, 145, 124, 0.2), rgba(0, 0, 0, 0)),
+        linear-gradient(180deg, rgba(251, 248, 243, 0.82), rgba(237, 230, 221, 0.94));
+    border: 1px solid rgba(148, 128, 109, 0.24);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -20px 44px rgba(124, 100, 75, 0.08);
+}
+
+.portal-card__visual::before,
+.portal-card__visual::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.portal-card__visual::before {
+    z-index: -2;
+    background: inherit;
+}
+
+.portal-card__visual::after {
+    z-index: -1;
 }
 
 .portal-card__visual span {
+    position: relative;
+    z-index: 1;
     color: var(--wc-accent-strong);
-    font-weight: 700;
+    font-size: 0.98rem;
+    font-weight: 760;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+    text-shadow: 0 1px 12px rgba(255, 255, 255, 0.5);
+}
+
+.portal-card__visual--webapps,
+.portal-card__visual--projects,
+.portal-card__visual--care,
+.portal-card__visual--mobility,
+.portal-card__visual--tech,
+.portal-card__visual--documentation,
+.portal-card__visual--organization,
+.portal-card__visual--communication {
+    overflow: hidden;
+    border-color: rgba(93, 121, 143, 0.28);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 18px 38px rgba(38, 58, 73, 0.14);
+}
+
+.portal-card__visual--webapps::before,
+.portal-card__visual--projects::before,
+.portal-card__visual--care::before,
+.portal-card__visual--mobility::before,
+.portal-card__visual--tech::before,
+.portal-card__visual--documentation::before,
+.portal-card__visual--organization::before,
+.portal-card__visual--communication::before {
+    transform: scale(1.04);
+    filter: saturate(0.82) contrast(1.04) brightness(0.84) blur(1px);
+}
+
+.portal-card__visual--webapps::after,
+.portal-card__visual--projects::after,
+.portal-card__visual--care::after,
+.portal-card__visual--mobility::after,
+.portal-card__visual--tech::after,
+.portal-card__visual--documentation::after,
+.portal-card__visual--organization::after,
+.portal-card__visual--communication::after {
+    background:
+        linear-gradient(180deg, rgba(239, 245, 249, 0.08), rgba(49, 77, 101, 0.18)),
+        linear-gradient(180deg, rgba(9, 23, 36, 0.06), rgba(9, 23, 36, 0.28));
+}
+
+.portal-card__visual--webapps span,
+.portal-card__visual--projects span,
+.portal-card__visual--care span,
+.portal-card__visual--mobility span,
+.portal-card__visual--tech span,
+.portal-card__visual--documentation span,
+.portal-card__visual--organization span,
+.portal-card__visual--communication span {
+    color: #eff7ff;
+    text-shadow:
+        0 2px 18px rgba(7, 26, 48, 0.5),
+        0 1px 0 rgba(7, 26, 48, 0.18);
+}
+
+.portal-card__visual--webapps::before {
+    background:
+        radial-gradient(circle at 16% 30%, rgba(188, 221, 244, 0.34), transparent 16%),
+        radial-gradient(circle at 74% 34%, rgba(209, 229, 243, 0.26), transparent 18%),
+        linear-gradient(90deg, rgba(239, 247, 252, 0.12) 0, rgba(239, 247, 252, 0.12) 1px, transparent 1px, transparent 18%),
+        linear-gradient(180deg, rgba(174, 197, 215, 0.16), rgba(255, 255, 255, 0.04)),
+        linear-gradient(135deg, rgba(41, 64, 84, 0.5), rgba(144, 169, 187, 0.08));
+}
+
+.portal-card__visual--projects::before {
+    background:
+        linear-gradient(180deg, rgba(181, 202, 219, 0.18), rgba(255, 255, 255, 0.06)),
+        linear-gradient(135deg, rgba(47, 72, 94, 0.44), rgba(154, 177, 194, 0.08)),
+        url("./assets/project-previews/projects-header.webp") center 52% / cover no-repeat;
+}
+
+.portal-card__visual--care::before {
+    background:
+        linear-gradient(180deg, rgba(186, 206, 220, 0.18), rgba(255, 255, 255, 0.06)),
+        linear-gradient(135deg, rgba(52, 77, 96, 0.42), rgba(159, 181, 197, 0.08)),
+        url("./assets/project-previews/care-header.webp") center 38% / cover no-repeat;
+}
+
+.portal-card__visual--mobility::before {
+    background:
+        linear-gradient(180deg, rgba(178, 198, 214, 0.18), rgba(255, 255, 255, 0.06)),
+        linear-gradient(135deg, rgba(47, 73, 95, 0.42), rgba(155, 178, 194, 0.08)),
+        url("./assets/project-previews/mobility-header.webp") center 50% / cover no-repeat;
+}
+
+.portal-card__visual--tech::before {
+    background:
+        linear-gradient(180deg, rgba(175, 197, 214, 0.2), rgba(255, 255, 255, 0.04)),
+        linear-gradient(135deg, rgba(37, 62, 85, 0.48), rgba(145, 171, 192, 0.08)),
+        url("./assets/project-previews/tech-header.webp") center 50% / cover no-repeat;
+}
+
+.portal-card__visual--documentation::before {
+    background:
+        linear-gradient(180deg, rgba(185, 206, 220, 0.18), rgba(255, 255, 255, 0.06)),
+        linear-gradient(135deg, rgba(52, 79, 102, 0.42), rgba(159, 182, 196, 0.08)),
+        url("./assets/project-previews/documentation-header.webp") center 44% / cover no-repeat;
+}
+
+.portal-card__visual--organization::before {
+    background:
+        radial-gradient(circle at 18% 50%, rgba(215, 230, 239, 0.26), transparent 12%),
+        radial-gradient(circle at 42% 50%, rgba(215, 230, 239, 0.18), transparent 11%),
+        radial-gradient(circle at 66% 50%, rgba(215, 230, 239, 0.16), transparent 11%),
+        linear-gradient(90deg, transparent 15%, rgba(214, 228, 238, 0.24) 15%, rgba(214, 228, 238, 0.24) 17%, transparent 17%, transparent 39%, rgba(214, 228, 238, 0.2) 39%, rgba(214, 228, 238, 0.2) 41%, transparent 41%, transparent 63%, rgba(214, 228, 238, 0.18) 63%, rgba(214, 228, 238, 0.18) 65%, transparent 65%),
+        linear-gradient(180deg, rgba(184, 204, 219, 0.16), rgba(255, 255, 255, 0.04)),
+        linear-gradient(135deg, rgba(52, 80, 102, 0.46), rgba(156, 179, 194, 0.08));
+}
+
+.portal-card__visual--communication::before {
+    background:
+        radial-gradient(circle at 22% 34%, rgba(212, 229, 240, 0.34), transparent 10%),
+        radial-gradient(circle at 50% 60%, rgba(204, 224, 238, 0.24), transparent 11%),
+        radial-gradient(circle at 78% 30%, rgba(212, 229, 240, 0.3), transparent 10%),
+        linear-gradient(120deg, transparent 24%, rgba(214, 228, 238, 0.2) 24%, rgba(214, 228, 238, 0.2) 25%, transparent 25%, transparent 49%, rgba(214, 228, 238, 0.18) 49%, rgba(214, 228, 238, 0.18) 50%, transparent 50%, transparent 73%, rgba(214, 228, 238, 0.16) 73%, rgba(214, 228, 238, 0.16) 74%, transparent 74%),
+        linear-gradient(180deg, rgba(182, 203, 219, 0.16), rgba(255, 255, 255, 0.04)),
+        linear-gradient(135deg, rgba(48, 76, 99, 0.48), rgba(156, 180, 197, 0.08));
+}
+
+.portal-card__visual--enpal-hallenberg {
+    overflow: hidden;
+    border-color: rgba(88, 116, 138, 0.3);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 18px 38px rgba(36, 58, 75, 0.18);
+}
+
+.portal-card__visual--enpal-hallenberg::before {
+    background:
+        linear-gradient(180deg, rgba(174, 198, 217, 0.18), rgba(255, 255, 255, 0.04)),
+        linear-gradient(135deg, rgba(35, 61, 85, 0.5), rgba(149, 173, 191, 0.08)),
+        url("./assets/project-previews/enpal-hallenberg-header.webp") center 52% / cover no-repeat;
+    transform: scale(1.04);
+    filter: saturate(0.8) contrast(1.06) brightness(0.72) blur(1.2px);
+}
+
+.portal-card__visual--enpal-hallenberg::after {
+    background:
+        linear-gradient(180deg, rgba(240, 246, 250, 0.06), rgba(46, 73, 98, 0.18)),
+        linear-gradient(180deg, rgba(8, 22, 34, 0.08), rgba(8, 22, 34, 0.3));
+}
+
+.portal-card__visual--enpal-hallenberg span {
+    color: #eff7ff;
+    text-shadow:
+        0 2px 18px rgba(7, 26, 48, 0.55),
+        0 1px 0 rgba(7, 26, 48, 0.18);
 }
 
 .portal-card__link {
     margin-top: auto;
-    padding-top: 1rem;
+    padding-top: 1.08rem;
     color: var(--wc-accent-strong);
     font-weight: 700;
 }
 
+.portal-card__link:hover,
+.portal-card__link:focus-visible {
+    color: #3f3126;
+}
+
+.project-detail-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+}
+
+.project-detail-stat {
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(250, 246, 241, 0.78), rgba(236, 229, 220, 0.9));
+    border: 1px solid rgba(114, 93, 73, 0.18);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.project-detail-stat strong {
+    display: block;
+    font-size: 1.2rem;
+    color: #33271e;
+}
+
+.project-detail-stat span,
+.project-detail-summary p,
+.project-detail-list li {
+    color: var(--wc-text-muted);
+}
+
+.project-detail-summary h2 {
+    margin-bottom: 0.6rem;
+}
+
+.project-detail-summary p {
+    margin: 0.8rem 0 0;
+}
+
+.project-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.08rem;
+}
+
+.project-detail-card {
+    min-height: 100%;
+}
+
+.project-detail-card .portal-card__visual {
+    margin-bottom: 0.92rem;
+}
+
+.project-detail-card h3 {
+    margin-top: 0.15rem;
+}
+
+.project-detail-list {
+    list-style: none;
+    margin: 0.2rem 0 0;
+    padding: 0;
+}
+
+.project-detail-list li {
+    position: relative;
+    padding: 0.68rem 0 0.68rem 1rem;
+    border-bottom: 1px solid rgba(129, 109, 88, 0.18);
+}
+
+.project-detail-list li::before {
+    content: "";
+    position: absolute;
+    top: 1rem;
+    left: 0;
+    width: 0.38rem;
+    height: 0.38rem;
+    border-radius: 999px;
+    background: rgba(118, 96, 75, 0.56);
+}
+
+.project-detail-list li:last-child {
+    border-bottom: 0;
+}
+
 .portal-intro {
     margin-bottom: 1.25rem;
+    box-shadow: var(--wc-shadow-soft), var(--wc-highlight);
 }
 
 .portal-activity-list {
@@ -859,7 +1431,7 @@ input[type="submit"]:focus-visible {
 
 .portal-activity-list li {
     padding: 0.8rem 0;
-    border-bottom: 1px solid rgba(145, 184, 220, 0.2);
+    border-bottom: 1px solid rgba(129, 109, 88, 0.2);
 }
 
 .portal-activity-list li:last-child {
@@ -875,16 +1447,16 @@ textarea,
 select {
     width: 100%;
     padding: 0.8rem 0.9rem;
-    border: 1px solid rgba(87, 129, 166, 0.16);
+    border: 1px solid rgba(116, 96, 78, 0.22);
     border-radius: var(--wc-radius-sm);
-    background: rgba(255, 255, 255, 0.78);
+    background: rgba(250, 246, 241, 0.92);
     color: var(--wc-text);
 }
 
 input:focus,
 textarea:focus,
 select:focus {
-    outline: 2px solid rgba(86, 182, 240, 0.3);
+    outline: 2px solid rgba(124, 101, 80, 0.28);
     outline-offset: 1px;
 }
 
@@ -899,7 +1471,8 @@ select:focus {
     .portal-hero,
     .portal-grid--areas,
     .portal-grid--featured,
-    .portal-grid--projects {
+    .portal-grid--projects,
+    .project-detail-grid {
         grid-template-columns: 1fr;
     }
 
@@ -915,6 +1488,32 @@ select:focus {
 
     .hero__stats {
         grid-template-columns: 1fr;
+    }
+
+    .project-detail-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .single-dokumentation .content-wrap {
+        width: min(calc(100% - 1.5rem), var(--wc-content)) !important;
+        grid-template-columns: 1fr !important;
+        gap: 1.1rem !important;
+    }
+
+    .single-dokumentation .content-sidebar {
+        max-width: none !important;
+        justify-self: stretch !important;
+        opacity: 1;
+    }
+
+    .single-dokumentation .entry-header {
+        max-width: 100% !important;
+    }
+
+    .single-dokumentation .entry-title {
+        font-size: clamp(1.58rem, 1.25rem + 2.5vw, 2.05rem) !important;
+        line-height: 1.03 !important;
+        max-width: 100% !important;
     }
 
     .hero h1,

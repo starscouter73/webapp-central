@@ -12,9 +12,61 @@ get_header();
     <?php while (have_posts()) : the_post(); ?>
         <?php
         $slug = (string) get_post_field('post_name', get_the_ID());
+        $project_slug = sanitize_key((string) ($_GET['projekt'] ?? ''));
+        $project_detail = $project_slug !== '' ? webapp_central_starter_project_detail_data($slug, $project_slug) : null;
         $cards = webapp_central_starter_project_hub_cards($slug);
         $activities = webapp_central_starter_project_hub_activities($slug);
         ?>
+        <?php if (is_array($project_detail)) : ?>
+            <section class="portal-hero portal-hero--project-detail">
+                <div class="portal-hero__content portal-panel">
+                    <span class="portal-badge"><?php echo esc_html((string) $project_detail['eyebrow']); ?></span>
+                    <h1 class="portal-title portal-title--detail"><?php echo esc_html((string) $project_detail['title']); ?></h1>
+                    <p class="portal-lead"><?php echo esc_html((string) $project_detail['summary']); ?></p>
+                    <div class="portal-actions">
+                        <a class="button-link" href="<?php echo esc_url((string) $project_detail['back_url']); ?>"><?php esc_html_e('Zur Projektkarte', 'webapp-central-starter'); ?></a>
+                    </div>
+                    <div class="project-detail-stats">
+                        <?php foreach (($project_detail['stats'] ?? []) as $stat) : ?>
+                            <article class="project-detail-stat">
+                                <strong><?php echo esc_html((string) ($stat['value'] ?? '')); ?></strong>
+                                <span><?php echo esc_html((string) ($stat['label'] ?? '')); ?></span>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <aside class="portal-hero__aside portal-panel project-detail-summary">
+                    <div class="portal-card__meta">
+                        <span class="portal-status"><?php echo esc_html((string) $project_detail['status']); ?></span>
+                        <span class="portal-timestamp"><?php echo esc_html((string) $project_detail['updated']); ?></span>
+                    </div>
+                    <h2><?php esc_html_e('Projektliste', 'webapp-central-starter'); ?></h2>
+                    <p><?php esc_html_e('Strukturierte Uebersicht der bisherigen Themen, Kleinprojekte und Tasks fuer die operative Begleitung.', 'webapp-central-starter'); ?></p>
+                </aside>
+            </section>
+
+            <section class="portal-section">
+                <div class="portal-section__heading">
+                    <span class="portal-badge portal-badge--soft"><?php esc_html_e('Projekt-Dashboard', 'webapp-central-starter'); ?></span>
+                    <h2><?php esc_html_e('Themen, Aufgaben und Dokumentationsspuren', 'webapp-central-starter'); ?></h2>
+                </div>
+                <div class="project-detail-grid">
+                    <?php foreach (($project_detail['sections'] ?? []) as $section) : ?>
+                        <article class="project-detail-card portal-card">
+                            <div class="portal-card__meta">
+                                <span class="portal-status"><?php echo esc_html((string) ($section['status'] ?? '')); ?></span>
+                            </div>
+                            <h3><?php echo esc_html((string) ($section['title'] ?? '')); ?></h3>
+                            <ul class="project-detail-list">
+                                <?php foreach (($section['items'] ?? []) as $item) : ?>
+                                    <li><?php echo esc_html((string) $item); ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        <?php else : ?>
         <section class="portal-hero portal-hero--project">
             <div class="portal-hero__content portal-panel">
                 <span class="portal-badge"><?php esc_html_e('Projekt-Hub', 'webapp-central-starter'); ?></span>
@@ -62,6 +114,7 @@ get_header();
                 <?php endforeach; ?>
             </div>
         </section>
+        <?php endif; ?>
     <?php endwhile; ?>
 </main>
 <?php
