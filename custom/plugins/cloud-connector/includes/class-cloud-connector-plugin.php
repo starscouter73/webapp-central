@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 final class CloudConnectorPlugin
 {
+    private const VERSION = '0.1.0';
+    private const NOTICE_OPTION = 'cloud_connector_admin_notice';
+
     public static function bootstrap(string $pluginFile): void
     {
         register_activation_hook($pluginFile, [self::class, 'activate']);
+        add_action('plugins_loaded', [self::class, 'maybeUpgrade']);
         add_action('admin_menu', [self::class, 'registerAdmin']);
+        add_action('admin_notices', [self::class, 'renderAdminNotices']);
         add_action('admin_post_cc_save_connection', [self::class, 'saveConnection']);
         add_action('admin_post_cc_delete_connection', [self::class, 'deleteConnection']);
         add_action('admin_post_cc_connection_action', [self::class, 'connectionAction']);
@@ -20,8 +25,36 @@ final class CloudConnectorPlugin
 
     public static function activate(): void
     {
-        CloudStorage::install();
+        CloudStorage::clearTableCache();
+        $installed = CloudStorage::install();
+
+        if (!$installed) {
+            self::storeAdminNotice('Die Cloud-Connector-Tabellen konnten bei der Aktivierung nicht vollstaendig angelegt werden. Bitte Datenbankrechte und WordPress-Umgebung pruefen.');
+            return;
+        }
+
         CloudLogger::log('info', 'activate', 'Cloud Connector wurde initialisiert.');
+    }
+
+    public static function maybeUpgrade(): void
+    {
+        $installedVersion = get_option('cloud_connector_db_version', '');
+
+        if ($installedVersion === self::VERSION && CloudStorage::schemaReady()) {
+            return;
+        }
+
+        CloudStorage::clearTableCache();
+        $installed = CloudStorage::install();
+
+        if (!$installed) {
+            self::storeAdminNotice('Cloud Connector ist aktiv, aber die Datenbankbasis ist unvollstaendig. Das Modul bleibt im Safe-Mode und zeigt nur eingeschraenkte Verwaltungsdaten.');
+            return;
+        }
+
+        if ($installedVersion !== '' && $installedVersion !== self::VERSION) {
+            self::storeAdminNotice('Cloud Connector Datenbankschema wurde auf die aktuelle Plugin-Version abgeglichen.');
+        }
     }
 
     public static function registerAdmin(): void
@@ -32,6 +65,11 @@ final class CloudConnectorPlugin
     public static function saveConnection(): void
     {
         CloudAdmin::assertAdminAction('cc_save_connection');
+
+        if (!CloudStorage::schemaReady()) {
+            self::storeAdminNotice('Speichern nicht moeglich: Die Cloud-Connector-Tabellen sind nicht vollstaendig verfuegbar.');
+            CloudAdmin::redirectWithNotice('connections', 'schema_incomplete', true);
+        }
 
         $connectionId = isset($_POST['id']) ? absint($_POST['id']) : 0;
         $existing = $connectionId ? CloudStorage::getConnection($connectionId) : null;
@@ -73,6 +111,10 @@ final class CloudConnectorPlugin
     {
         CloudAdmin::assertAdminAction('cc_delete_connection');
 
+        if (!CloudStorage::schemaReady()) {
+            CloudAdmin::redirectWithNotice('connections', 'schema_incomplete', true);
+        }
+
         $id = absint($_POST['id'] ?? 0);
         CloudStorage::deleteConnection($id);
         CloudLogger::log('warning', 'delete_connection', 'Verbindung entfernt.', ['connection_id' => $id]);
@@ -82,6 +124,10 @@ final class CloudConnectorPlugin
     public static function connectionAction(): void
     {
         CloudAdmin::assertAdminAction('cc_connection_action');
+
+        if (!CloudStorage::schemaReady()) {
+            CloudAdmin::redirectWithNotice('connections', 'schema_incomplete', true);
+        }
 
         $id = absint($_POST['id'] ?? 0);
         $action = sanitize_key(wp_unslash($_POST['connection_action'] ?? ''));
@@ -131,6 +177,10 @@ final class CloudConnectorPlugin
     {
         CloudAdmin::assertAdminAction('cc_save_job');
 
+        if (!CloudStorage::schemaReady()) {
+            CloudAdmin::redirectWithNotice('sync-jobs', 'schema_incomplete', true);
+        }
+
         $id = CloudStorage::saveJob([
             'id' => absint($_POST['id'] ?? 0),
             'provider_slug' => wp_unslash($_POST['provider_slug'] ?? ''),
@@ -151,6 +201,10 @@ final class CloudConnectorPlugin
     {
         CloudAdmin::assertAdminAction('cc_delete_job');
 
+        if (!CloudStorage::schemaReady()) {
+            CloudAdmin::redirectWithNotice('sync-jobs', 'schema_incomplete', true);
+        }
+
         $id = absint($_POST['id'] ?? 0);
         CloudStorage::deleteJob($id);
         CloudLogger::log('warning', 'delete_job', 'Sync-Job geloescht.', ['job_id' => $id]);
@@ -160,6 +214,10 @@ final class CloudConnectorPlugin
     public static function jobAction(): void
     {
         CloudAdmin::assertAdminAction('cc_job_action');
+
+        if (!CloudStorage::schemaReady()) {
+            CloudAdmin::redirectWithNotice('sync-jobs', 'schema_incomplete', true);
+        }
 
         $id = absint($_POST['id'] ?? 0);
         $action = sanitize_key(wp_unslash($_POST['job_action'] ?? ''));
@@ -207,6 +265,10 @@ final class CloudConnectorPlugin
     {
         CloudAdmin::assertAdminAction('cc_refresh_files');
 
+        if (!CloudStorage::schemaReady()) {
+            CloudAdmin::redirectWithNotice('files', 'schema_incomplete', true);
+        }
+
         $connectionId = absint($_POST['connection_id'] ?? 0);
         $connection = CloudStorage::getConnection($connectionId);
 
@@ -230,6 +292,10 @@ final class CloudConnectorPlugin
     {
         CloudAdmin::assertAdminAction('cc_save_settings');
 
+        if (!CloudStorage::schemaReady()) {
+            CloudAdmin::redirectWithNotice('settings', 'schema_incomplete', true);
+        }
+
         CloudStorage::setSetting('safe_mode', empty($_POST['safe_mode']) ? '0' : '1');
         CloudStorage::setSetting('http_timeout', (string) absint($_POST['http_timeout'] ?? 5));
         CloudStorage::setSetting('allow_destructive_actions', empty($_POST['allow_destructive_actions']) ? '0' : '1');
@@ -237,5 +303,39 @@ final class CloudConnectorPlugin
 
         CloudLogger::log('info', 'save_settings', 'Einstellungen aktualisiert.');
         CloudAdmin::redirectWithNotice('settings', 'settings_saved');
+    }
+
+    public static function renderAdminNotices(): void
+    {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        $notice = get_option(self::NOTICE_OPTION, '');
+
+        if (is_string($notice) && $notice !== '') {
+            echo '<div class="notice notice-warning"><p>' . esc_html($notice) . '</p></div>';
+            delete_option(self::NOTICE_OPTION);
+        }
+
+        if (!CloudStorage::schemaReady()) {
+            $missing = CloudStorage::missingTables();
+            echo '<div class="notice notice-error"><p>';
+            echo esc_html('Cloud Connector laeuft im eingeschraenkten Recovery-Modus. Fehlende Tabellen: ' . implode(', ', $missing));
+            echo '</p></div>';
+        }
+
+        if (!CloudCrypto::canEncrypt()) {
+            echo '<div class="notice notice-warning"><p>Cloud Connector kann Konfigurationen in dieser Umgebung nicht verschluesseln und faellt auf maskierte Fallback-Speicherung zurueck.</p></div>';
+        }
+
+        if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
+            echo '<div class="notice notice-info"><p>WP-Cron ist deaktiviert. Das betrifft V1 nicht produktiv, spaetere Hintergrundjobs benoetigen jedoch einen separaten Scheduler.</p></div>';
+        }
+    }
+
+    private static function storeAdminNotice(string $message): void
+    {
+        update_option(self::NOTICE_OPTION, sanitize_text_field($message), false);
     }
 }

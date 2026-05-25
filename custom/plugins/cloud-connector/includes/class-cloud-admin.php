@@ -130,6 +130,7 @@ final class CloudAdmin
             'job_missing' => 'Sync-Job nicht gefunden.',
             'files_refreshed' => 'Dateiliste aus Demo-/Cache-Daten aktualisiert.',
             'settings_saved' => 'Einstellungen gespeichert.',
+            'schema_incomplete' => 'Die Datenbankbasis des Cloud Connectors ist unvollstaendig. Aktion wurde nicht ausgefuehrt.',
         ];
 
         return $messages[$key] ?? 'Aktion ausgefuehrt.';
@@ -141,10 +142,12 @@ final class CloudAdmin
         $connections = CloudStorage::getConnections();
         $jobs = CloudStorage::getJobs();
         $safeMode = CloudStorage::getSetting('safe_mode', '1') === '1' ? 'Aktiv' : 'Deaktiviert';
+        $schemaStatus = CloudStorage::schemaReady() ? 'Bereit' : 'Recovery-Modus';
 
         echo '<p>V1 stellt nur die sichere Verwaltungsbasis bereit. Produktive Sync-, Move- und Delete-Aktionen bleiben blockiert.</p>';
         echo '<table class="widefat striped"><tbody>';
         echo '<tr><td><strong>Safe-Mode</strong></td><td>' . esc_html($safeMode) . '</td></tr>';
+        echo '<tr><td><strong>Schema-Status</strong></td><td>' . esc_html($schemaStatus) . '</td></tr>';
         echo '<tr><td><strong>Anbieter</strong></td><td>' . esc_html((string) count($providers)) . '</td></tr>';
         echo '<tr><td><strong>Verbindungen</strong></td><td>' . esc_html((string) count($connections)) . '</td></tr>';
         echo '<tr><td><strong>Sync-Jobs</strong></td><td>' . esc_html((string) count($jobs)) . '</td></tr>';

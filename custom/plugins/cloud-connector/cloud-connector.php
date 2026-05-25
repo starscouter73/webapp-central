@@ -4,6 +4,8 @@
  * Description: Sichere Modulbasis fuer die zentrale Verwaltung von Cloud-Anbietern in webapp-central.de.
  * Version: 0.1.0
  * Author: Mark Dorth
+ * Requires at least: 6.0
+ * Requires PHP: 7.4
  */
 
 declare(strict_types=1);

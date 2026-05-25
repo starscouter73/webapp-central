@@ -41,13 +41,13 @@ final class CloudCrypto
             return [];
         }
 
-        if (str_starts_with($payload, 'plain:')) {
+        if (self::startsWith($payload, 'plain:')) {
             $decoded = base64_decode(substr($payload, 6), true);
 
             return is_string($decoded) ? (json_decode($decoded, true) ?: []) : [];
         }
 
-        if (!str_starts_with($payload, 'enc:') || !self::canEncrypt()) {
+        if (!self::startsWith($payload, 'enc:') || !self::canEncrypt()) {
             return [];
         }
 
@@ -68,6 +68,15 @@ final class CloudCrypto
 
     public static function canEncrypt(): bool
     {
-        return function_exists('openssl_encrypt') && defined('AUTH_KEY') && defined('SECURE_AUTH_KEY');
+        return function_exists('openssl_encrypt')
+            && function_exists('openssl_decrypt')
+            && function_exists('random_bytes')
+            && defined('AUTH_KEY')
+            && defined('SECURE_AUTH_KEY');
+    }
+
+    private static function startsWith(string $haystack, string $needle): bool
+    {
+        return strpos($haystack, $needle) === 0;
     }
 }
