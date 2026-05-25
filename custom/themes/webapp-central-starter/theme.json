@@ -8,32 +8,32 @@
         {
           "slug": "background",
           "name": "Background",
-          "color": "#efe8e0"
+          "color": "#050505"
         },
         {
           "slug": "surface",
           "name": "Surface",
-          "color": "#e6dbcf"
+          "color": "#111111"
         },
         {
           "slug": "text",
           "name": "Text",
-          "color": "#2b221b"
+          "color": "#ffffff"
         },
         {
           "slug": "muted",
           "name": "Muted",
-          "color": "#615348"
+          "color": "#d4d4d8"
         },
         {
           "slug": "accent",
           "name": "Accent",
-          "color": "#6f5e4e"
+          "color": "#efff3d"
         },
         {
           "slug": "accent-strong",
           "name": "Accent Strong",
-          "color": "#514233"
+          "color": "#f4ff45"
         }
       ]
     },
@@ -50,17 +50,17 @@
   },
   "styles": {
     "color": {
-      "background": "#efe8e0",
-      "text": "#2b221b"
+      "background": "#050505",
+      "text": "#ffffff"
     },
     "typography": {
-      "fontFamily": "\"Segoe UI\", \"Helvetica Neue\", sans-serif",
+      "fontFamily": "\"Aptos\", \"Segoe UI\", sans-serif",
       "lineHeight": "1.7"
     },
     "elements": {
       "link": {
         "color": {
-          "text": "#6f5e4e"
+          "text": "#efff3d"
         }
       }
     }

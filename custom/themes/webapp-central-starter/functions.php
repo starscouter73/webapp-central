@@ -117,9 +117,9 @@ function webapp_central_starter_render_header_branding(): void
     }
 
     echo '<div class="site-branding__text">';
-    echo '<p class="site-title' . ($logo_markup !== null ? ' screen-reader-text' : '') . '"><span>' . esc_html(get_bloginfo('name')) . '</span></p>';
-    echo '<p class="site-kicker">' . esc_html__('Offizielle Wortmarke', 'webapp-central-starter') . '</p>';
-    echo '<p class="site-caption">' . esc_html__('Projektzentrale fuer Inhalte, Module und Tutorials', 'webapp-central-starter') . '</p>';
+    echo '<p class="site-title' . ($logo_markup !== null ? ' screen-reader-text' : '') . '"><span>' . esc_html__('Webapp Central', 'webapp-central-starter') . '</span></p>';
+    echo '<p class="site-kicker">' . esc_html__('Digitale Steuerzentrale', 'webapp-central-starter') . '</p>';
+    echo '<p class="site-caption">' . esc_html__('Projekte, Dokumentation und intelligente Workflows in einer Plattform.', 'webapp-central-starter') . '</p>';
     echo '</div>';
 }
 
@@ -165,8 +165,9 @@ function webapp_central_starter_render_menu(): void
 
     echo '<nav class="site-nav" aria-label="' . esc_attr__('Primary Navigation', 'webapp-central-starter') . '"><ul>';
     echo '<li><a href="' . esc_url(home_url('/')) . '">' . esc_html__('Start', 'webapp-central-starter') . '</a></li>';
-    echo '<li><a href="' . esc_url(admin_url()) . '">' . esc_html__('Dashboard', 'webapp-central-starter') . '</a></li>';
-    echo '<li><a href="' . esc_url(home_url('/wp-admin/post-new.php?post_type=page')) . '">' . esc_html__('Neue Seite', 'webapp-central-starter') . '</a></li>';
+    echo '<li><a href="' . esc_url(webapp_central_starter_portal_page_url('projekte', '/projekte/')) . '">' . esc_html__('Module', 'webapp-central-starter') . '</a></li>';
+    echo '<li><a href="' . esc_url(webapp_central_starter_portal_page_url('dokumentationen', '/dokumentationen/')) . '">' . esc_html__('Dokumentation', 'webapp-central-starter') . '</a></li>';
+    echo '<li><a href="' . esc_url(webapp_central_starter_portal_page_url('kontakt', '/kontakt/')) . '">' . esc_html__('Kontakt', 'webapp-central-starter') . '</a></li>';
     echo '</ul></nav>';
 }
 

@@ -15,6 +15,11 @@ declare(strict_types=1);
             <div class="site-branding">
                 <?php webapp_central_starter_render_header_branding(); ?>
             </div>
-            <?php webapp_central_starter_render_menu(); ?>
+            <div class="site-header__nav-group">
+                <?php webapp_central_starter_render_menu(); ?>
+                <a class="button-link site-header__cta" href="<?php echo esc_url(webapp_central_starter_portal_page_url('projekte', '/projekte/')); ?>">
+                    <?php esc_html_e('Projekt starten', 'webapp-central-starter'); ?>
+                </a>
+            </div>
         </div>
     </header>
