@@ -54,6 +54,6 @@ Die Einfuehrung der `AGENTS.md` ist eine bewusste Entscheidung fuer strukturiert
 
 ## Verwandte Dokumente
 
-- [Warum webapp-central.de keine klassische Website ist](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/warum-webapp-central-keine-klassische-website-ist.md)
-- [Dokumentation als Plattformgedaechtnis](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/dokumentation-als-plattformgedaechtnis.md)
-- [AGENTS.md](C:/Users/dorth/Documents/webapp-zentrale/AGENTS.md)
+- [Warum webapp-central.de keine klassische Website ist](warum-webapp-central-keine-klassische-website-ist.md)
+- [Dokumentation als Plattformgedaechtnis](dokumentation-als-plattformgedaechtnis.md)
+- [AGENTS.md](../../AGENTS.md)

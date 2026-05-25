@@ -54,6 +54,6 @@ Die Plattform befindet sich in einer Architektur-, Governance- und Strukturierun
 
 ## Verwandte Dokumente
 
-- [Einfuehrung der AGENTS.md](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/einfuehrung-der-agents-md.md)
-- [Grundprinzipien der Plattformarchitektur](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/grundprinzipien-der-plattformarchitektur.md)
-- [Dokumentation als Plattformgedaechtnis](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/dokumentation-als-plattformgedaechtnis.md)
+- [Einfuehrung der AGENTS.md](einfuehrung-der-agents-md.md)
+- [Grundprinzipien der Plattformarchitektur](grundprinzipien-der-plattformarchitektur.md)
+- [Dokumentation als Plattformgedaechtnis](dokumentation-als-plattformgedaechtnis.md)

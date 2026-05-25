@@ -13,11 +13,11 @@ Sie sind keine Blogbeitraege, sondern ruhige Referenztexte mit langfristigem Gel
 
 ## Enthaltene Dokumente
 
-1. [Warum webapp-central.de keine klassische Website ist](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/warum-webapp-central-keine-klassische-website-ist.md)
-2. [Einfuehrung der AGENTS.md](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/einfuehrung-der-agents-md.md)
-3. [Dokumentation als Plattformgedaechtnis](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/dokumentation-als-plattformgedaechtnis.md)
-4. [GitHub als Steuerzentrale statt WordPress-Archiv](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/github-als-steuerzentrale-statt-wordpress-archiv.md)
-5. [Grundprinzipien der Plattformarchitektur](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/grundprinzipien-der-plattformarchitektur.md)
+1. [Warum webapp-central.de keine klassische Website ist](warum-webapp-central-keine-klassische-website-ist.md)
+2. [Einfuehrung der AGENTS.md](einfuehrung-der-agents-md.md)
+3. [Dokumentation als Plattformgedaechtnis](dokumentation-als-plattformgedaechtnis.md)
+4. [GitHub als Steuerzentrale statt WordPress-Archiv](github-als-steuerzentrale-statt-wordpress-archiv.md)
+5. [Grundprinzipien der Plattformarchitektur](grundprinzipien-der-plattformarchitektur.md)
 
 ## Empfohlener Einstiegspfad
 

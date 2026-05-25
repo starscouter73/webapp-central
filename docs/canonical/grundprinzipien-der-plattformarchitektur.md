@@ -56,6 +56,6 @@ Architektur wird nicht nur als technisches Geruest verstanden, sondern als Regel
 
 ## Verwandte Dokumente
 
-- [Warum webapp-central.de keine klassische Website ist](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/warum-webapp-central-keine-klassische-website-ist.md)
-- [Einfuehrung der AGENTS.md](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/einfuehrung-der-agents-md.md)
-- [Dokumentation als Plattformgedaechtnis](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/dokumentation-als-plattformgedaechtnis.md)
+- [Warum webapp-central.de keine klassische Website ist](warum-webapp-central-keine-klassische-website-ist.md)
+- [Einfuehrung der AGENTS.md](einfuehrung-der-agents-md.md)
+- [Dokumentation als Plattformgedaechtnis](dokumentation-als-plattformgedaechtnis.md)

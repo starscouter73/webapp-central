@@ -54,6 +54,6 @@ Die Entscheidung gegen ein WordPress-Archiv und fuer eine kontrollierte Projektq
 
 ## Verwandte Dokumente
 
-- [docs/GITHUB_VERSIONIERUNG.md](C:/Users/dorth/Documents/webapp-zentrale/docs/GITHUB_VERSIONIERUNG.md)
-- [docs/WORDPRESS_SETUP.md](C:/Users/dorth/Documents/webapp-zentrale/docs/WORDPRESS_SETUP.md)
-- [Grundprinzipien der Plattformarchitektur](C:/Users/dorth/Documents/webapp-zentrale/docs/canonical/grundprinzipien-der-plattformarchitektur.md)
+- [docs/GITHUB_VERSIONIERUNG.md](../GITHUB_VERSIONIERUNG.md)
+- [docs/WORDPRESS_SETUP.md](../WORDPRESS_SETUP.md)
+- [Grundprinzipien der Plattformarchitektur](grundprinzipien-der-plattformarchitektur.md)
