@@ -2,6 +2,7 @@
 declare(strict_types=1);
 ?>
 <aside class="content-sidebar">
+    <?php webapp_central_starter_render_github_status_card(); ?>
     <section class="glass-panel">
         <h2 class="section-heading"><?php esc_html_e('Projektstatus', 'webapp-central-starter'); ?></h2>
         <ul class="meta-list">

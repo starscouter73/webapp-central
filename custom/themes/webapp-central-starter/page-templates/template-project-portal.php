@@ -35,14 +35,17 @@ get_header();
                         <?php endforeach; ?>
                     </div>
                 </div>
-                <aside class="portal-hero__aside portal-panel project-detail-summary">
-                    <div class="portal-card__meta">
-                        <span class="portal-status"><?php echo esc_html((string) $project_detail['status']); ?></span>
-                        <span class="portal-timestamp"><?php echo esc_html((string) $project_detail['updated']); ?></span>
-                    </div>
-                    <h2><?php esc_html_e('Projektliste', 'webapp-central-starter'); ?></h2>
-                    <p><?php esc_html_e('Strukturierte Uebersicht der bisherigen Themen, Kleinprojekte und Tasks fuer die operative Begleitung.', 'webapp-central-starter'); ?></p>
-                </aside>
+                <div class="portal-hero__side-stack">
+                    <aside class="portal-hero__aside portal-panel project-detail-summary">
+                        <div class="portal-card__meta">
+                            <span class="portal-status"><?php echo esc_html((string) $project_detail['status']); ?></span>
+                            <span class="portal-timestamp"><?php echo esc_html((string) $project_detail['updated']); ?></span>
+                        </div>
+                        <h2><?php esc_html_e('Projektliste', 'webapp-central-starter'); ?></h2>
+                        <p><?php esc_html_e('Strukturierte Uebersicht der bisherigen Themen, Kleinprojekte und Tasks fuer die operative Begleitung.', 'webapp-central-starter'); ?></p>
+                    </aside>
+                    <?php webapp_central_starter_render_github_status_card('portal-panel sidebar-card sidebar-card--github'); ?>
+                </div>
             </section>
 
             <section class="portal-section">
@@ -82,17 +85,20 @@ get_header();
                 </p>
                 <div class="portal-actions">
                     <a class="button-link" href="<?php echo esc_url(webapp_central_starter_portal_page_url('projekte')); ?>"><?php esc_html_e('Zu Projekte', 'webapp-central-starter'); ?></a>
-                    <a class="button-link button-link--ghost" href="<?php echo esc_url(admin_url('post.php?post=' . get_the_ID() . '&action=edit')); ?>"><?php esc_html_e('Hub bearbeiten', 'webapp-central-starter'); ?></a>
+                    <a class="button-link button-link--ghost" href="<?php echo esc_url(webapp_central_starter_portal_page_url('dokumentationen', '/dokumentationen/')); ?>"><?php esc_html_e('Dokumentationen lesen', 'webapp-central-starter'); ?></a>
                 </div>
             </div>
-            <aside class="portal-hero__aside portal-panel">
-                <h2><?php esc_html_e('Letzte Aktivitaeten', 'webapp-central-starter'); ?></h2>
-                <ul class="portal-activity-list">
-                    <?php foreach ($activities as $activity) : ?>
-                        <li><?php echo esc_html($activity); ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </aside>
+            <div class="portal-hero__side-stack">
+                <aside class="portal-hero__aside portal-panel">
+                    <h2><?php esc_html_e('Letzte Aktivitaeten', 'webapp-central-starter'); ?></h2>
+                    <ul class="portal-activity-list">
+                        <?php foreach ($activities as $activity) : ?>
+                            <li><?php echo esc_html($activity); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </aside>
+                <?php webapp_central_starter_render_github_status_card('portal-panel sidebar-card sidebar-card--github'); ?>
+            </div>
         </section>
 
         <?php if (trim((string) get_the_content()) !== '') : ?>

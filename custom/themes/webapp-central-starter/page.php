@@ -6,15 +6,16 @@ get_header();
 <div class="content-wrap">
     <main class="content-main">
         <?php while (have_posts()) : the_post(); ?>
-            <article <?php post_class('glass-panel page-shell'); ?>>
-                <header class="entry-header">
-                    <span class="eyebrow"><?php esc_html_e('Seite', 'webapp-central-starter'); ?></span>
-                    <h1 class="entry-title"><?php the_title(); ?></h1>
-                </header>
-                <div class="entry-content">
-                    <?php the_content(); ?>
-                </div>
-            </article>
+            <?php
+            ob_start();
+            the_content();
+            $page_content = (string) ob_get_clean();
+            webapp_central_starter_render_structured_page_article(
+                (string) get_post_field('post_name', get_the_ID()),
+                get_the_title(),
+                $page_content
+            );
+            ?>
         <?php endwhile; ?>
     </main>
     <?php get_sidebar(); ?>

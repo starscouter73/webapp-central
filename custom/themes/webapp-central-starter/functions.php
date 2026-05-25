@@ -69,12 +69,21 @@ function webapp_central_starter_body_classes(array $classes): array
         $classes[] = 'is-front-page';
     }
 
+    if (webapp_central_starter_is_virtual_portal_request()) {
+        $classes = array_values(array_diff($classes, ['error404']));
+        $classes[] = 'is-virtual-portal';
+    }
+
     return $classes;
 }
 
 add_filter('body_class', 'webapp_central_starter_body_classes');
 
 add_filter('pre_get_document_title', static function (string $title): string {
+    if (webapp_central_starter_is_virtual_portal_request()) {
+        return __('Portal', 'webapp-central-starter') . ' - ' . get_bloginfo('name');
+    }
+
     if (!is_page()) {
         return $title;
     }
@@ -229,9 +238,9 @@ function webapp_central_starter_portal_sections(): array
 {
     return [
         [
-            'title' => __('Dashboard', 'webapp-central-starter'),
-            'description' => __('Zentrale Einstiegsseite fuer den aktuellen Projekt- und Systemueberblick.', 'webapp-central-starter'),
-            'url' => home_url('/'),
+            'title' => __('Portal', 'webapp-central-starter'),
+            'description' => __('Oeffentliche Einstiegsseite fuer Projektstatus, Schnellzugriffe und den aktuellen Relaunch-Kontext.', 'webapp-central-starter'),
+            'url' => home_url('/portal/'),
             'badge' => __('Live', 'webapp-central-starter'),
         ],
         [
@@ -468,3 +477,398 @@ function webapp_central_starter_project_detail_data(string $hub_slug, string $pr
         ],
     ];
 }
+
+function webapp_central_starter_structured_page_data(string $slug): ?array
+{
+    $pages = [
+        'portal' => [
+            'eyebrow' => __('Portal', 'webapp-central-starter'),
+            'summary' => __('Oeffentliche Steuerzentrale fuer Projektstatus, Schnellzugriffe und den aktuellen Live-Kontext von Webapp Central.', 'webapp-central-starter'),
+            'highlights' => [
+                __('Status: Relaunch live', 'webapp-central-starter'),
+                __('Arbeitsmodus: Lokal / Codex / SSH-Deploy', 'webapp-central-starter'),
+                __('Lokal: kein Docker', 'webapp-central-starter'),
+            ],
+            'actions' => [
+                [
+                    'label' => __('Projekte oeffnen', 'webapp-central-starter'),
+                    'url' => webapp_central_starter_portal_page_url('projekte', '/projekte/'),
+                ],
+                [
+                    'label' => __('Dokumentationen ansehen', 'webapp-central-starter'),
+                    'url' => webapp_central_starter_portal_page_url('dokumentationen', '/dokumentationen/'),
+                    'variant' => 'ghost',
+                ],
+            ],
+            'sections' => [
+                [
+                    'badge' => __('Projektstatus', 'webapp-central-starter'),
+                    'title' => __('Was aktuell live ist', 'webapp-central-starter'),
+                    'cards' => [
+                        [
+                            'status' => __('Live', 'webapp-central-starter'),
+                            'title' => __('Plattform-Relaunch', 'webapp-central-starter'),
+                            'text' => __('Die dunkle Plattformoptik, die Projektstruktur und die navigierbaren Hauptbereiche sind live aktiv.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Arbeitsmodus', 'webapp-central-starter'),
+                            'title' => __('Lokale Entwicklung mit Codex', 'webapp-central-starter'),
+                            'text' => __('Aenderungen werden lokal im Repository vorbereitet und kontrolliert per SSH auf den Server uebertragen.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Naechste Schritte', 'webapp-central-starter'),
+                            'title' => __('Inhalte vor Automatisierung', 'webapp-central-starter'),
+                            'text' => __('Im Fokus stehen zuerst klare Inhalte, Zielseiten und stabile Arbeitsbereiche statt weiterer Technikshow.', 'webapp-central-starter'),
+                        ],
+                    ],
+                ],
+                [
+                    'badge' => __('Schnellzugriffe', 'webapp-central-starter'),
+                    'title' => __('Direkte Wege in die Hauptbereiche', 'webapp-central-starter'),
+                    'cards' => [
+                        [
+                            'title' => __('Projekte', 'webapp-central-starter'),
+                            'text' => __('Projekt-Hubs, Themenkarten und laufende Uebersichtsbereiche fuer operative Arbeit.', 'webapp-central-starter'),
+                            'link' => [
+                                'label' => __('Zu Projekte', 'webapp-central-starter'),
+                                'url' => webapp_central_starter_portal_page_url('projekte', '/projekte/'),
+                            ],
+                        ],
+                        [
+                            'title' => __('Dokumentationen', 'webapp-central-starter'),
+                            'text' => __('Canonical Docs, Leitfaeden, Projektgedaechtnis und saubere Ablagestrukturen.', 'webapp-central-starter'),
+                            'link' => [
+                                'label' => __('Zu Dokumentationen', 'webapp-central-starter'),
+                                'url' => webapp_central_starter_portal_page_url('dokumentationen', '/dokumentationen/'),
+                            ],
+                        ],
+                        [
+                            'title' => __('System', 'webapp-central-starter'),
+                            'text' => __('Technische Leitplanken, Workspace-Kontext, SSH-Deploy und Rollback-Logik.', 'webapp-central-starter'),
+                            'link' => [
+                                'label' => __('Zu System', 'webapp-central-starter'),
+                                'url' => webapp_central_starter_portal_page_url('system', '/system/'),
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+        'dokumentationen' => [
+            'eyebrow' => __('Dokumentationen', 'webapp-central-starter'),
+            'summary' => __('Technische Dokumentationen, Canonical Docs, Projektgedaechtnis und nachvollziehbare Leitfaeden fuer Webapp Central.', 'webapp-central-starter'),
+            'highlights' => [
+                __('Canonical Docs als Referenzspur', 'webapp-central-starter'),
+                __('Projektgedaechtnis statt Einzeldatei-Chaos', 'webapp-central-starter'),
+                __('Leitfaeden und Ablagen fuer spaetere Erweiterungen', 'webapp-central-starter'),
+            ],
+            'actions' => [
+                [
+                    'label' => __('Projektbereiche ansehen', 'webapp-central-starter'),
+                    'url' => webapp_central_starter_portal_page_url('projekte', '/projekte/'),
+                ],
+                [
+                    'label' => __('Systemkontext lesen', 'webapp-central-starter'),
+                    'url' => webapp_central_starter_portal_page_url('system', '/system/'),
+                    'variant' => 'ghost',
+                ],
+            ],
+            'sections' => [
+                [
+                    'badge' => __('Dokumentationsbereiche', 'webapp-central-starter'),
+                    'title' => __('Saubere Einordnung statt Ablage ohne Struktur', 'webapp-central-starter'),
+                    'cards' => [
+                        [
+                            'status' => __('Basis', 'webapp-central-starter'),
+                            'title' => __('Canonical Docs', 'webapp-central-starter'),
+                            'text' => __('Grundlegende Architektur-, Plattform- und Governance-Texte als verbindliche Referenzschicht.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Laufend', 'webapp-central-starter'),
+                            'title' => __('Projektgedaechtnis', 'webapp-central-starter'),
+                            'text' => __('Entscheidungen, Entwicklungswege und Lessons Learned werden nachvollziehbar statt nur implizit gehalten.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Vorbereitet', 'webapp-central-starter'),
+                            'title' => __('Leitfaeden und Ablagen', 'webapp-central-starter'),
+                            'text' => __('Technische Wege, PDF-Bereiche und geordnete Ablagen koennen hier modular weiter ausgebaut werden.', 'webapp-central-starter'),
+                        ],
+                    ],
+                ],
+            ],
+        ],
+        'medien' => [
+            'eyebrow' => __('Medien', 'webapp-central-starter'),
+            'summary' => __('Strukturierte Medienablage fuer Bilder, Berichte, Hallenberg-Nachweise und spaetere visuelle Galerien.', 'webapp-central-starter'),
+            'highlights' => [
+                __('Bilder und Nachweise geordnet statt verstreut', 'webapp-central-starter'),
+                __('Hallenberg-Medien als eigener Bezugspunkt', 'webapp-central-starter'),
+                __('Spaetere Galerien klar als Ausbaupfad', 'webapp-central-starter'),
+            ],
+            'actions' => [
+                [
+                    'label' => __('Projekt-Hubs ansehen', 'webapp-central-starter'),
+                    'url' => webapp_central_starter_portal_page_url('projekte', '/projekte/'),
+                ],
+                [
+                    'label' => __('Analyse vorbereiten', 'webapp-central-starter'),
+                    'url' => webapp_central_starter_portal_page_url('analyse', '/analyse/'),
+                    'variant' => 'ghost',
+                ],
+            ],
+            'sections' => [
+                [
+                    'badge' => __('Medienstruktur', 'webapp-central-starter'),
+                    'title' => __('Visuelle Nachweise mit klarer Ordnung', 'webapp-central-starter'),
+                    'cards' => [
+                        [
+                            'status' => __('Aktiv', 'webapp-central-starter'),
+                            'title' => __('Bilder und Berichte', 'webapp-central-starter'),
+                            'text' => __('Bildmaterial, Berichte und spaetere Exportformate koennen hier nachvollziehbar zusammengefuehrt werden.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Projektbezug', 'webapp-central-starter'),
+                            'title' => __('Hallenberg-Medien', 'webapp-central-starter'),
+                            'text' => __('Fotos, visuelle Nachweise und Projektmaterialien koennen fuer Hallenberg und andere Hubs separat gebuendelt werden.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Roadmap', 'webapp-central-starter'),
+                            'title' => __('Spaetere Galerien', 'webapp-central-starter'),
+                            'text' => __('Noch keine Fake-Galerie: der Bereich ist vorbereitet fuer spaetere strukturierte Medienansichten.', 'webapp-central-starter'),
+                        ],
+                    ],
+                ],
+            ],
+        ],
+        'analyse' => [
+            'eyebrow' => __('Analyse', 'webapp-central-starter'),
+            'summary' => __('Vorbereiteter Bereich fuer KI-Auswertungen, Reports, Dashboards und projektbezogene Analysen ohne vorgetaeuschte Live-Funktionen.', 'webapp-central-starter'),
+            'highlights' => [
+                __('Keine Fake-Dashboards', 'webapp-central-starter'),
+                __('Reports und Analysen als Roadmap markiert', 'webapp-central-starter'),
+                __('Spaetere KI-Auswertungen mit Governance-Rahmen', 'webapp-central-starter'),
+            ],
+            'actions' => [
+                [
+                    'label' => __('Systemleitplanken lesen', 'webapp-central-starter'),
+                    'url' => webapp_central_starter_portal_page_url('system', '/system/'),
+                ],
+                [
+                    'label' => __('Dokumentationen ansehen', 'webapp-central-starter'),
+                    'url' => webapp_central_starter_portal_page_url('dokumentationen', '/dokumentationen/'),
+                    'variant' => 'ghost',
+                ],
+            ],
+            'sections' => [
+                [
+                    'badge' => __('Analyse-Roadmap', 'webapp-central-starter'),
+                    'title' => __('Was hier spaeter sinnvoll wachsen kann', 'webapp-central-starter'),
+                    'cards' => [
+                        [
+                            'status' => __('Vorbereitet', 'webapp-central-starter'),
+                            'title' => __('Reports', 'webapp-central-starter'),
+                            'text' => __('Strukturierte Statusberichte, Auswertungen und Verdichtungen koennen hier spaeter eingebunden werden.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Roadmap', 'webapp-central-starter'),
+                            'title' => __('Dashboards', 'webapp-central-starter'),
+                            'text' => __('Keine Scheinoberflaechen: Dashboards werden erst gezeigt, wenn echte Datenquellen und klare Pflegewege existieren.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Governance', 'webapp-central-starter'),
+                            'title' => __('KI-Auswertungen', 'webapp-central-starter'),
+                            'text' => __('Codex- und spaetere Agenten-Workflows koennen Analysen vorbereiten, aber nur kontrolliert und nachvollziehbar.', 'webapp-central-starter'),
+                        ],
+                    ],
+                ],
+            ],
+        ],
+        'system' => [
+            'eyebrow' => __('System', 'webapp-central-starter'),
+            'summary' => __('Technische Leitplanken fuer Repository, lokalen Workspace, SSH-Deploy und kontrollierte Rollback-Strategien.', 'webapp-central-starter'),
+            'highlights' => [
+                __('GitHub bleibt die Steuerzentrale', 'webapp-central-starter'),
+                __('Lokaler Workspace: D:\\Projekte\\webapp-central\\repo', 'webapp-central-starter'),
+                __('Kein lokales Docker', 'webapp-central-starter'),
+            ],
+            'actions' => [
+                [
+                    'label' => __('Dokumentationen lesen', 'webapp-central-starter'),
+                    'url' => webapp_central_starter_portal_page_url('dokumentationen', '/dokumentationen/'),
+                ],
+                [
+                    'label' => __('Projektuebersicht oeffnen', 'webapp-central-starter'),
+                    'url' => webapp_central_starter_portal_page_url('projekte', '/projekte/'),
+                    'variant' => 'ghost',
+                ],
+            ],
+            'sections' => [
+                [
+                    'badge' => __('Systemstatus', 'webapp-central-starter'),
+                    'title' => __('Technischer Rahmen fuer den laufenden Betrieb', 'webapp-central-starter'),
+                    'cards' => [
+                        [
+                            'status' => __('Repository', 'webapp-central-starter'),
+                            'title' => __('GitHub als Steuerzentrale', 'webapp-central-starter'),
+                            'text' => __('Das Repository bleibt die nachvollziehbare Quelle fuer Theme-, Dokumentations- und Strukturveraenderungen.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Workspace', 'webapp-central-starter'),
+                            'title' => __('Lokale Arbeit in D:\\Projekte\\webapp-central\\repo', 'webapp-central-starter'),
+                            'text' => __('VSCode, Codex und lokale Dateiverwaltung greifen auf den D:-Workspace zu; der alte C:-Pfad bleibt nur als Sicherheitskopie.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Deployment', 'webapp-central-starter'),
+                            'title' => __('SSH-Deploy ohne lokales Docker', 'webapp-central-starter'),
+                            'text' => __('Live-Aenderungen werden kontrolliert per SSH synchronisiert. Lokale Docker-Container gehoeren nicht mehr zum Arbeitsmodus.', 'webapp-central-starter'),
+                        ],
+                        [
+                            'status' => __('Sicherheit', 'webapp-central-starter'),
+                            'title' => __('Backup- und Rollback-Konzept', 'webapp-central-starter'),
+                            'text' => __('Vor Live-Aenderungen wird ein Theme-Backup mit Timestamp angelegt, damit jede Anpassung kontrolliert ruecksetzbar bleibt.', 'webapp-central-starter'),
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ];
+
+    return $pages[$slug] ?? null;
+}
+
+function webapp_central_starter_render_github_status_card(string $classes = 'glass-panel sidebar-card sidebar-card--github'): void
+{
+    $items = [
+        __('Repository: webapp-central', 'webapp-central-starter'),
+        __('Branch: codex/docs-plugin-theme-pass', 'webapp-central-starter'),
+        __('Arbeitsmodus: Lokal / Codex / SSH-Deploy', 'webapp-central-starter'),
+        __('Status: Relaunch live', 'webapp-central-starter'),
+        __('Lokal: kein Docker', 'webapp-central-starter'),
+        __('Theme: Webapp Central Starter', 'webapp-central-starter'),
+    ];
+
+    echo '<section class="' . esc_attr($classes) . '">';
+    echo '<div class="sidebar-card__badge">' . esc_html__('GitHub Status', 'webapp-central-starter') . '</div>';
+    echo '<h2 class="section-heading">' . esc_html__('GitHub Status', 'webapp-central-starter') . '</h2>';
+    echo '<ul class="meta-list meta-list--status">';
+
+    foreach ($items as $item) {
+        echo '<li>' . esc_html($item) . '</li>';
+    }
+
+    echo '</ul>';
+    echo '</section>';
+}
+
+function webapp_central_starter_render_structured_page_article(string $slug, string $title, string $content = ''): void
+{
+    $page_data = webapp_central_starter_structured_page_data($slug);
+    $page_summary = is_array($page_data) ? (string) ($page_data['summary'] ?? '') : '';
+
+    echo '<article class="glass-panel page-shell structured-page structured-page--' . esc_attr(sanitize_html_class($slug)) . '">';
+    echo '<header class="entry-header">';
+    echo '<span class="eyebrow">' . esc_html(is_array($page_data) ? (string) ($page_data['eyebrow'] ?? __('Seite', 'webapp-central-starter')) : __('Seite', 'webapp-central-starter')) . '</span>';
+    echo '<h1 class="entry-title">' . esc_html($title) . '</h1>';
+
+    if ($page_summary !== '') {
+        echo '<p class="entry-summary">' . esc_html($page_summary) . '</p>';
+    }
+
+    if (is_array($page_data) && !empty($page_data['highlights']) && is_array($page_data['highlights'])) {
+        echo '<ul class="page-hero-meta">';
+        foreach ($page_data['highlights'] as $highlight) {
+            echo '<li>' . esc_html((string) $highlight) . '</li>';
+        }
+        echo '</ul>';
+    }
+
+    if (is_array($page_data) && !empty($page_data['actions']) && is_array($page_data['actions'])) {
+        echo '<div class="page-actions">';
+        foreach ($page_data['actions'] as $action) {
+            $button_classes = 'button-link';
+            if (($action['variant'] ?? '') === 'ghost') {
+                $button_classes .= ' button-link--ghost';
+            }
+
+            echo '<a class="' . esc_attr($button_classes) . '" href="' . esc_url((string) ($action['url'] ?? '#')) . '">';
+            echo esc_html((string) ($action['label'] ?? ''));
+            echo '</a>';
+        }
+        echo '</div>';
+    }
+
+    echo '</header>';
+
+    if (trim($content) !== '') {
+        echo '<div class="entry-content">' . $content . '</div>';
+    }
+
+    if (is_array($page_data) && !empty($page_data['sections']) && is_array($page_data['sections'])) {
+        echo '<div class="page-sections">';
+        foreach ($page_data['sections'] as $section) {
+            echo '<section class="page-section">';
+            echo '<div class="page-section__heading">';
+            if (!empty($section['badge'])) {
+                echo '<span class="portal-badge portal-badge--soft">' . esc_html((string) $section['badge']) . '</span>';
+            }
+            echo '<h2>' . esc_html((string) ($section['title'] ?? '')) . '</h2>';
+            echo '</div>';
+
+            if (!empty($section['cards']) && is_array($section['cards'])) {
+                echo '<div class="page-grid">';
+                foreach ($section['cards'] as $card) {
+                    echo '<article class="page-card">';
+                    if (!empty($card['status'])) {
+                        echo '<div class="page-card__meta"><span class="portal-status">' . esc_html((string) $card['status']) . '</span></div>';
+                    }
+                    echo '<h3>' . esc_html((string) ($card['title'] ?? '')) . '</h3>';
+                    echo '<p>' . esc_html((string) ($card['text'] ?? '')) . '</p>';
+
+                    if (!empty($card['link']) && is_array($card['link'])) {
+                        echo '<a class="page-card__link" href="' . esc_url((string) ($card['link']['url'] ?? '#')) . '">';
+                        echo esc_html((string) ($card['link']['label'] ?? ''));
+                        echo '</a>';
+                    }
+
+                    echo '</article>';
+                }
+                echo '</div>';
+            }
+
+            echo '</section>';
+        }
+        echo '</div>';
+    }
+
+    echo '</article>';
+}
+
+function webapp_central_starter_is_virtual_portal_request(): bool
+{
+    if (is_admin()) {
+        return false;
+    }
+
+    $request_uri = (string) ($_SERVER['REQUEST_URI'] ?? '');
+    $request_path = trim((string) parse_url($request_uri, PHP_URL_PATH), '/');
+
+    return $request_path === 'portal';
+}
+
+add_filter('template_include', static function (string $template): string {
+    if (!webapp_central_starter_is_virtual_portal_request()) {
+        return $template;
+    }
+
+    global $wp_query;
+
+    if ($wp_query instanceof WP_Query) {
+        $wp_query->is_404 = false;
+        $wp_query->is_page = true;
+        $wp_query->is_singular = true;
+    }
+
+    status_header(200);
+
+    return get_template_directory() . '/portal.php';
+}, 0);

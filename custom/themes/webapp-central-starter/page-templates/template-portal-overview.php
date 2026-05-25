@@ -28,17 +28,20 @@ $featured_hubs = webapp_central_starter_featured_project_hubs();
                 </p>
                 <div class="portal-actions">
                     <a class="button-link" href="<?php echo esc_url(webapp_central_starter_portal_page_url('projekte/pfarrer-matthias-genster')); ?>"><?php esc_html_e('Projekt-Hub oeffnen', 'webapp-central-starter'); ?></a>
-                    <a class="button-link button-link--ghost" href="<?php echo esc_url(admin_url('edit.php?post_type=page')); ?>"><?php esc_html_e('Portalinhalte pflegen', 'webapp-central-starter'); ?></a>
+                    <a class="button-link button-link--ghost" href="<?php echo esc_url(home_url('/portal/')); ?>"><?php esc_html_e('Portal ansehen', 'webapp-central-starter'); ?></a>
                 </div>
             </div>
-            <aside class="portal-hero__aside portal-panel">
-                <h2><?php esc_html_e('Erste Ausbaustufe', 'webapp-central-starter'); ?></h2>
-                <ul class="portal-activity-list">
-                    <li><?php esc_html_e('Einfaches, stabiles Portal statt komplexem Projektmanagement.', 'webapp-central-starter'); ?></li>
-                    <li><?php esc_html_e('Jede Hauptsektion ist bereits als spaeter erweiterbarer Bereich angelegt.', 'webapp-central-starter'); ?></li>
-                    <li><?php esc_html_e('Projekt-Hubs koennen nach demselben Muster schrittweise weiter wachsen.', 'webapp-central-starter'); ?></li>
-                </ul>
-            </aside>
+            <div class="portal-hero__side-stack">
+                <aside class="portal-hero__aside portal-panel">
+                    <h2><?php esc_html_e('Erste Ausbaustufe', 'webapp-central-starter'); ?></h2>
+                    <ul class="portal-activity-list">
+                        <li><?php esc_html_e('Einfaches, stabiles Portal statt komplexem Projektmanagement.', 'webapp-central-starter'); ?></li>
+                        <li><?php esc_html_e('Jede Hauptsektion ist bereits als spaeter erweiterbarer Bereich angelegt.', 'webapp-central-starter'); ?></li>
+                        <li><?php esc_html_e('Projekt-Hubs koennen nach demselben Muster schrittweise weiter wachsen.', 'webapp-central-starter'); ?></li>
+                    </ul>
+                </aside>
+                <?php webapp_central_starter_render_github_status_card('portal-panel sidebar-card sidebar-card--github'); ?>
+            </div>
         </section>
 
         <?php if (trim((string) get_the_content()) !== '') : ?>
