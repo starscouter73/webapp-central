@@ -6,6 +6,16 @@
 
 V1 fuehrt bewusst keine produktiven Datei-Loeschungen, Verschiebungen oder Vollsynchronisationen aus.
 
+## Mindestanforderungen
+
+- WordPress ab 6.0
+- PHP ab 7.4
+- MySQL bzw. MariaDB mit Berechtigung fuer `CREATE TABLE`, `ALTER TABLE`, `INSERT`, `UPDATE`, `DELETE`
+- WordPress-Schluessel (`AUTH_KEY`, `SECURE_AUTH_KEY`) fuer die bevorzugte Konfigurationsverschluesselung
+
+Hinweis:
+Wenn `OpenSSL` oder `random_bytes()` nicht verfuegbar sind, bleibt das Plugin aktivierbar. Sensible Konfigurationswerte fallen dann auf eine maskierte Fallback-Speicherung zurueck und werden weiterhin nicht im Klartext angezeigt.
+
 ## Architektur
 
 - Eigenstaendiges WordPress-Plugin unter `custom/plugins/cloud-connector`
@@ -48,6 +58,21 @@ Die Provider liefern in V1 nur sichere Demo- bzw. Simulationsantworten. Es finde
 - Sync-Jobs koennen nur simuliert werden
 - Dateioperationen werden protokolliert, aber nicht produktiv ausgefuehrt
 - Destruktive Aktionen bleiben auch bei gesetztem Einstellungsflag ohne produktive Implementierung deaktiviert
+
+## Aktivierungsverhalten
+
+- Bei Aktivierung versucht das Plugin ausschliesslich, seine eigenen Tabellen anzulegen oder zu aktualisieren.
+- Schlaegt das Schema unvollstaendig fehl, bleibt das Plugin im eingeschraenkten Recovery-Modus nutzbar.
+- Im Recovery-Modus werden Admin-Warnungen angezeigt, riskante Schreibaktionen blockiert und leere Listen statt PHP-Warnings ausgegeben.
+- Das Plugin fuehrt bei Aktivierung keine Cloud-API-Calls, keine OAuth-Flows und keine Dateioperationen aus.
+
+## Fehlerbehandlung
+
+- Fehlende Tabellen werden erkannt und im Admin als Warnung angezeigt.
+- Datenbankzugriffe liefern bei fehlendem Schema sichere Defaults wie leere Arrays oder Standardwerte.
+- Logging ist fehlertolerant und schreibt nur, wenn die Log-Tabelle verfuegbar ist.
+- Bei fehlender Verschluesselungsumgebung wird eine nicht-fatale Fallback-Speicherung genutzt.
+- Deaktiviertes `WP-Cron` verursacht keinen Aktivierungsfehler; fuer spaetere Worker wird dann ein externer Scheduler benoetigt.
 
 ## Datenmodell
 
@@ -100,6 +125,13 @@ Es werden folgende WordPress-Tabellen angelegt:
 - Keine Secret-Anzeige im Klartext
 - Fehlende Zugangsdaten fuehren zu kontrollierten Fehlermeldungen statt Fatal Errors
 
+## Recovery-/Safe-Mode
+
+- Safe-Mode bleibt der funktionale Standard fuer alle Provider.
+- Recovery-Modus bedeutet: Plugin geladen, aber Datenbankschema unvollstaendig oder Umgebung eingeschraenkt.
+- In diesem Zustand werden Verwaltungsaktionen defensiv blockiert, waehrend die Admin-Oberflaeche weiter erreichbar bleibt.
+- Ziel ist, White Screens und WP-Admin-Blockaden zu vermeiden und stattdessen konkrete Warnungen anzuzeigen.
+
 ## Sync-Konzept
 
 V1:
@@ -141,6 +173,21 @@ Spaeter:
 - Ausfuehrung nicht im Seitenrendering, sondern in separaten Cron-/Worker-Kontexten
 - Harte Timeouts und Logging pro Lauf
 - Safe-Mode bleibt Default, bis produktive Synchronisation explizit freigegeben ist
+
+## Geplante Migrationen
+
+- Versionierte Schema-Weiterentwicklung ueber `cloud_connector_db_version`
+- spaetere Datenmigrationen bei neuen Providern, Worker-Metadaten oder erweiterten Job-Statuswerten
+- Upgrades sollen wiederholt ausfuehrbar und idempotent bleiben
+- neue Provider sollen ueber Registry- und Tabellenkompatibilitaet nachruestbar sein, ohne bestehende Verbindungen zu brechen
+
+## Bekannte Einschraenkungen V1
+
+- Keine lokale Laufzeitpruefung per `php -l` in dieser Codex-Umgebung moeglich, da keine PHP-Runtime verfuegbar war
+- Keine Plugin-Aktivierung getestet, da keine lauffaehige WordPress-Instanz im aktuellen Kontext verfuegbar war
+- Keine produktiven Upload-, Download-, Move-, Delete- oder Sync-Prozesse
+- Keine OAuth-Implementierung, kein Token-Refresh, keine externen API-Requests
+- Log-Rotation ist nur als einfache Aufbewahrungsbereinigung vorbereitet, nicht als vollwertiges Monitoring
 
 ## Naechste Ausbaustufen
 

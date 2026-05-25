@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 final class CloudStorage
 {
+    private static array $tableExistsCache = [];
+
     public static function table(string $table): string
     {
         global $wpdb;
@@ -11,9 +13,13 @@ final class CloudStorage
         return $wpdb->prefix . $table;
     }
 
-    public static function install(): void
+    public static function install(): bool
     {
         global $wpdb;
+
+        if (!($wpdb instanceof wpdb)) {
+            return false;
+        }
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -110,6 +116,14 @@ final class CloudStorage
 
         self::seedProviders();
         self::seedSettings();
+
+        if (!self::schemaReady()) {
+            return false;
+        }
+
+        update_option('cloud_connector_db_version', '0.1.0', false);
+
+        return true;
     }
 
     public static function seedProviders(): void
@@ -160,6 +174,10 @@ final class CloudStorage
     {
         global $wpdb;
 
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_settings')) {
+            return $default;
+        }
+
         $table = self::table('cloud_settings');
         $value = $wpdb->get_var($wpdb->prepare("SELECT setting_value FROM {$table} WHERE setting_key = %s", $key));
 
@@ -169,6 +187,10 @@ final class CloudStorage
     public static function setSetting(string $key, string $value, int $autoload = 0): void
     {
         global $wpdb;
+
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_settings')) {
+            return;
+        }
 
         $table = self::table('cloud_settings');
         $existing = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table} WHERE setting_key = %s", $key));
@@ -200,6 +222,10 @@ final class CloudStorage
     {
         global $wpdb;
 
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_providers')) {
+            return [];
+        }
+
         return $wpdb->get_results('SELECT * FROM ' . self::table('cloud_providers') . ' ORDER BY name ASC', ARRAY_A) ?: [];
     }
 
@@ -207,12 +233,20 @@ final class CloudStorage
     {
         global $wpdb;
 
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_connections')) {
+            return [];
+        }
+
         return $wpdb->get_results('SELECT * FROM ' . self::table('cloud_connections') . ' ORDER BY updated_at DESC', ARRAY_A) ?: [];
     }
 
     public static function getConnection(int $id): ?array
     {
         global $wpdb;
+
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_connections')) {
+            return null;
+        }
 
         $row = $wpdb->get_row(
             $wpdb->prepare('SELECT * FROM ' . self::table('cloud_connections') . ' WHERE id = %d', $id),
@@ -225,6 +259,10 @@ final class CloudStorage
     public static function saveConnection(array $data): int
     {
         global $wpdb;
+
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_connections')) {
+            return 0;
+        }
 
         $table = self::table('cloud_connections');
         $now = current_time('mysql');
@@ -265,6 +303,10 @@ final class CloudStorage
     {
         global $wpdb;
 
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_connections')) {
+            return;
+        }
+
         $wpdb->delete(self::table('cloud_connections'), ['id' => $id], ['%d']);
     }
 
@@ -272,12 +314,20 @@ final class CloudStorage
     {
         global $wpdb;
 
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_sync_jobs')) {
+            return [];
+        }
+
         return $wpdb->get_results('SELECT * FROM ' . self::table('cloud_sync_jobs') . ' ORDER BY updated_at DESC', ARRAY_A) ?: [];
     }
 
     public static function getJob(int $id): ?array
     {
         global $wpdb;
+
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_sync_jobs')) {
+            return null;
+        }
 
         $row = $wpdb->get_row(
             $wpdb->prepare('SELECT * FROM ' . self::table('cloud_sync_jobs') . ' WHERE id = %d', $id),
@@ -290,6 +340,10 @@ final class CloudStorage
     public static function saveJob(array $data): int
     {
         global $wpdb;
+
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_sync_jobs')) {
+            return 0;
+        }
 
         $table = self::table('cloud_sync_jobs');
         $now = current_time('mysql');
@@ -333,12 +387,20 @@ final class CloudStorage
     {
         global $wpdb;
 
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_sync_jobs')) {
+            return;
+        }
+
         $wpdb->delete(self::table('cloud_sync_jobs'), ['id' => $id], ['%d']);
     }
 
     public static function getFileCache(?int $connectionId = null): array
     {
         global $wpdb;
+
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_file_cache')) {
+            return [];
+        }
 
         $table = self::table('cloud_file_cache');
 
@@ -355,6 +417,10 @@ final class CloudStorage
     public static function replaceFileCache(int $connectionId, array $files): void
     {
         global $wpdb;
+
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_file_cache')) {
+            return;
+        }
 
         $table = self::table('cloud_file_cache');
         $wpdb->delete($table, ['connection_id' => $connectionId], ['%d']);
@@ -382,11 +448,92 @@ final class CloudStorage
     {
         global $wpdb;
 
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_logs')) {
+            return [];
+        }
+
         $limit = max(1, $limit);
 
         return $wpdb->get_results(
             $wpdb->prepare('SELECT * FROM ' . self::table('cloud_logs') . ' ORDER BY created_at DESC LIMIT %d', $limit),
             ARRAY_A
         ) ?: [];
+    }
+
+    public static function pruneLogs(int $retentionDays): void
+    {
+        global $wpdb;
+
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_logs')) {
+            return;
+        }
+
+        $retentionDays = max(1, $retentionDays);
+        $cutoff = gmdate('Y-m-d H:i:s', time() - ($retentionDays * DAY_IN_SECONDS));
+        $wpdb->query(
+            $wpdb->prepare('DELETE FROM ' . self::table('cloud_logs') . ' WHERE created_at < %s', $cutoff)
+        );
+    }
+
+    public static function schemaReady(): bool
+    {
+        foreach (self::requiredTables() as $table) {
+            if (!self::tableExists($table)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static function missingTables(): array
+    {
+        $missing = [];
+
+        foreach (self::requiredTables() as $table) {
+            if (!self::tableExists($table)) {
+                $missing[] = self::table($table);
+            }
+        }
+
+        return $missing;
+    }
+
+    public static function tableExists(string $table): bool
+    {
+        global $wpdb;
+
+        if (isset(self::$tableExistsCache[$table])) {
+            return self::$tableExistsCache[$table];
+        }
+
+        if (!($wpdb instanceof wpdb)) {
+            self::$tableExistsCache[$table] = false;
+
+            return false;
+        }
+
+        $prefixedTable = self::table($table);
+        $result = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $prefixedTable));
+        self::$tableExistsCache[$table] = $result === $prefixedTable;
+
+        return self::$tableExistsCache[$table];
+    }
+
+    public static function clearTableCache(): void
+    {
+        self::$tableExistsCache = [];
+    }
+
+    private static function requiredTables(): array
+    {
+        return [
+            'cloud_providers',
+            'cloud_connections',
+            'cloud_sync_jobs',
+            'cloud_file_cache',
+            'cloud_logs',
+            'cloud_settings',
+        ];
     }
 }
