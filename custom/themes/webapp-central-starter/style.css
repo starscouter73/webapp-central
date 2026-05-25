@@ -39,6 +39,8 @@ Text Domain: webapp-central-starter
 }
 
 html {
+    background-color: #050505;
+    color-scheme: dark;
     scroll-behavior: smooth;
 }
 
@@ -112,30 +114,31 @@ img {
     width: 30rem;
     height: 30rem;
     border-radius: 999px;
-    filter: blur(28px);
+    filter: blur(10px);
     z-index: -1;
-    opacity: 0.4;
+    opacity: 0.12;
 }
 
 .site-shell::before {
     top: -10rem;
     left: -8rem;
-    background: rgba(156, 131, 106, 0.2);
+    background: rgba(108, 120, 34, 0.12);
 }
 
 .site-shell::after {
     right: -10rem;
     bottom: -10rem;
-    background: rgba(199, 180, 158, 0.18);
+    background: rgba(80, 92, 26, 0.1);
 }
 
 .site-header,
 .site-footer,
 .glass-panel,
 .module-card,
-.content-card {
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+.content-card,
+.portal-panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 .site-header {
@@ -525,8 +528,8 @@ input[type="submit"]:focus-visible {
     background: linear-gradient(180deg, rgba(250, 246, 241, 0.9), rgba(238, 231, 222, 0.96));
     border: 1px solid rgba(111, 92, 74, 0.18);
     border-radius: var(--wc-radius-md);
-    box-shadow: var(--wc-shadow);
-    transition: transform 0.22s ease, box-shadow 0.26s ease, border-color 0.22s ease;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
     --wc-card-banner-bg:
         linear-gradient(180deg, rgba(252, 254, 255, 0.14), rgba(16, 30, 40, 0.18)),
         linear-gradient(135deg, rgba(110, 137, 158, 0.26), rgba(223, 231, 237, 0.1)),
@@ -552,12 +555,10 @@ input[type="submit"]:focus-visible {
     height: 5.6rem;
     z-index: 0;
     background: var(--wc-card-banner-bg);
-    border: 1px solid rgba(182, 199, 210, 0.2);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        inset 0 -16px 34px rgba(39, 60, 75, 0.16);
-    filter: saturate(0.9) contrast(1.08) brightness(1.08);
-    transition: transform 0.26s ease, filter 0.26s ease, box-shadow 0.26s ease;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 -10px 18px rgba(0, 0, 0, 0.2);
+    filter: none;
+    transition: box-shadow 0.18s ease;
 }
 
 .module-card::after,
@@ -566,12 +567,10 @@ input[type="submit"]:focus-visible {
     height: 4.7rem;
     z-index: 1;
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.04)),
-        radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.48), transparent 24%),
-        linear-gradient(135deg, rgba(132, 159, 177, 0.12), rgba(255, 255, 255, 0));
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    opacity: 0.9;
-    transition: transform 0.26s ease, opacity 0.26s ease;
+        linear-gradient(180deg, rgba(3, 6, 10, 0.08), rgba(3, 6, 10, 0.22)),
+        linear-gradient(135deg, rgba(239, 255, 61, 0.05), rgba(255, 255, 255, 0));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    opacity: 0.3;
 }
 
 .module-card > *,
@@ -582,68 +581,61 @@ input[type="submit"]:focus-visible {
 
 .module-grid .module-card:nth-child(1) {
     --wc-card-banner-bg:
-        linear-gradient(180deg, rgba(252, 254, 255, 0.16), rgba(18, 33, 45, 0.16)),
-        linear-gradient(135deg, rgba(97, 126, 147, 0.24), rgba(215, 226, 234, 0.08)),
+        linear-gradient(180deg, rgba(4, 9, 14, 0.18), rgba(4, 9, 14, 0.4)),
+        linear-gradient(135deg, rgba(88, 112, 129, 0.18), rgba(14, 18, 24, 0.06)),
         url("./assets/brand/header/webapp-central-header-fresh-blue-display.png") center center / contain no-repeat;
 }
 
 .module-grid .module-card:nth-child(2) {
     --wc-card-banner-bg:
-        linear-gradient(180deg, rgba(252, 254, 255, 0.18), rgba(18, 33, 45, 0.14)),
-        linear-gradient(135deg, rgba(89, 118, 138, 0.22), rgba(219, 227, 232, 0.08)),
+        linear-gradient(180deg, rgba(4, 9, 14, 0.16), rgba(4, 9, 14, 0.38)),
+        linear-gradient(135deg, rgba(81, 108, 126, 0.16), rgba(14, 18, 24, 0.06)),
         url("./assets/brand/header/webapp-central-header-soft-cyan-display.png") center center / contain no-repeat;
 }
 
 .module-grid .module-card:nth-child(3) {
     --wc-card-banner-bg:
-        linear-gradient(180deg, rgba(252, 254, 255, 0.18), rgba(20, 34, 45, 0.14)),
-        linear-gradient(135deg, rgba(96, 120, 135, 0.2), rgba(215, 225, 229, 0.08)),
+        linear-gradient(180deg, rgba(4, 9, 14, 0.16), rgba(4, 9, 14, 0.38)),
+        linear-gradient(135deg, rgba(83, 108, 121, 0.16), rgba(14, 18, 24, 0.06)),
         url("./assets/brand/header/webapp-central-header-mint-glass-display.png") center center / contain no-repeat;
 }
 
 .post-grid .content-card:nth-child(odd),
 .archive-shell .content-card:nth-child(odd) {
     --wc-card-banner-bg:
-        linear-gradient(180deg, rgba(252, 254, 255, 0.18), rgba(18, 33, 45, 0.16)),
-        linear-gradient(135deg, rgba(95, 123, 143, 0.24), rgba(220, 229, 234, 0.08)),
-        url("./assets/brand/header/webapp-central-header-soft-cyan-display.png") center center / contain no-repeat;
+        radial-gradient(circle at 82% 20%, rgba(239, 255, 61, 0.08), transparent 18%),
+        linear-gradient(180deg, rgba(7, 10, 15, 0.96), rgba(7, 10, 15, 0.9)),
+        linear-gradient(135deg, rgba(44, 58, 70, 0.18), rgba(14, 18, 24, 0.04));
 }
 
 .post-grid .content-card:nth-child(even),
 .archive-shell .content-card:nth-child(even) {
     --wc-card-banner-bg:
-        linear-gradient(180deg, rgba(252, 254, 255, 0.18), rgba(18, 33, 45, 0.16)),
-        linear-gradient(135deg, rgba(95, 121, 138, 0.22), rgba(220, 229, 234, 0.08)),
-        url("./assets/brand/header/webapp-central-header-fresh-blue-display.png") center center / contain no-repeat;
+        radial-gradient(circle at 80% 18%, rgba(239, 255, 61, 0.08), transparent 18%),
+        linear-gradient(180deg, rgba(7, 10, 15, 0.96), rgba(7, 10, 15, 0.9)),
+        linear-gradient(135deg, rgba(40, 55, 68, 0.18), rgba(14, 18, 24, 0.04));
 }
 
 .module-card:hover,
 .module-card:focus-within,
 .content-card:hover,
 .content-card:focus-within {
-    transform: translateY(-2px);
     border-color: rgba(126, 103, 82, 0.3);
-    box-shadow: var(--wc-shadow-card);
+    box-shadow: 0 22px 46px rgba(0, 0, 0, 0.32);
 }
 
 .module-card:hover::before,
 .module-card:focus-within::before,
 .content-card:hover::before,
 .content-card:focus-within::before {
-    transform: translateY(-2px) scale(1.015);
-    filter: saturate(0.94) contrast(1.1) brightness(1.12);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.22),
-        inset 0 -16px 34px rgba(39, 60, 75, 0.14),
-        0 10px 18px rgba(39, 60, 75, 0.1);
+    box-shadow: inset 0 -12px 22px rgba(0, 0, 0, 0.22);
 }
 
 .module-card:hover::after,
 .module-card:focus-within::after,
 .content-card:hover::after,
 .content-card:focus-within::after {
-    transform: translateY(-1px);
-    opacity: 0.96;
+    opacity: 0.34;
 }
 
 .module-card h3,
@@ -798,7 +790,7 @@ input[type="submit"]:focus-visible {
 .single-shell.glass-panel:focus-within::before,
 .error-shell.glass-panel:hover::before,
 .error-shell.glass-panel:focus-within::before {
-    transform: translateY(-2px) scale(1.01);
+    box-shadow: inset 0 -12px 22px rgba(0, 0, 0, 0.22);
 }
 
 .content-main > article.glass-panel:not(.portal-panel):not(.portal-card):hover::after,
@@ -1999,5 +1991,32 @@ select:focus {
 
     .site-logo img {
         width: min(220px, 100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .module-card,
+    .content-card,
+    .portal-card,
+    .platform-card,
+    .module-card::before,
+    .content-card::before,
+    .content-main > article.glass-panel:not(.portal-panel):not(.portal-card)::before,
+    .content-sidebar > section.glass-panel::before,
+    .archive-shell.glass-panel::before,
+    .page-shell.glass-panel::before,
+    .single-shell.glass-panel::before,
+    .error-shell.glass-panel::before {
+        transition: none !important;
+    }
+
+    .site-shell::before,
+    .site-shell::after {
+        filter: none;
+        opacity: 0.14;
     }
 }

@@ -30,6 +30,13 @@ add_action('wp_enqueue_scripts', static function (): void {
     );
 });
 
+add_action('wp_head', static function (): void {
+    echo '<meta name="theme-color" content="#050505">' . PHP_EOL;
+    echo '<meta name="color-scheme" content="dark">' . PHP_EOL;
+    echo '<meta name="description" content="' . esc_attr__('Webapp Central ist eine digitale Steuerzentrale fuer Projekte, Dokumentation und intelligente Workflows.', 'webapp-central-starter') . '">' . PHP_EOL;
+    echo '<style id="webapp-central-critical-css">html{background:#050505;color-scheme:dark}body,.site-shell{margin:0;min-height:100vh;background:#050505;color:#fff}.content-wrap,.portal-shell,.platform-home{background:transparent}</style>' . PHP_EOL;
+}, 1);
+
 add_action('widgets_init', static function (): void {
     register_sidebar([
         'name' => __('Primary Sidebar', 'webapp-central-starter'),
