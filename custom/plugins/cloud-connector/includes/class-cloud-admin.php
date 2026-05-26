@@ -494,6 +494,7 @@ final class CloudAdmin
         $conflictRows = self::buildExplorerConflictRows($previewRows, $selectedProvider);
         $health = self::buildExplorerHealth($jobs, $logs, $previewRows, $safeModeEnabled);
         $detailPanel = self::buildExplorerDetailPanel($explorerFiles, $previewRows, $selectedProvider, $selectedConnection);
+        $activityEntries = self::buildExplorerActivityEntries($previewRows);
 
         echo '<div style="margin-bottom:16px;padding:12px 16px;border:1px solid #dcdcde;background:#fff;">';
         echo '<strong>Safe-Mode aktiv.</strong> Explorer-Daten stammen nur aus Cache-, DB- und Mockquellen. Es werden keine Provider-Requests, OAuth-Flows oder Dateioperationen ausgeloest.';
@@ -551,10 +552,15 @@ final class CloudAdmin
 
             echo '</div>';
             echo '<div style="margin-top:10px;"><strong style="display:block;margin-bottom:6px;">Virtuelle Ordner</strong>';
-            echo '<ul style="margin:0;padding-left:18px;">';
+            echo '<ul style="margin:0;padding-left:18px;list-style:none;">';
 
             foreach (['/', '/Dokumente', '/Uploads', '/Archiv', '/Sync Queue'] as $folder) {
-                echo '<li><code>' . esc_html($folder) . '</code></li>';
+                echo '<li style="margin-bottom:6px;">';
+                echo '<button type="button" class="button-link cc-drop-zone" data-drop-zone="folder" data-drop-target="' . esc_attr($folder) . '" style="display:block;width:100%;padding:10px 12px;border:1px dashed #c3c4c7;border-radius:8px;background:#f6f7f7;text-align:left;">';
+                echo '<strong style="display:block;"><code>' . esc_html($folder) . '</code></strong>';
+                echo '<span style="display:block;margin-top:4px;color:#646970;">Safe-Mode Drop-Zone fuer simulierte Move-Previews</span>';
+                echo '</button>';
+                echo '</li>';
             }
 
             echo '</ul></div>';
@@ -568,11 +574,13 @@ final class CloudAdmin
         echo '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;">';
 
         foreach ($health as $card) {
-            echo '<div style="border:1px solid #dcdcde;background:#fff;padding:14px;">';
+            echo '<div data-health-label="' . esc_attr($card['label']) . '" style="border:1px solid #dcdcde;background:#fff;padding:14px;">';
             echo '<div style="font-size:12px;text-transform:uppercase;color:#646970;margin-bottom:8px;">' . esc_html($card['label']) . '</div>';
-            echo '<div style="font-size:22px;font-weight:600;line-height:1.2;">' . esc_html($card['value']) . '</div>';
+            echo '<div data-health-value style="font-size:22px;font-weight:600;line-height:1.2;">' . esc_html($card['value']) . '</div>';
             if ($card['note'] !== '') {
-                echo '<div style="margin-top:6px;color:#50575e;">' . esc_html($card['note']) . '</div>';
+                echo '<div data-health-note style="margin-top:6px;color:#50575e;">' . esc_html($card['note']) . '</div>';
+            } else {
+                echo '<div data-health-note style="margin-top:6px;color:#50575e;"></div>';
             }
             echo '</div>';
         }
@@ -591,41 +599,59 @@ final class CloudAdmin
         echo '</div>';
         echo '<div>' . self::renderStatusBadge('safe-mode') . '</div>';
         echo '</div>';
+        echo '<div id="cc-dnd-feedback" style="display:none;margin:0 0 16px 0;padding:12px 14px;border:1px solid #c3c4c7;background:#f6f7f7;"></div>';
         echo '<div style="overflow:auto;">';
         echo '<table class="widefat striped">';
-        echo '<thead><tr><th>Dateiname</th><th>Typ</th><th>Groesse</th><th>Provider</th><th>Sync-Richtung</th><th>Status</th><th>Letzte Aenderung</th><th>Letzter Sync</th><th>Konfliktstatus</th></tr></thead><tbody>';
+        echo '<thead><tr><th>Dateiname</th><th>Typ</th><th>Groesse</th><th>Provider</th><th>Sync-Richtung</th><th>Status</th><th>Letzte Aenderung</th><th>Letzter Sync</th><th>Konfliktstatus</th><th>Safe-Mode Aktionen</th></tr></thead><tbody>';
 
-        foreach ($explorerFiles as $row) {
+        foreach ($explorerFiles as $index => $row) {
             $fileKey = md5($row['name'] . '|' . $row['provider'] . '|' . $row['last_sync']);
-            echo '<tr>';
-            echo '<td><button type="button" class="button-link cc-explorer-file-trigger" data-file-key="' . esc_attr($fileKey) . '" style="font-weight:600;text-align:left;">' . esc_html($row['name']) . '</button></td>';
+            $previewRow = $previewRows[$index] ?? null;
+            $isReadonly = is_array($previewRow) && (string) ($previewRow['status'] ?? '') === 'readonly';
+            $isBlocked = (string) ($row['status'] ?? '') === 'offline';
+            $rowStyle = '';
+
+            if ($isReadonly) {
+                $rowStyle = 'background:#f6f7f7;color:#646970;';
+            } elseif ($isBlocked) {
+                $rowStyle = 'background:#fcf0f1;';
+            }
+
+            echo '<tr class="cc-explorer-row" draggable="' . ($isReadonly || $isBlocked ? 'false' : 'true') . '" data-file-key="' . esc_attr($fileKey) . '" data-readonly="' . ($isReadonly ? 'true' : 'false') . '" data-blocked="' . ($isBlocked ? 'true' : 'false') . '" style="' . esc_attr($rowStyle) . '">';
+            echo '<td><button type="button" class="button-link cc-explorer-file-trigger" data-file-key="' . esc_attr($fileKey) . '" draggable="false" style="font-weight:600;text-align:left;">' . esc_html($row['name']) . '</button></td>';
             echo '<td>' . esc_html($row['type']) . '</td>';
             echo '<td>' . esc_html($row['size']) . '</td>';
             echo '<td>' . esc_html($row['provider']) . '</td>';
             echo '<td><code>' . esc_html($row['direction']) . '</code></td>';
-            echo '<td>' . self::renderStatusBadge($row['status']) . '</td>';
+            echo '<td>' . self::renderStatusBadge($row['status']) . ($isReadonly ? ' ' . self::renderStatusBadge('readonly') : '') . ($isBlocked ? ' ' . self::renderStatusBadge('blocked') : '') . '</td>';
             echo '<td>' . esc_html($row['modified']) . '</td>';
             echo '<td>' . esc_html($row['last_sync']) . '</td>';
             echo '<td>' . self::renderStatusBadge($row['conflict']) . '</td>';
+            echo '<td>' . self::renderExplorerActionButtons($fileKey, $isReadonly || $isBlocked) . '</td>';
             echo '</tr>';
         }
 
         if (empty($explorerFiles)) {
-            echo '<tr><td colspan="9">Keine Explorer-Daten verfuegbar.</td></tr>';
+            echo '<tr><td colspan="10">Keine Explorer-Daten verfuegbar.</td></tr>';
         }
 
         echo '</tbody></table>';
         echo '</div>';
         echo '<div id="cc-file-detail-panel" style="margin-top:16px;border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
         echo '<h3 style="margin-top:0;">Datei-Detailpanel</h3>';
-        echo '<p style="margin-top:0;color:#50575e;">Datei im Explorer anklicken, um virtuelle Sync- und Konfliktdetails anzuzeigen.</p>';
+        echo '<p style="margin-top:0;color:#50575e;">Datei im Explorer anklicken oder per Drag-and-Drop simuliert verschieben. Safe-Mode bleibt read-only.</p>';
+        echo '<div id="cc-detail-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">';
+        echo '<button type="button" class="button button-secondary cc-detail-action" data-sim-action="queue">Zur Queue simulieren</button>';
+        echo '<button type="button" class="button button-secondary cc-detail-action" data-sim-action="conflict">Konflikt simulieren</button>';
+        echo '<button type="button" class="button button-secondary cc-detail-action" data-sim-action="move">Move simulieren</button>';
+        echo '</div>';
         echo '<div id="cc-file-detail-content">';
         echo self::renderExplorerDetailHtml($detailPanel['initial']);
         echo '</div>';
         echo '</div>';
         echo '</div>';
 
-        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;margin-top:16px;">';
+        echo '<div id="cc-preview-drop-zone" class="cc-drop-zone" data-drop-zone="preview" data-drop-target="/local/sync-preview" style="border:1px solid #dcdcde;background:#fff;padding:16px;margin-top:16px;">';
         echo '<div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">';
         echo '<div>';
         echo '<h2 style="margin-top:0;">Sync Preview / Dry Run</h2>';
@@ -635,7 +661,7 @@ final class CloudAdmin
         echo '</div>';
         echo '<div style="overflow:auto;">';
         echo '<table class="widefat striped">';
-        echo '<thead><tr><th>Datei</th><th>Quelle</th><th>Ziel</th><th>Aktion</th><th>Status</th><th>Groesse</th><th>Zeitstempel</th></tr></thead><tbody>';
+        echo '<thead><tr><th>Datei</th><th>Quelle</th><th>Ziel</th><th>Aktion</th><th>Status</th><th>Groesse</th><th>Zeitstempel</th></tr></thead><tbody id="cc-preview-body">';
 
         foreach ($previewRows as $previewRow) {
             echo '<tr>';
@@ -656,9 +682,9 @@ final class CloudAdmin
         echo '</tbody></table>';
         echo '</div>';
         echo '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px;">';
-        echo '<div style="border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
+        echo '<div id="cc-conflict-drop-zone" class="cc-drop-zone" data-drop-zone="conflict" data-drop-target="Virtuelle Konflikte" style="border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
         echo '<h3 style="margin-top:0;">Virtuelle Konflikte</h3>';
-        echo '<table class="widefat striped"><thead><tr><th>Datei</th><th>Lokaler Zustand</th><th>Cloud-Zustand</th><th>Konfliktstatus</th></tr></thead><tbody>';
+        echo '<table class="widefat striped"><thead><tr><th>Datei</th><th>Lokaler Zustand</th><th>Cloud-Zustand</th><th>Konfliktstatus</th></tr></thead><tbody id="cc-conflict-body">';
 
         foreach ($conflictRows as $conflictRow) {
             echo '<tr>';
@@ -675,9 +701,9 @@ final class CloudAdmin
 
         echo '</tbody></table>';
         echo '</div>';
-        echo '<div style="border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
+        echo '<div id="cc-queue-drop-zone" class="cc-drop-zone" data-drop-zone="queue" data-drop-target="Virtuelle Warteschlange" style="border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
         echo '<h3 style="margin-top:0;">Virtuelle Warteschlange</h3>';
-        echo '<ul style="margin:0;padding-left:18px;">';
+        echo '<ul id="cc-queue-list" style="margin:0;padding-left:18px;">';
         foreach ($previewRows as $previewRow) {
             echo '<li style="margin-bottom:6px;">';
             echo '<strong>' . esc_html($previewRow['file']) . '</strong> - ' . esc_html($previewRow['action']) . ' - ' . self::renderStatusBadge($previewRow['status']);
@@ -687,11 +713,19 @@ final class CloudAdmin
             echo '<li>Keine Eintraege in der virtuellen Queue.</li>';
         }
         echo '</ul>';
+        echo '<div style="margin-top:16px;padding-top:16px;border-top:1px solid #dcdcde;">';
+        echo '<h4 style="margin:0 0 10px 0;">Aktivitaets-Historie</h4>';
+        echo '<ul id="cc-activity-list" style="margin:0;padding-left:18px;">';
+        foreach ($activityEntries as $entry) {
+            echo '<li style="margin-bottom:6px;">' . esc_html($entry) . '</li>';
+        }
+        echo '</ul>';
         echo '</div>';
         echo '</div>';
         echo '</div>';
         echo '</div>';
-        self::renderExplorerScript($detailPanel['map']);
+        echo '</div>';
+        self::renderExplorerScript($detailPanel['map'], $previewRows, $conflictRows, $health, $activityEntries);
     }
 
     private static function renderLogs(): void
@@ -766,6 +800,7 @@ final class CloudAdmin
             'preview' => ['#f3e8ff', '#7e22ce'],
             'queued' => ['#dbeafe', '#1d4ed8'],
             'readonly' => ['#f3f4f6', '#111827'],
+            'blocked' => ['#fee2e2', '#991b1b'],
         ];
 
         [$background, $color] = $styles[$status] ?? ['#f3f4f6', '#111827'];
@@ -776,6 +811,24 @@ final class CloudAdmin
             esc_attr($color),
             esc_html($status)
         );
+    }
+
+    private static function renderExplorerActionButtons(string $fileKey, bool $disabled = false): string
+    {
+        $buttons = [
+            'queue' => 'Zur Queue simulieren',
+            'conflict' => 'Konflikt simulieren',
+            'move' => 'Move simulieren',
+        ];
+        $html = '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+
+        foreach ($buttons as $action => $label) {
+            $html .= '<button type="button" class="button button-secondary cc-inline-action" data-file-key="' . esc_attr($fileKey) . '" data-sim-action="' . esc_attr($action) . '"' . ($disabled ? ' disabled aria-disabled="true" style="cursor:not-allowed;opacity:0.6;"' : '') . '>' . esc_html($label) . '</button>';
+        }
+
+        $html .= '</div>';
+
+        return $html;
     }
 
     private static function maskConnectionSummary(array $config): string
@@ -1276,16 +1329,21 @@ final class CloudAdmin
             $preview = $previewRows[$index] ?? null;
             $key = md5($file['name'] . '|' . $file['provider'] . '|' . $file['last_sync']);
             $detail = [
+                'file_key' => $key,
                 'file_name' => $file['name'],
                 'provider' => $providerLabel,
                 'virtual_source' => (string) ($preview['source'] ?? '/cloud/' . $file['name']),
                 'virtual_target' => (string) ($preview['target'] ?? '/local/' . $file['name']),
                 'size' => $file['size'],
                 'last_sync' => $file['last_sync'],
+                'direction' => $file['direction'],
                 'status' => $file['status'],
                 'simulated_action' => (string) ($preview['action'] ?? 'update (simuliert)'),
                 'conflict_status' => $file['conflict'],
                 'checksum' => 'sim-' . substr(md5($connectionName . '|' . $file['name']), 0, 12),
+                'preview_status' => (string) ($preview['status'] ?? 'preview'),
+                'readonly' => ((string) ($preview['status'] ?? '')) === 'readonly',
+                'blocked' => ((string) ($file['status'] ?? '')) === 'offline',
             ];
             $map[$key] = $detail;
         }
@@ -1304,6 +1362,9 @@ final class CloudAdmin
                 'simulated_action' => 'preview',
                 'conflict_status' => 'keiner',
                 'checksum' => 'sim-000000000000',
+                'preview_status' => 'preview',
+                'readonly' => false,
+                'blocked' => false,
             ];
         }
 
@@ -1311,6 +1372,31 @@ final class CloudAdmin
             'initial' => $initial,
             'map' => $map,
         ];
+    }
+
+    private static function buildExplorerActivityEntries(array $previewRows): array
+    {
+        $entries = [];
+
+        foreach (array_slice($previewRows, 0, 4) as $previewRow) {
+            if ($previewRow['status'] === 'queued') {
+                $entries[] = $previewRow['file'] . ' in Queue gezogen (simuliert)';
+                continue;
+            }
+
+            if ($previewRow['status'] === 'konflikt' || $previewRow['conflict'] === 'konflikt') {
+                $entries[] = 'Konfliktmarkierung fuer ' . $previewRow['file'] . ' simuliert';
+                continue;
+            }
+
+            $entries[] = 'Simulierter Move fuer ' . $previewRow['file'] . ' vorbereitet';
+        }
+
+        if (empty($entries)) {
+            $entries[] = 'Noch keine clientseitigen Drag-&-Drop-Simulationen ausgefuehrt.';
+        }
+
+        return $entries;
     }
 
     private static function renderExplorerDetailHtml(array $detail): string
@@ -1331,14 +1417,24 @@ final class CloudAdmin
         return $html;
     }
 
-    private static function renderExplorerScript(array $detailMap): void
+    private static function renderExplorerScript(array $detailMap, array $previewRows, array $conflictRows, array $health, array $activityEntries): void
     {
         echo '<script>';
         echo '(function(){';
         echo 'const detailRoot=document.getElementById("cc-file-detail-content");';
+        echo 'const feedbackRoot=document.getElementById("cc-dnd-feedback");';
+        echo 'const previewBody=document.getElementById("cc-preview-body");';
+        echo 'const conflictBody=document.getElementById("cc-conflict-body");';
+        echo 'const queueList=document.getElementById("cc-queue-list");';
+        echo 'const activityList=document.getElementById("cc-activity-list");';
         echo 'const detailMap=' . wp_json_encode($detailMap) . ';';
-        echo 'if(!detailRoot||!detailMap){return;}';
-        echo 'const renderBadge=function(label){return \'<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:#f3f4f6;color:#111827;font-weight:600;">\'+label+\'</span>\';};';
+        echo 'const initialPreviewRows=' . wp_json_encode(array_values($previewRows)) . ';';
+        echo 'const initialConflictRows=' . wp_json_encode(array_values($conflictRows)) . ';';
+        echo 'const initialHealth=' . wp_json_encode(array_values($health)) . ';';
+        echo 'const initialActivity=' . wp_json_encode(array_values($activityEntries)) . ';';
+        echo 'if(!detailRoot||!detailMap||!previewBody||!conflictBody||!queueList||!activityList){return;}';
+        echo 'const badgePalette={geplant:["#dbeafe","#1d4ed8"],pausiert:["#e5e7eb","#374151"],erfolgreich:["#dcfce7","#166534"],fehlerhaft:["#fee2e2","#991b1b"],laeuft:["#fef3c7","#92400e"],aktiv:["#dcfce7","#166534"],inaktiv:["#e5e7eb","#374151"],testmodus:["#fef3c7","#92400e"],synchronisiert:["#dcfce7","#166534"],ausstehend:["#fef3c7","#92400e"],konflikt:["#fee2e2","#991b1b"],simuliert:["#ede9fe","#6d28d9"],offline:["#e5e7eb","#374151"],"safe-mode":["#e0f2fe","#075985"],keiner:["#f3f4f6","#111827"],preview:["#f3e8ff","#7e22ce"],queued:["#dbeafe","#1d4ed8"],readonly:["#f3f4f6","#111827"],blocked:["#fee2e2","#991b1b"]};';
+        echo 'const renderBadge=function(label){const palette=badgePalette[label]||["#f3f4f6","#111827"];return \'<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:\'+palette[0]+\';color:\'+palette[1]+\';font-weight:600;">\'+label+\'</span>\';};';
         echo 'const renderTable=function(detail){return \'<table class="widefat striped"><tbody>\''
             . '+\'<tr><td style="width:180px;"><strong>Dateiname</strong></td><td>\'+detail.file_name+\'</td></tr>\''
             . '+\'<tr><td><strong>Provider</strong></td><td>\'+detail.provider+\'</td></tr>\''
@@ -1351,7 +1447,32 @@ final class CloudAdmin
             . '+\'<tr><td><strong>Konfliktstatus</strong></td><td>\'+renderBadge(detail.conflict_status)+\'</td></tr>\''
             . '+\'<tr><td><strong>Hash / Checksum</strong></td><td><code>\'+detail.checksum+\'</code></td></tr>\''
             . '+\'</tbody></table>\';};';
-        echo 'document.querySelectorAll(".cc-explorer-file-trigger").forEach(function(button){button.addEventListener("click",function(){const key=button.getAttribute("data-file-key")||""; if(!detailMap[key]){return;} detailRoot.innerHTML=renderTable(detailMap[key]);});});';
+        echo 'const escapeHtml=function(value){return String(value).replace(/[&<>"\']/g,function(char){if(char==="&"){return "&amp;";} if(char==="<"){return "&lt;";} if(char===">"){return "&gt;";} if(char===\'"\'){return "&quot;";} return "&#039;";});};';
+        echo 'const state={activeKey:Object.keys(detailMap)[0]||"",previewRows:initialPreviewRows.slice(),conflictRows:initialConflictRows.slice(),activity:initialActivity.slice(),health:initialHealth.slice()};';
+        echo 'const activityMessage=function(file,action,target,blocked){if(blocked){return file+" fuer "+target+" geblockt (Safe-Mode)";} if(action==="queue"){return file+" in Queue gezogen";} if(action==="conflict"){return "Konfliktmarkierung fuer "+file+" simuliert";} if(action==="move"){return "Simulierter Move fuer "+file+" vorbereitet";} return file+" zur Preview hinzugefuegt";};';
+        echo 'const folderTargets={"/":"preview","/Dokumente":"move","/Uploads":"move","/Archiv":"move","/Sync Queue":"queue"};';
+        echo 'const statusText=function(action){if(action==="queue"){return "queued";} if(action==="conflict"){return "konflikt";} if(action==="move"){return "simuliert";} return "preview";};';
+        echo 'const actionText=function(action,target){if(action==="queue"){return "zur Queue hinzugefuegt (simuliert)";} if(action==="conflict"){return "als Konflikt markiert (simuliert)";} if(action==="move"){return "Move nach "+target+" (simuliert)";} return "zur Preview hinzugefuegt (simuliert)";};';
+        echo 'const nowString=function(){const now=new Date();const pad=function(value){return String(value).padStart(2,"0");};return now.getFullYear()+"-"+pad(now.getMonth()+1)+"-"+pad(now.getDate())+" "+pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());};';
+        echo 'const setActiveRow=function(key){document.querySelectorAll(".cc-explorer-row").forEach(function(row){row.style.outline=row.getAttribute("data-file-key")===key?"2px solid #72aee6":"none";row.style.outlineOffset=row.getAttribute("data-file-key")===key?"-2px":"0";});};';
+        echo 'const syncDetailButtons=function(detail){document.querySelectorAll(".cc-detail-action").forEach(function(button){const disable=!!(detail&& (detail.readonly||detail.blocked)); button.disabled=disable; button.setAttribute("aria-disabled",disable?"true":"false"); button.style.cursor=disable?"not-allowed":""; button.style.opacity=disable?"0.6":"";});};';
+        echo 'const updateDetail=function(key){if(!detailMap[key]){return;} state.activeKey=key; detailRoot.innerHTML=renderTable(detailMap[key]); setActiveRow(key); syncDetailButtons(detailMap[key]);};';
+        echo 'const showFeedback=function(detail,target,action,blocked){if(!feedbackRoot){return;} const statusLabel=blocked?"blocked":"Safe-Mode Preview"; const hint=blocked?"Drop erkannt, aber keine echte Aktion ausgefuehrt. Datei bleibt unveraendert.":"Keine echte Dateioperation ausgefuehrt. Queue und Preview wurden nur clientseitig simuliert."; feedbackRoot.style.display="block"; feedbackRoot.style.borderColor=blocked?"#d63638":"#72aee6"; feedbackRoot.style.background=blocked?"#fcf0f1":"#f0f6fc"; feedbackRoot.innerHTML="<strong>"+escapeHtml(detail.file_name)+"</strong><div style=\"margin-top:6px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;\"><div><strong>Quelle</strong><br><code>"+escapeHtml(detail.virtual_source)+"</code></div><div><strong>Ziel</strong><br><code>"+escapeHtml(target)+"</code></div><div><strong>Aktion</strong><br>"+escapeHtml(actionText(action,target))+"</div><div><strong>Status</strong><br>"+escapeHtml(statusLabel)+"</div></div><div style=\"margin-top:8px;color:#50575e;\">"+escapeHtml(hint)+"</div>";};';
+        echo 'const renderPreviewRows=function(){if(!state.previewRows.length){previewBody.innerHTML=\'<tr><td colspan="7">Noch keine simulierten Preview-Daten verfuegbar.</td></tr>\';return;} previewBody.innerHTML=state.previewRows.map(function(row){return "<tr><td>"+escapeHtml(row.file)+"</td><td><code>"+escapeHtml(row.source)+"</code></td><td><code>"+escapeHtml(row.target)+"</code></td><td>"+escapeHtml(row.action)+"</td><td>"+renderBadge(row.status)+"</td><td>"+escapeHtml(row.size)+"</td><td>"+escapeHtml(row.timestamp)+"</td></tr>";}).join("");};';
+        echo 'const renderConflictRows=function(){if(!state.conflictRows.length){conflictBody.innerHTML=\'<tr><td colspan="4">Keine virtuellen Konflikte im aktuellen Preview-Fenster.</td></tr>\';return;} conflictBody.innerHTML=state.conflictRows.map(function(row){return "<tr><td>"+escapeHtml(row.file)+"</td><td>"+escapeHtml(row.local)+"</td><td>"+escapeHtml(row.cloud)+"</td><td>"+renderBadge(row.status)+"</td></tr>";}).join("");};';
+        echo 'const renderQueueList=function(){if(!state.previewRows.length){queueList.innerHTML="<li>Keine Eintraege in der virtuellen Queue.</li>";return;} queueList.innerHTML=state.previewRows.map(function(row){return "<li style=\"margin-bottom:6px;\"><strong>"+escapeHtml(row.file)+"</strong> - "+escapeHtml(row.action)+" - "+renderBadge(row.status)+"</li>";}).join("");};';
+        echo 'const renderActivity=function(){activityList.innerHTML=state.activity.slice(0,8).map(function(entry){return "<li style=\"margin-bottom:6px;\">"+escapeHtml(entry)+"</li>";}).join("");};';
+        echo 'const updateHealth=function(){const queued=state.previewRows.filter(function(row){return row.status==="queued";}).length; const simulated=state.previewRows.filter(function(row){return row.status==="preview"||row.status==="safe-mode"||row.status==="simuliert";}).length; const conflicts=state.previewRows.filter(function(row){return row.status==="konflikt";}).length; const ignored=state.previewRows.filter(function(row){return row.status==="readonly"||row.action==="ignoriert";}).length; const now=nowString(); document.querySelectorAll("[data-health-label]").forEach(function(card){const label=card.getAttribute("data-health-label"); const valueNode=card.querySelector("[data-health-value]"); const noteNode=card.querySelector("[data-health-note]"); if(!valueNode||!noteNode){return;} if(label==="Verarbeitet"){valueNode.textContent=String(queued); noteNode.textContent="Virtuell als queued markiert";} if(label==="Simuliert"){valueNode.textContent=String(simulated); noteNode.textContent="Preview-, Drag-&-Drop- und Safe-Mode-Eintraege";} if(label==="Konflikt"){valueNode.textContent=String(conflicts); noteNode.textContent="Virtuelle Konfliktfaelle";} if(label==="Ignoriert"){valueNode.textContent=String(ignored); noteNode.textContent="Read-only oder geblockte Simulationen";} if(label==="Letzte Simulation"){valueNode.textContent=now; noteNode.textContent="Clientseitige Drag-&-Drop-Simulation";} if(label==="Letzte Queue-Aktualisierung"){valueNode.textContent=now; noteNode.textContent="Nur virtuelle Queue-Metadaten";} if(label==="Queue-Groesse"){valueNode.textContent=String(state.previewRows.length); noteNode.textContent="Alle sichtbaren Safe-Mode-Eintraege";} });};';
+        echo 'const rerender=function(){renderPreviewRows(); renderConflictRows(); renderQueueList(); renderActivity(); updateHealth();};';
+        echo 'const applySimulation=function(key,zone){const detail=detailMap[key]; if(!detail){return;} const target=zone.target; const action=zone.action; const blocked=detail.blocked||detail.readonly; showFeedback(detail,target,action,blocked); if(blocked){detail.status=detail.readonly?"readonly":"blocked"; detail.simulated_action="blocked (simuliert)"; updateDetail(key); return;} state.activity.unshift(activityMessage(detail.file_name,action,target,blocked)); detail.virtual_target=target; detail.simulated_action=actionText(action,target); detail.status=statusText(action); detail.preview_status=statusText(action); detail.conflict_status=action==="conflict"?"konflikt":"keiner"; const timestamp=nowString(); const previewRow={file:detail.file_name,source:detail.virtual_source,target:detail.virtual_target,action:detail.simulated_action,status:detail.status,size:detail.size,timestamp:timestamp,provider:detail.provider,last_sync:timestamp,direction:detail.direction||"safe-mode",conflict:detail.conflict_status}; state.previewRows=[previewRow].concat(state.previewRows.filter(function(row){return row.file!==detail.file_name;})); if(action==="conflict"){state.conflictRows=[{file:detail.file_name,local:"Simulierter lokaler Konflikt",cloud:"Simulierter Cloud-Konflikt",status:"konflikt"}].concat(state.conflictRows.filter(function(row){return row.file!==detail.file_name;}));} updateDetail(key); rerender();};';
+        echo 'const resolveZone=function(zoneType,target){if(zoneType==="folder"){const action=folderTargets[target]||"move"; return {action:action,target:target==="\/Sync Queue"?"Virtuelle Warteschlange":target};} if(zoneType==="preview"){return {action:"preview",target:target};} if(zoneType==="queue"){return {action:"queue",target:target};} if(zoneType==="conflict"){return {action:"conflict",target:target};} return {action:"preview",target:target};};';
+        echo 'document.querySelectorAll(".cc-explorer-file-trigger").forEach(function(button){button.addEventListener("click",function(){const key=button.getAttribute("data-file-key")||""; updateDetail(key);});});';
+        echo 'document.querySelectorAll(".cc-inline-action").forEach(function(button){button.addEventListener("click",function(){const key=button.getAttribute("data-file-key")||""; const action=button.getAttribute("data-sim-action")||"preview"; const target=action==="queue"?"Virtuelle Warteschlange":(action==="conflict"?"Virtuelle Konflikte":"/Dokumente"); applySimulation(key,{action:action,target:target});});});';
+        echo 'document.querySelectorAll(".cc-detail-action").forEach(function(button){button.addEventListener("click",function(){if(!state.activeKey){return;} const action=button.getAttribute("data-sim-action")||"preview"; const target=action==="queue"?"Virtuelle Warteschlange":(action==="conflict"?"Virtuelle Konflikte":"/Dokumente"); applySimulation(state.activeKey,{action:action,target:target});});});';
+        echo 'document.querySelectorAll(".cc-explorer-row").forEach(function(row){row.addEventListener("dragstart",function(event){const key=row.getAttribute("data-file-key")||""; const detail=detailMap[key]; if(!detail){event.preventDefault();return;} if(detail.readonly||detail.blocked){event.preventDefault(); showFeedback(detail,"Safe-Mode Drop-Zone","preview",true); updateDetail(key); return;} state.activeKey=key; event.dataTransfer.setData("text/plain",key); event.dataTransfer.effectAllowed="move"; row.style.opacity="0.55"; row.style.background="#f0f6fc"; showFeedback(detail,"Safe-Mode Drop-Zone","preview",false);}); row.addEventListener("dragend",function(){row.style.opacity="1"; row.style.background=row.getAttribute("data-blocked")==="true"?"#fcf0f1":(row.getAttribute("data-readonly")==="true"?"#f6f7f7":""); setActiveRow(state.activeKey); document.querySelectorAll(".cc-drop-zone").forEach(function(zone){zone.style.outline="none"; zone.style.backgroundColor="";});});});';
+        echo 'document.querySelectorAll(".cc-drop-zone").forEach(function(zone){zone.addEventListener("dragover",function(event){event.preventDefault(); zone.style.outline="2px dashed #72aee6"; zone.style.outlineOffset="2px"; zone.style.backgroundColor="#f0f6fc";}); zone.addEventListener("dragleave",function(){zone.style.outline="none"; zone.style.backgroundColor="";}); zone.addEventListener("drop",function(event){event.preventDefault(); zone.style.outline="none"; zone.style.backgroundColor=""; const key=event.dataTransfer.getData("text/plain")||state.activeKey; const zoneType=zone.getAttribute("data-drop-zone")||"preview"; const target=zone.getAttribute("data-drop-target")||"/local/sync-preview"; applySimulation(key,resolveZone(zoneType,target));});});';
+        echo 'document.querySelectorAll(".cc-drop-zone button,.cc-explorer-file-trigger,.cc-inline-action,.cc-detail-action").forEach(function(node){node.setAttribute("aria-label",(node.textContent||"Safe-Mode Aktion").trim());});';
+        echo 'updateDetail(state.activeKey); rerender();';
         echo '})();';
         echo '</script>';
     }
