@@ -321,6 +321,29 @@ final class CloudStorage
         return $wpdb->get_results('SELECT * FROM ' . self::table('cloud_sync_jobs') . ' ORDER BY updated_at DESC', ARRAY_A) ?: [];
     }
 
+    public static function getDueJobs(): array
+    {
+        global $wpdb;
+
+        if (!($wpdb instanceof wpdb) || !self::tableExists('cloud_sync_jobs')) {
+            return [];
+        }
+
+        $table = self::table('cloud_sync_jobs');
+        $now = current_time('mysql');
+
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$table} WHERE status = %s AND next_run IS NOT NULL AND next_run <> %s AND next_run <> %s AND next_run <= %s ORDER BY next_run ASC",
+                'geplant',
+                '',
+                '0000-00-00 00:00:00',
+                $now
+            ),
+            ARRAY_A
+        ) ?: [];
+    }
+
     public static function getJob(int $id): ?array
     {
         global $wpdb;
@@ -347,6 +370,8 @@ final class CloudStorage
 
         $table = self::table('cloud_sync_jobs');
         $now = current_time('mysql');
+        $lastRun = self::normalizeDateTimeValue($data['last_run'] ?? null);
+        $nextRun = self::normalizeDateTimeValue($data['next_run'] ?? null);
         $record = [
             'provider_slug' => sanitize_key($data['provider_slug'] ?? ''),
             'connection_id' => empty($data['connection_id']) ? null : (int) $data['connection_id'],
@@ -354,8 +379,8 @@ final class CloudStorage
             'source_path' => sanitize_text_field($data['source_path'] ?? ''),
             'target_path' => sanitize_text_field($data['target_path'] ?? ''),
             'status' => sanitize_text_field($data['status'] ?? 'geplant'),
-            'last_run' => $data['last_run'] ?? null,
-            'next_run' => $data['next_run'] ?? null,
+            'last_run' => $lastRun,
+            'next_run' => $nextRun,
             'file_count' => isset($data['file_count']) ? (int) $data['file_count'] : 0,
             'error_text' => sanitize_textarea_field($data['error_text'] ?? ''),
             'updated_at' => $now,
@@ -523,6 +548,21 @@ final class CloudStorage
     public static function clearTableCache(): void
     {
         self::$tableExistsCache = [];
+    }
+
+    private static function normalizeDateTimeValue($value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        if ($value === '' || $value === '0000-00-00 00:00:00') {
+            return null;
+        }
+
+        return sanitize_text_field($value);
     }
 
     private static function requiredTables(): array

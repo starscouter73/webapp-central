@@ -170,9 +170,19 @@ Spaeter:
 ## Cron-/Automation-Konzept
 
 - Empfohlener spaeterer Hook: `cloud_connector_run_jobs`
+- V1 registriert bereits einen stuendlichen WP-Cron-Worker fuer faellige Simulationsjobs, sofern `WP-Cron` aktiv ist
 - Ausfuehrung nicht im Seitenrendering, sondern in separaten Cron-/Worker-Kontexten
 - Harte Timeouts und Logging pro Lauf
 - Safe-Mode bleibt Default, bis produktive Synchronisation explizit freigegeben ist
+- Es werden nur Jobs mit Status `geplant` und gueltigem `next_run` verarbeitet
+- Jeder Lauf bleibt eine reine Simulation; Upload, Download, Move, Delete und externe Cloud-API-Calls bleiben deaktiviert
+- Fehler pro Job werden geloggt und blockieren die weitere Abarbeitung nicht
+
+### Manuelle Pruefung per WP-CLI
+
+- `wp cron event list | grep cloud_connector`
+- `wp cron event run cloud_connector_run_jobs --allow-root`
+- `wp plugin status cloud-connector --allow-root`
 
 ## Geplante Migrationen
 
@@ -186,6 +196,7 @@ Spaeter:
 - Keine lokale Laufzeitpruefung per `php -l` in dieser Codex-Umgebung moeglich, da keine PHP-Runtime verfuegbar war
 - Keine Plugin-Aktivierung getestet, da keine lauffaehige WordPress-Instanz im aktuellen Kontext verfuegbar war
 - Keine produktiven Upload-, Download-, Move-, Delete- oder Sync-Prozesse
+- Kein echter Hintergrund-Sync trotz registriertem Worker; V1 fuehrt ausschliesslich Safe-Mode-Simulationen aus
 - Keine OAuth-Implementierung, kein Token-Refresh, keine externen API-Requests
 - Log-Rotation ist nur als einfache Aufbewahrungsbereinigung vorbereitet, nicht als vollwertiges Monitoring
 
