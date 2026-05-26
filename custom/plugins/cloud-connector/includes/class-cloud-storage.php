@@ -133,9 +133,9 @@ final class CloudStorage
         $table = self::table('cloud_providers');
         $now = current_time('mysql');
         $providers = [
-            'google_drive' => ['Google Drive', ['quota', 'download', 'upload', 'safe_mode']],
-            'dropbox' => ['Dropbox', ['quota', 'download', 'upload', 'safe_mode']],
-            'onedrive' => ['Microsoft OneDrive', ['quota', 'download', 'upload', 'safe_mode']],
+            'google_drive' => ['Google Drive', ['quota', 'download', 'upload', 'safe_mode', 'readonly_live']],
+            'dropbox' => ['Dropbox', ['quota', 'download', 'upload', 'safe_mode', 'readonly_live_prepared']],
+            'onedrive' => ['Microsoft OneDrive', ['quota', 'download', 'upload', 'safe_mode', 'readonly_live_prepared']],
             'local_storage' => ['Local Storage', ['browse', 'download', 'safe_mode']],
             'webdav' => ['Nextcloud / WebDAV / SFTP (spaeter)', ['planned', 'safe_mode']],
         ];

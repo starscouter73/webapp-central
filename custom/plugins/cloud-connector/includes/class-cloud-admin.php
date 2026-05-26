@@ -126,7 +126,9 @@ final class CloudAdmin
             'connection_deleted' => 'Verbindung geloescht.',
             'connection_updated' => 'Verbindung aktualisiert.',
             'connection_disabled' => 'Verbindung deaktiviert.',
-            'connection_test_mode_set' => 'Verbindung auf Testmodus gesetzt.',
+            'connection_test_mode_set' => 'Verbindung auf Safe-Mode gesetzt.',
+            'readonly_connection_tested' => 'Readonly-Verbindung erfolgreich getestet. Es wurden nur bis zu 5 Metadaten-Eintraege gelesen.',
+            'readonly_connection_failed' => 'Readonly-Verbindungstest fehlgeschlagen.',
             'connection_missing' => 'Verbindung nicht gefunden.',
             'provider_missing' => 'Anbieter nicht gefunden.',
             'job_saved' => 'Sync-Job gespeichert.',
@@ -189,13 +191,14 @@ final class CloudAdmin
         $editId = absint($_GET['edit_connection'] ?? 0);
         $editConnection = $editId ? CloudStorage::getConnection($editId) : null;
         $config = $editConnection ? CloudCrypto::decryptConfig((string) $editConnection['config_encrypted']) : [];
+        $connectionMode = self::getConnectionMode($editConnection, $config);
         $selectedConnectionStatus = ($editConnection['status'] ?? '') === 'aktiv' ? 'aktiv' : 'inaktiv';
         $providerGuides = self::getProviderGuides();
         $selectedProviderSlug = (string) ($editConnection['provider_slug'] ?? ($providers[0]['slug'] ?? 'google_drive'));
 
         echo '<h2>Verbindungen</h2>';
-        echo '<p>Safe-Mode bleibt aktiv. Diese UI speichert nur vorbereitete Provider-Verbindungen und loest keine OAuth- oder API-Aufrufe aus.</p>';
-        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Anbieter</th><th>Anzeigename</th><th>Status</th><th>Modus</th><th>Client ID</th><th>Client Secret</th><th>Redirect URI</th><th>Token vorhanden</th><th>Erstellt am</th><th>Aktualisiert am</th><th>Aktionen</th></tr></thead><tbody>';
+        echo '<p>Safe-Mode bleibt global Standard. Nur Verbindungen im Modus <strong>READONLY LIVE</strong> duerfen bei einer expliziten Admin-Aktion einen begrenzten Metadaten-Test gegen den Provider ausfuehren.</p>';
+        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Anbieter</th><th>Anzeigename</th><th>Status</th><th>Modus</th><th>Client ID</th><th>Client Secret</th><th>Redirect URI</th><th>Token vorhanden</th><th>Letzte Live-Pruefung</th><th>Erstellt am</th><th>Aktualisiert am</th><th>Aktionen</th></tr></thead><tbody>';
 
         foreach ($connections as $connection) {
             $rowConfig = CloudCrypto::decryptConfig((string) $connection['config_encrypted']);
@@ -207,16 +210,21 @@ final class CloudAdmin
             echo '<td><code>' . esc_html($connection['provider_slug']) . '</code></td>';
             echo '<td>' . esc_html($connection['name']) . '</td>';
             echo '<td>' . self::renderStatusBadge((string) $connection['status']) . '</td>';
-            echo '<td>' . esc_html(self::describeConnectionMode($connection, $rowConfig)) . '</td>';
+            echo '<td>' . self::renderConnectionModeBadge(self::getConnectionMode($connection, $rowConfig)) . '</td>';
             echo '<td><code>' . esc_html(self::maskCredential((string) ($rowConfig['client_id'] ?? ''))) . '</code></td>';
             echo '<td><code>' . esc_html(self::maskCredential((string) ($rowConfig['client_secret'] ?? ''))) . '</code></td>';
             echo '<td>' . self::renderOptionalUrl((string) ($rowConfig['redirect_uri'] ?? '')) . '</td>';
             echo '<td>' . esc_html($hasToken ? 'Ja' : 'Nein') . '</td>';
+            echo '<td>' . esc_html((string) ($connection['last_connected_at'] ?: '-')) . '</td>';
             echo '<td>' . esc_html((string) ($connection['created_at'] ?: '-')) . '</td>';
             echo '<td>' . esc_html((string) ($connection['updated_at'] ?: '-')) . '</td>';
             echo '<td>';
             echo '<a class="button button-secondary" href="' . $editUrl . '">Bearbeiten</a> ';
-            self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'set_test_mode'], 'Testmodus');
+            if ((string) $connection['provider_slug'] === 'google_drive' && self::getConnectionMode($connection, $rowConfig) === 'readonly_live') {
+                self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'test_readonly_connection'], 'Readonly-Verbindung testen');
+                echo ' ';
+            }
+            self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'set_test_mode'], 'Safe-Mode');
             echo ' ';
             self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'deactivate'], 'Deaktivieren');
             echo ' ';
@@ -226,7 +234,7 @@ final class CloudAdmin
         }
 
         if (empty($connections)) {
-            echo '<tr><td colspan="12">Noch keine vorbereiteten Verbindungen vorhanden.</td></tr>';
+            echo '<tr><td colspan="13">Noch keine vorbereiteten Verbindungen vorhanden.</td></tr>';
         }
 
         echo '</tbody></table>';
@@ -245,21 +253,28 @@ final class CloudAdmin
 
         echo '</select></td></tr>';
         echo '<tr><th><label for="name">Anzeigename</label></th><td><input class="regular-text" id="name" name="name" value="' . esc_attr((string) ($editConnection['name'] ?? '')) . '"></td></tr>';
+        echo '<tr><th><label for="connection_mode">Verbindungsmodus</label></th><td><select id="connection_mode" name="connection_mode">';
+        echo '<option value="safe_mode"' . selected('safe_mode', $connectionMode, false) . '>safe_mode</option>';
+        echo '<option value="readonly_live"' . selected('readonly_live', $connectionMode, false) . '>readonly_live</option>';
+        echo '<option value="disabled"' . selected('disabled', $connectionMode, false) . '>disabled</option>';
+        echo '</select><p class="description">Default bleibt <code>safe_mode</code>. <code>readonly_live</code> erlaubt nur einen expliziten Metadaten-Test ohne Dateioperationen. <code>disabled</code> blockiert jegliche Provider-Kommunikation.</p></td></tr>';
         echo '<tr><th><label for="status">Status</label></th><td><select id="status" name="status">';
         echo '<option value="aktiv"' . selected('aktiv', $selectedConnectionStatus, false) . '>Aktiv</option>';
         echo '<option value="inaktiv"' . selected('inaktiv', $selectedConnectionStatus, false) . '>Inaktiv</option>';
-        echo '</select><p class="description">Safe-Mode bleibt auch bei aktivem Status eingeschaltet.</p></td></tr>';
+        echo '</select><p class="description">Safe-Mode bleibt auch bei aktivem Status global eingeschaltet. Live-Kommunikation erfolgt nur im Modus <code>readonly_live</code> und nur bei explizitem Test.</p></td></tr>';
         echo '<tr><th><label for="client_id">Client ID</label></th><td><input class="regular-text" id="client_id" name="client_id" value="' . esc_attr((string) ($config['client_id'] ?? '')) . '"></td></tr>';
         echo '<tr><th><label for="client_secret">Client Secret</label></th><td><input class="regular-text" id="client_secret" name="client_secret" value=""><p class="description">Leer lassen, um das bestehende Secret beizubehalten.</p></td></tr>';
+        echo '<tr><th><label for="access_token">Access-Token</label></th><td><input class="regular-text" id="access_token" name="access_token" value="" autocomplete="off"><p class="description">Optional fuer readonly Live-Tests. Leer lassen, um ein bereits gespeichertes Token beizubehalten. Token werden nie im Klartext angezeigt.</p></td></tr>';
+        echo '<tr><th><label for="refresh_token">Refresh-Token</label></th><td><input class="regular-text" id="refresh_token" name="refresh_token" value="" autocomplete="off"><p class="description">Optional fuer die stille Access-Token-Aktualisierung im readonly Live-Test. Es werden keine Tokens im HTML, JS oder Log ausgegeben.</p></td></tr>';
         echo '<tr><th><label for="redirect_uri">Redirect URI</label></th><td><input class="regular-text" id="redirect_uri" name="redirect_uri" value="' . esc_attr((string) ($config['redirect_uri'] ?? '')) . '"></td></tr>';
-        echo '<tr><th><label for="notes">Notizen</label></th><td><textarea class="large-text" rows="4" id="notes" name="notes">' . esc_textarea((string) ($config['notes'] ?? '')) . '</textarea><p class="description">Google Drive, Dropbox, OneDrive, Local Storage sowie vorbereitete Nextcloud-/WebDAV- und SFTP-Konfigurationen bleiben in dieser Stufe ohne echten OAuth- oder API-Handshake.</p></td></tr>';
+        echo '<tr><th><label for="notes">Notizen</label></th><td><textarea class="large-text" rows="4" id="notes" name="notes">' . esc_textarea((string) ($config['notes'] ?? '')) . '</textarea><p class="description">Google Drive kann in dieser Stufe optional fuer einen strikt readonly begrenzten Metadaten-Test vorbereitet werden. Keine Uploads, keine Moves, keine Deletes, kein echter Sync.</p></td></tr>';
         echo '</tbody></table>';
         submit_button($editConnection ? 'Verbindung aktualisieren' : 'Verbindung speichern');
         echo '</form>';
 
         echo '<div style="margin-top:24px;padding:16px;border:1px solid #dcdcde;background:#fff;">';
         echo '<h2 style="margin-top:0;">OAuth-/Provider-Informationen</h2>';
-        echo '<p>Noch kein produktiver OAuth-Flow aktiv. Die folgenden Angaben dienen nur der sicheren Vorbereitung im Safe-Mode.</p>';
+        echo '<p>Produktive Schreibpfade bleiben deaktiviert. Fuer Google Drive wird nur ein readonly OAuth-Setup mit reinem Metadatenzugriff vorbereitet.</p>';
         echo '<p><label for="cc_provider_guide_select"><strong>Infoprovider</strong></label> ';
         echo '<select id="cc_provider_guide_select" style="min-width:240px;">';
 
@@ -281,9 +296,13 @@ final class CloudAdmin
             echo '<table class="widefat striped"><tbody>';
             echo '<tr><td style="width:180px;"><strong>Redirect URI</strong></td><td>' . self::renderProviderGuideValue($redirectUri) . '</td><td style="width:140px;">' . self::renderCopyButton($redirectUri, 'Redirect URI kopieren') . '</td></tr>';
             echo '<tr><td><strong>Empfohlene Scopes</strong></td><td>' . self::renderScopeList($scopes) . '</td><td>' . self::renderCopyButton($scopeText, 'Scopes kopieren') . '</td></tr>';
+            if ($slug === 'google_drive') {
+                $authUrl = CloudReadonlyProviderService::buildPreparedGoogleAuthUrl($config);
+                echo '<tr><td><strong>Readonly OAuth-URL</strong></td><td>' . self::renderProviderGuideValue($authUrl) . '</td><td>' . self::renderCopyButton($authUrl, 'OAuth-URL kopieren') . '</td></tr>';
+            }
             echo '<tr><td><strong>Hinweis</strong></td><td colspan="2">' . esc_html((string) $guide['hint']) . '</td></tr>';
             echo '<tr><td><strong>Dokumentationsstatus</strong></td><td colspan="2">' . esc_html((string) $guide['docs_note']) . '</td></tr>';
-            echo '<tr><td><strong>Safe-Mode</strong></td><td colspan="2">Aktiv - keine Redirect-Ausfuehrung, keine Token-Anforderung, keine externen API-Calls.</td></tr>';
+            echo '<tr><td><strong>Sicherheitsgrenze</strong></td><td colspan="2">Default bleibt Safe-Mode. Nur eine explizite Aktion <code>Readonly-Verbindung testen</code> darf in <code>readonly_live</code> minimale Provider-Metadaten lesen.</td></tr>';
             echo '</tbody></table>';
             echo '</div>';
         }
@@ -489,6 +508,8 @@ final class CloudAdmin
         }
 
         $selectedConnectionId = (int) ($selectedConnection['id'] ?? 0);
+        $selectedConnectionConfig = $selectedConnection ? CloudCrypto::decryptConfig((string) $selectedConnection['config_encrypted']) : [];
+        $selectedConnectionMode = self::getConnectionMode($selectedConnection, $selectedConnectionConfig);
         $explorerFiles = self::buildExplorerRows($selectedProvider, $selectedConnection, $jobs, $logs, $fileCache);
         $previewRows = self::buildExplorerPreviewRows($explorerFiles, $selectedProvider, $selectedConnection, $jobs, $logs);
         $conflictRows = self::buildExplorerConflictRows($previewRows, $selectedProvider);
@@ -497,7 +518,11 @@ final class CloudAdmin
         $activityEntries = self::buildExplorerActivityEntries($previewRows);
 
         echo '<div style="margin-bottom:16px;padding:12px 16px;border:1px solid #dcdcde;background:#fff;">';
-        echo '<strong>Safe-Mode aktiv.</strong> Explorer-Daten stammen nur aus Cache-, DB- und Mockquellen. Es werden keine Provider-Requests, OAuth-Flows oder Dateioperationen ausgeloest.';
+        if ($selectedConnectionMode === 'readonly_live') {
+            echo '<strong>READONLY LIVE aktiv.</strong> Diese Verbindung darf nur einen streng begrenzten Metadatenzugriff gegen den Provider ausfuehren. Keine Dateioperationen, keine Queue, kein Worker, kein echter Sync.';
+        } else {
+            echo '<strong>Safe-Mode aktiv.</strong> Explorer-Daten stammen nur aus Cache-, DB- und Mockquellen. Es werden keine Provider-Requests, OAuth-Flows oder Dateioperationen ausgeloest.';
+        }
         echo '</div>';
 
         echo '<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">';
@@ -540,10 +565,12 @@ final class CloudAdmin
                         'explorer_connection' => (int) $connection['id'],
                     ], admin_url('admin.php')));
                     $isSelectedConnection = $providerSlug === $selectedProvider && (int) $connection['id'] === $selectedConnectionId;
+                    $connectionConfig = CloudCrypto::decryptConfig((string) ($connection['config_encrypted'] ?? ''));
 
                     echo '<li style="margin-bottom:4px;">';
                     echo '<a href="' . $connectionUrl . '" style="text-decoration:none;' . ($isSelectedConnection ? 'font-weight:600;' : '') . '">' . esc_html((string) $connection['name']) . '</a> ';
                     echo self::renderStatusBadge((string) $connection['status']);
+                    echo ' ' . self::renderConnectionModeBadge(self::getConnectionMode($connection, $connectionConfig));
                     echo '</li>';
                 }
 
@@ -569,6 +596,12 @@ final class CloudAdmin
 
         echo '</div>';
         echo '</div>';
+
+        if ($selectedConnectionMode === 'readonly_live') {
+            self::renderReadonlyLiveExplorer($selectedProvider, $selectedConnection, $fileCache);
+
+            return;
+        }
 
         echo '<div style="flex:2 1 640px;min-width:320px;">';
         echo '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;">';
@@ -728,6 +761,58 @@ final class CloudAdmin
         self::renderExplorerScript($detailPanel['map'], $previewRows, $conflictRows, $health, $activityEntries);
     }
 
+    private static function renderReadonlyLiveExplorer(string $selectedProvider, ?array $selectedConnection, array $fileCache): void
+    {
+        $connectionId = (int) ($selectedConnection['id'] ?? 0);
+        $connectionFiles = array_values(array_filter(
+            $fileCache,
+            static fn(array $row): bool => (int) ($row['connection_id'] ?? 0) === $connectionId
+        ));
+
+        echo '<div style="flex:2 1 640px;min-width:320px;">';
+        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;">';
+        echo '<div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">';
+        echo '<div>';
+        echo '<h2 style="margin-top:0;">Readonly Live Explorer</h2>';
+        echo '<p style="margin-top:0;color:#50575e;">';
+        echo esc_html((string) (self::getProviderGuides()[$selectedProvider]['title'] ?? $selectedProvider));
+        if ($selectedConnection) {
+            echo ' / ' . esc_html((string) $selectedConnection['name']);
+        }
+        echo '</p>';
+        echo '</div>';
+        echo '<div>' . self::renderConnectionModeBadge('readonly_live') . '</div>';
+        echo '</div>';
+        echo '<div style="margin:0 0 16px 0;padding:12px 14px;border:1px solid #c3c4c7;background:#f6f7f7;">';
+        echo '<strong>Nur Metadatenzugriff.</strong> Diese Verbindung erlaubt nur readonly Metadatenzugriff. Es werden keine Dateiaenderungen durchgefuehrt.';
+        echo '</div>';
+        echo '<table class="widefat striped" style="margin-bottom:16px;"><tbody>';
+        echo '<tr><td><strong>Verbindungsmodus</strong></td><td>' . self::renderConnectionModeBadge('readonly_live') . '</td></tr>';
+        echo '<tr><td><strong>Provider</strong></td><td>' . esc_html((string) ($selectedConnection['provider_slug'] ?? '-')) . '</td></tr>';
+        echo '<tr><td><strong>Letzte Live-Pruefung</strong></td><td>' . esc_html((string) (($selectedConnection['last_connected_at'] ?? '') ?: '-')) . '</td></tr>';
+        echo '<tr><td><strong>Hard-Limits</strong></td><td><code>maxResults=5</code>, keine Rekursion, kein Auto-Refresh, kein Queue-/Worker-Link, kein Download/Upload/Move/Delete</td></tr>';
+        echo '</tbody></table>';
+        echo '<h3 style="margin-top:0;">Kleine Test-Dateiliste</h3>';
+        echo '<table class="widefat striped"><thead><tr><th>Name</th><th>Typ</th><th>Groesse</th><th>Geaendert am</th></tr></thead><tbody>';
+
+        foreach (array_slice($connectionFiles, 0, 5) as $file) {
+            echo '<tr>';
+            echo '<td>' . esc_html((string) ($file['name'] ?? '')) . '</td>';
+            echo '<td>' . esc_html((string) ($file['mime_type'] ?? 'application/octet-stream')) . '</td>';
+            echo '<td>' . esc_html(size_format((int) ($file['size_bytes'] ?? 0))) . '</td>';
+            echo '<td>' . esc_html((string) ($file['last_modified'] ?? '-')) . '</td>';
+            echo '</tr>';
+        }
+
+        if (empty($connectionFiles)) {
+            echo '<tr><td colspan="4">Noch keine readonly Live-Metadaten vorhanden. Fuehre zuerst den Button <strong>Readonly-Verbindung testen</strong> im Tab Verbindungen aus.</td></tr>';
+        }
+
+        echo '</tbody></table>';
+        echo '</div>';
+        echo '</div>';
+    }
+
     private static function renderLogs(): void
     {
         $logs = CloudStorage::getLogs();
@@ -884,19 +969,37 @@ final class CloudAdmin
         return '<code>' . esc_html($url) . '</code>';
     }
 
-    private static function describeConnectionMode(array $connection, array $config): string
+    private static function getConnectionMode(?array $connection, ?array $config = null): string
     {
-        $status = (string) ($connection['status'] ?? '');
+        $resolvedConfig = $config;
 
-        if ($status === 'testmodus') {
-            return 'Test';
+        if ($resolvedConfig === null && is_array($connection)) {
+            $resolvedConfig = CloudCrypto::decryptConfig((string) ($connection['config_encrypted'] ?? ''));
         }
 
-        if ($status === 'aktiv' && (!empty($config['client_id']) || !empty($config['client_secret']))) {
-            return 'Live vorbereitet';
-        }
+        return CloudReadonlyProviderService::normalizeMode((string) ($resolvedConfig['connection_mode'] ?? 'safe_mode'));
+    }
 
-        return 'Safe';
+    private static function renderConnectionModeBadge(string $mode): string
+    {
+        $labels = [
+            'safe_mode' => 'SAFE MODE',
+            'readonly_live' => 'READONLY LIVE',
+            'disabled' => 'DISABLED',
+        ];
+        $styles = [
+            'safe_mode' => ['#e0f2fe', '#075985'],
+            'readonly_live' => ['#dcfce7', '#166534'],
+            'disabled' => ['#e5e7eb', '#374151'],
+        ];
+        [$background, $color] = $styles[$mode] ?? ['#f3f4f6', '#111827'];
+
+        return sprintf(
+            '<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:%s;color:%s;font-weight:700;">%s</span>',
+            esc_attr($background),
+            esc_attr($color),
+            esc_html($labels[$mode] ?? strtoupper($mode))
+        );
     }
 
     private static function renderInfoBadge(string $label): string
@@ -974,14 +1077,11 @@ final class CloudAdmin
             'google_drive' => [
                 'title' => 'Google Drive',
                 'redirect_uri' => $redirectUri,
-                'scopes' => [
-                    'https://www.googleapis.com/auth/drive.metadata.readonly',
-                    'https://www.googleapis.com/auth/drive.file',
-                ],
-                'hint' => 'Nur vorbereitende Angaben. Es wird kein OAuth-Redirect erzeugt und kein Token angefordert.',
+                'scopes' => CloudReadonlyProviderService::getGoogleReadonlyScopes(),
+                'hint' => 'Readonly-Live ist auf maximal 5 Metadateneintraege begrenzt. Kein Download, kein Upload, kein Move, kein Delete.',
                 'status_label' => 'vorbereitet',
                 'docs_status' => 'geplant',
-                'docs_note' => 'Scopes und Redirect sind fuer eine spaetere OAuth-Stufe vorgemerkt.',
+                'docs_note' => 'Es wird nur der Scope fuer readonly Metadatenzugriff vorbereitet.',
             ],
             'dropbox' => [
                 'title' => 'Dropbox',
