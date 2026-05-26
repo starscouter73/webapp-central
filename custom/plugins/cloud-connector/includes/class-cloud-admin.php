@@ -53,6 +53,7 @@ final class CloudAdmin
             'sync-jobs' => 'Sync-Jobs',
             'automation' => 'Automatisierung',
             'explorer' => 'Explorer',
+            'network' => 'Netzwerk',
             'logs' => 'Logs',
             'settings' => 'Einstellungen',
         ];
@@ -89,6 +90,9 @@ final class CloudAdmin
                 break;
             case 'explorer':
                 self::renderExplorer();
+                break;
+            case 'network':
+                self::renderNetwork();
                 break;
             case 'logs':
                 self::renderLogs();
@@ -811,6 +815,97 @@ final class CloudAdmin
         echo '</tbody></table>';
         echo '</div>';
         echo '</div>';
+    }
+
+    private static function renderNetwork(): void
+    {
+        $nodes = self::getNetworkNodes();
+        $initial = $nodes[0] ?? [];
+
+        echo '<div style="margin-bottom:16px;padding:12px 16px;border:1px solid #dcdcde;background:#fff;">';
+        echo '<strong>Readonly Netzwerkansicht.</strong> Diese Mesh-Ansicht ist reine Statusvisualisierung. Keine Provider-Calls, keine Dateioperationen, keine Worker-Anbindung.';
+        echo '</div>';
+        echo '<div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:16px;align-items:start;">';
+        echo '<div style="border:1px solid #dcdcde;background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%);padding:18px;overflow:hidden;">';
+        echo '<h2 style="margin-top:0;">Cloud Connector Mesh</h2>';
+        echo '<p style="margin-top:0;color:#50575e;">Safe-Mode als Schutzschicht, Readonly Live als streng begrenzter Providerpfad und alle Systemkomponenten als Topologie.</p>';
+        echo '<div class="cc-network-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;position:relative;">';
+
+        foreach ($nodes as $node) {
+            $allowed = implode(' | ', array_map('strval', $node['allowed']));
+            $blocked = implode(' | ', array_map('strval', $node['blocked']));
+            echo '<button type="button" class="cc-network-node" data-node-title="' . esc_attr((string) $node['title']) . '" data-node-status="' . esc_attr((string) $node['status']) . '" data-node-description="' . esc_attr((string) $node['description']) . '" data-node-allowed="' . esc_attr($allowed) . '" data-node-blocked="' . esc_attr($blocked) . '" style="text-align:left;border:1px solid #dcdcde;border-radius:14px;padding:14px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,0.06);cursor:pointer;">';
+            echo '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">';
+            echo '<strong>' . esc_html((string) $node['title']) . '</strong>';
+            echo self::renderStatusBadge((string) $node['status']);
+            echo '</div>';
+            echo '<p style="margin:10px 0 8px 0;color:#50575e;min-height:42px;">' . esc_html((string) $node['description']) . '</p>';
+            echo '<div style="font-size:12px;color:#646970;">Erlaubt: ' . esc_html((string) ($node['allowed'][0] ?? '-')) . '</div>';
+            echo '<div style="font-size:12px;color:#646970;">Blockiert: ' . esc_html((string) ($node['blocked'][0] ?? '-')) . '</div>';
+            echo '</button>';
+        }
+
+        echo '</div>';
+        echo '</div>';
+        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;position:sticky;top:16px;">';
+        echo '<h2 style="margin-top:0;">Node-Details</h2>';
+        echo '<div id="cc-network-detail">';
+        echo self::renderNetworkDetailHtml($initial);
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '<script>';
+        echo '(function(){const detail=document.getElementById("cc-network-detail");const nodes=document.querySelectorAll(".cc-network-node");if(!detail||!nodes.length){return;}';
+        echo 'const esc=function(value){return String(value).replace(/[&<>"\']/g,function(char){if(char==="&"){return "&amp;";}if(char==="<"){return "&lt;";}if(char===">"){return "&gt;";}if(char===\'"\'){return "&quot;";}return "&#039;";});};';
+        echo 'const badge=function(label){const palette={aktiv:["#dcfce7","#166534"],"safe-mode":["#e0f2fe","#075985"],readonly:["#f3f4f6","#111827"],blocked:["#fee2e2","#991b1b"],geplant:["#dbeafe","#1d4ed8"],inaktiv:["#e5e7eb","#374151"]};const colors=palette[label]||["#f3f4f6","#111827"];return \'<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:\'+colors[0]+\';color:\'+colors[1]+\';font-weight:700;">\'+esc(label)+\'</span>\';};';
+        echo 'const list=function(value){return String(value||"").split(" | ").filter(Boolean).map(function(item){return "<li>"+esc(item)+"</li>";}).join("")||"<li>-</li>";};';
+        echo 'const render=function(node){detail.innerHTML="<h3 style=\"margin-top:0;\">"+esc(node.title)+"</h3><p style=\"margin:0 0 12px 0;\">"+badge(node.status)+"</p><p style=\"color:#50575e;\">"+esc(node.description)+"</p><div style=\"display:grid;grid-template-columns:1fr;gap:12px;\"><div><strong>Erlaubt</strong><ul style=\"margin:8px 0 0 18px;\">"+list(node.allowed)+"</ul></div><div><strong>Blockiert</strong><ul style=\"margin:8px 0 0 18px;\">"+list(node.blocked)+"</ul></div></div>";};';
+        echo 'nodes.forEach(function(node){node.addEventListener("click",function(){nodes.forEach(function(other){other.style.outline="none";});node.style.outline="2px solid #72aee6";node.style.outlineOffset="2px";render({title:node.getAttribute("data-node-title")||"",status:node.getAttribute("data-node-status")||"",description:node.getAttribute("data-node-description")||"",allowed:node.getAttribute("data-node-allowed")||"",blocked:node.getAttribute("data-node-blocked")||""});});});';
+        echo 'nodes[0].style.outline="2px solid #72aee6";nodes[0].style.outlineOffset="2px";';
+        echo '})();';
+        echo '</script>';
+    }
+
+    private static function renderNetworkDetailHtml(array $node): string
+    {
+        $allowedItems = '';
+        foreach ((array) ($node['allowed'] ?? []) as $item) {
+            $allowedItems .= '<li>' . esc_html((string) $item) . '</li>';
+        }
+        $blockedItems = '';
+        foreach ((array) ($node['blocked'] ?? []) as $item) {
+            $blockedItems .= '<li>' . esc_html((string) $item) . '</li>';
+        }
+
+        return '<h3 style="margin-top:0;">' . esc_html((string) ($node['title'] ?? 'Cloud Connector')) . '</h3>'
+            . '<p style="margin:0 0 12px 0;">' . self::renderStatusBadge((string) ($node['status'] ?? 'aktiv')) . '</p>'
+            . '<p style="color:#50575e;">' . esc_html((string) ($node['description'] ?? '')) . '</p>'
+            . '<div style="display:grid;grid-template-columns:1fr;gap:12px;">'
+            . '<div><strong>Erlaubt</strong><ul style="margin:8px 0 0 18px;">' . ($allowedItems !== '' ? $allowedItems : '<li>-</li>') . '</ul></div>'
+            . '<div><strong>Blockiert</strong><ul style="margin:8px 0 0 18px;">' . ($blockedItems !== '' ? $blockedItems : '<li>-</li>') . '</ul></div>'
+            . '</div>';
+    }
+
+    private static function getNetworkNodes(): array
+    {
+        return [
+            ['title' => 'Cloud Connector', 'status' => 'aktiv', 'description' => 'Zentrale Verwaltungsinstanz fuer Provider, Explorer und Schutzlogik.', 'allowed' => ['Admin-UI', 'Statusdarstellung', 'Readonly Vorbereitung'], 'blocked' => ['Direkter Sync ohne Freigabe', 'Ungeschuetzte Provideraktionen']],
+            ['title' => 'Safe-Mode', 'status' => 'safe-mode', 'description' => 'Globale Schutzschicht fuer Simulation, Preview und geblockte Dateiaktionen.', 'allowed' => ['Simulation', 'Preview', 'UI-Aktionen'], 'blocked' => ['Echte Dateioperationen', 'Destruktive Aenderungen']],
+            ['title' => 'Readonly Live', 'status' => 'readonly', 'description' => 'Streng begrenzter Live-Pfad nur fuer Provider-Metadaten.', 'allowed' => ['Token pruefen', 'max. 5 Metadaten lesen'], 'blocked' => ['Upload', 'Download', 'Move', 'Delete', 'Sync']],
+            ['title' => 'Google Drive', 'status' => 'readonly', 'description' => 'Vorbereitet fuer readonly Metadatenzugriff mit minimalem Scope.', 'allowed' => ['Token pruefen', 'max. 5 Metadaten lesen'], 'blocked' => ['Upload', 'Download', 'Move', 'Delete', 'Sync']],
+            ['title' => 'Dropbox', 'status' => 'geplant', 'description' => 'Nur vorbereitete Folgeausbaustufe ohne aktive Live-Kommunikation.', 'allowed' => ['Statusmodell', 'Dokumentation'], 'blocked' => ['Live-Calls', 'Dateioperationen']],
+            ['title' => 'OneDrive', 'status' => 'geplant', 'description' => 'Nur vorbereitete Folgeausbaustufe ohne aktive Live-Kommunikation.', 'allowed' => ['Statusmodell', 'Dokumentation'], 'blocked' => ['Live-Calls', 'Dateioperationen']],
+            ['title' => 'WebDAV / Nextcloud', 'status' => 'inaktiv', 'description' => 'Geplanter Providerknoten ohne angebundene Kommunikation.', 'allowed' => ['Topologie', 'Hinweise'], 'blocked' => ['Providerzugriff', 'Dateioperationen']],
+            ['title' => 'SFTP', 'status' => 'inaktiv', 'description' => 'Geplanter Infrastrukturknoten ohne aktive Integrationslogik.', 'allowed' => ['Topologie', 'Hinweise'], 'blocked' => ['Providerzugriff', 'Dateioperationen']],
+            ['title' => 'Server Storage', 'status' => 'safe-mode', 'description' => 'Lokales Zielsystem bleibt in der Schutzschicht isoliert.', 'allowed' => ['Pfadmodell', 'Statusdarstellung'], 'blocked' => ['Live-Schreiboperationen', 'Downloads']],
+            ['title' => 'Explorer', 'status' => 'aktiv', 'description' => 'Admin-Explorer fuer Cache-, Mock- und readonly Statusansichten.', 'allowed' => ['UI-Ansicht', 'Readonly Liste'], 'blocked' => ['Aktive Dateioperationen']],
+            ['title' => 'Sync Preview', 'status' => 'safe-mode', 'description' => 'Vorschau fuer simulierte Aenderungen ohne Providerwirkung.', 'allowed' => ['Preview', 'Konfliktanzeige'], 'blocked' => ['Echter Sync']],
+            ['title' => 'Drag & Drop', 'status' => 'safe-mode', 'description' => 'Clientseitige Simulationsinteraktionen im Explorer.', 'allowed' => ['UI-Simulation', 'Statuswechsel'], 'blocked' => ['Move', 'Delete', 'Upload']],
+            ['title' => 'Queue', 'status' => 'blocked', 'description' => 'Virtuelle Warteschlange fuer Safe-Mode-Simulationen.', 'allowed' => ['Anzeige', 'Simulationsstatus'], 'blocked' => ['Worker-Ausfuehrung im readonly Pfad']],
+            ['title' => 'Worker', 'status' => 'blocked', 'description' => 'Bestehende Simulationsworker bleiben vom readonly Live-Pfad getrennt.', 'allowed' => ['Safe-Mode Simulation'], 'blocked' => ['Readonly Live Integration', 'Automatische Provideraktionen']],
+            ['title' => 'Logs', 'status' => 'aktiv', 'description' => 'Sanitisierte Status- und Ereignisprotokolle ohne Tokenoffenlegung.', 'allowed' => ['Statuslogs', 'Readonly Ereignisse'], 'blocked' => ['Tokenlogging', 'Secrets im Kontext']],
+            ['title' => 'Verbindungen', 'status' => 'aktiv', 'description' => 'Providerkonfiguration mit Moduswahl und readonly Testaktion.', 'allowed' => ['Mode setzen', 'Readonly Test starten'], 'blocked' => ['Ungeschuetzte Schreibscopes']],
+        ];
     }
 
     private static function renderLogs(): void
