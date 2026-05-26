@@ -10,7 +10,9 @@ final class CloudConnectorPlugin
     public static function bootstrap(string $pluginFile): void
     {
         register_activation_hook($pluginFile, [self::class, 'activate']);
+        register_deactivation_hook($pluginFile, [self::class, 'deactivate']);
         add_action('plugins_loaded', [self::class, 'maybeUpgrade']);
+        add_action('init', [self::class, 'ensureAutomationHook']);
         add_action('admin_menu', [self::class, 'registerAdmin']);
         add_action('admin_notices', [self::class, 'renderAdminNotices']);
         add_action('admin_post_cc_save_connection', [self::class, 'saveConnection']);
@@ -21,6 +23,7 @@ final class CloudConnectorPlugin
         add_action('admin_post_cc_job_action', [self::class, 'jobAction']);
         add_action('admin_post_cc_refresh_files', [self::class, 'refreshFiles']);
         add_action('admin_post_cc_save_settings', [self::class, 'saveSettings']);
+        add_action(CloudJobRunner::HOOK, [CloudJobRunner::class, 'runDueJobs']);
     }
 
     public static function activate(): void
@@ -34,6 +37,12 @@ final class CloudConnectorPlugin
         }
 
         CloudLogger::log('info', 'activate', 'Cloud Connector wurde initialisiert.');
+        CloudJobRunner::ensureScheduled();
+    }
+
+    public static function deactivate(): void
+    {
+        CloudJobRunner::clearScheduled();
     }
 
     public static function maybeUpgrade(): void
@@ -60,6 +69,11 @@ final class CloudConnectorPlugin
     public static function registerAdmin(): void
     {
         CloudAdmin::registerMenu();
+    }
+
+    public static function ensureAutomationHook(): void
+    {
+        CloudJobRunner::ensureScheduled();
     }
 
     public static function saveConnection(): void

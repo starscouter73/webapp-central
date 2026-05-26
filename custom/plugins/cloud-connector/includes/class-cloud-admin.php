@@ -362,10 +362,26 @@ final class CloudAdmin
 
     private static function renderAutomation(): void
     {
+        $schedulerStatus = 'Nicht registriert';
+        $nextRun = '-';
+
+        if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
+            $schedulerStatus = 'WP-Cron deaktiviert';
+        } elseif (CloudJobRunner::isScheduled()) {
+            $schedulerStatus = 'Registriert';
+            $timestamp = CloudJobRunner::nextRunTimestamp();
+            $nextRun = $timestamp ? wp_date('Y-m-d H:i:s', $timestamp) : '-';
+        }
+
         echo '<p>Die Automatisierungsbasis ist vorbereitet, fuehrt in V1 aber keine produktiven Syncs aus.</p>';
+        echo '<table class="widefat striped" style="max-width:720px; margin-bottom:16px;"><tbody>';
+        echo '<tr><td><strong>Hook</strong></td><td><code>' . esc_html(CloudJobRunner::HOOK) . '</code></td></tr>';
+        echo '<tr><td><strong>Scheduler-Status</strong></td><td>' . esc_html($schedulerStatus) . '</td></tr>';
+        echo '<tr><td><strong>Naechster geplanter Worker-Lauf</strong></td><td>' . esc_html($nextRun) . '</td></tr>';
+        echo '</tbody></table>';
         echo '<ul style="list-style:disc; padding-left:20px;">';
-        echo '<li>Empfohlener spaeterer Hook: <code>cloud_connector_run_jobs</code></li>';
-        echo '<li>Nur Simulationslaeufe, solange Safe-Mode aktiv bleibt</li>';
+        echo '<li>Automatischer Worker nutzt den Hook <code>' . esc_html(CloudJobRunner::HOOK) . '</code></li>';
+        echo '<li>Faellige Jobs mit Status <code>geplant</code> und gesetztem <code>next_run</code> werden nur simuliert</li>';
         echo '<li>Keine externen API-Requests im normalen Backend-Rendering</li>';
         echo '<li>Timeout-Vorgabe fuer spaetere Worker: ' . esc_html(CloudStorage::getSetting('http_timeout', '5')) . ' Sekunden</li>';
         echo '</ul>';
