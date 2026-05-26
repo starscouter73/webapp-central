@@ -245,16 +245,19 @@ final class CloudConnectorPlugin
         $error = '';
         $lastRun = $job['last_run'];
         $fileCount = (int) $job['file_count'];
+        $nextRun = $job['next_run'];
+        $notice = 'job_updated';
 
         if ($action === 'pause') {
             $status = 'pausiert';
+            $notice = 'job_paused';
         } elseif ($action === 'resume') {
             $status = 'geplant';
+            $notice = 'job_resumed';
         } elseif ($action === 'simulate') {
-            $status = 'erfolgreich';
-            $lastRun = current_time('mysql');
-            $fileCount = 2;
-            $error = 'Nur Simulation. Keine Dateioperationen ausgefuehrt.';
+            $status = 'geplant';
+            $nextRun = current_time('mysql');
+            $notice = 'job_simulation_started';
         }
 
         CloudStorage::saveJob([
@@ -266,13 +269,23 @@ final class CloudConnectorPlugin
             'target_path' => $job['target_path'],
             'status' => $status,
             'last_run' => $lastRun,
-            'next_run' => $job['next_run'],
+            'next_run' => $nextRun,
             'file_count' => $fileCount,
             'error_text' => $error,
         ]);
 
-        CloudLogger::log('info', 'job_action', 'Job-Aktion ausgefuehrt.', ['job_id' => $id, 'job_action' => $action]);
-        CloudAdmin::redirectWithNotice('sync-jobs', 'job_updated');
+        if ($action === 'pause') {
+            CloudLogger::log('info', 'sync_job_paused', 'Sync-Job pausiert.', ['job_id' => $id]);
+        } elseif ($action === 'resume') {
+            CloudLogger::log('info', 'sync_job_resumed', 'Sync-Job fortgesetzt.', ['job_id' => $id]);
+        } elseif ($action === 'simulate') {
+            CloudLogger::log('info', 'sync_job_manual_simulation', 'Manueller Safe-Mode-Simulationslauf angefordert.', ['job_id' => $id]);
+            CloudJobRunner::runDueJobs();
+        } else {
+            CloudLogger::log('info', 'job_action', 'Job-Aktion ausgefuehrt.', ['job_id' => $id, 'job_action' => $action]);
+        }
+
+        CloudAdmin::redirectWithNotice('sync-jobs', $notice);
     }
 
     public static function refreshFiles(): void

@@ -138,6 +138,8 @@ V1:
 
 - Jobs anlegen, bearbeiten, pausieren, loeschen
 - Simulationslauf ausloesbar
+- Sync-Job-UI zeigt Status, Zeitpunkte, Dateizaehler und letzte Fehlermeldung im WordPress-Backend
+- Manueller Button `Simulation` setzt nur einen Safe-Mode-Lauf ueber den bestehenden Worker an
 - Dateizaehler und Status werden nur demonstrativ aktualisiert
 - Keine produktive Delta-Logik, keine Datei-Loeschung, kein Move, kein Upload/Download
 
@@ -177,12 +179,20 @@ Spaeter:
 - Es werden nur Jobs mit Status `geplant` und gueltigem `next_run` verarbeitet
 - Jeder Lauf bleibt eine reine Simulation; Upload, Download, Move, Delete und externe Cloud-API-Calls bleiben deaktiviert
 - Fehler pro Job werden geloggt und blockieren die weitere Abarbeitung nicht
+- Admin-Aktionen `Pausieren`, `Fortsetzen` und `Simulation` arbeiten nur mit der vorhandenen Safe-Mode-Logik
 
 ### Manuelle Pruefung per WP-CLI
 
 - `wp cron event list | grep cloud_connector`
 - `wp cron event run cloud_connector_run_jobs --allow-root`
 - `wp plugin status cloud-connector --allow-root`
+
+## Logging
+
+- `sync_job_paused` bei manueller Pausierung
+- `sync_job_resumed` bei manueller Fortsetzung
+- `sync_job_manual_simulation` bei manuell ausgeloster Safe-Mode-Simulation
+- `cron_simulation` bei erfolgreicher Worker-Simulation eines faelligen Jobs
 
 ## Geplante Migrationen
 
