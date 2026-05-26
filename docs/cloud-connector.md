@@ -95,6 +95,7 @@ Es werden folgende WordPress-Tabellen angelegt:
 - Verbindungsdefinitionen pro Anbieter
 - Konfigurationspayload verschluesselt, sofern OpenSSL und WordPress-Schluessel verfuegbar sind
 - Secrets werden im Backend nur maskiert dargestellt
+- V1 speichert vorbereitete Provider-Verbindungen ohne echten OAuth- oder API-Handshake
 
 ### `cloud_sync_jobs`
 
@@ -124,6 +125,24 @@ Es werden folgende WordPress-Tabellen angelegt:
 - CSRF-Schutz via WordPress-Nonces
 - Keine Secret-Anzeige im Klartext
 - Fehlende Zugangsdaten fuehren zu kontrollierten Fehlermeldungen statt Fatal Errors
+
+## Provider-Verbindungs-UI
+
+- Tab `Verbindungen` dient in dieser Stufe nur der sicheren Vorbereitung von Provider-Konfigurationen
+- Unterstuetzt werden Google Drive, Dropbox, OneDrive, Local Storage sowie vorbereitete Nextcloud-/WebDAV- und SFTP-Konfigurationen
+- Die Uebersicht zeigt ID, Provider, Anzeigename, Status, Modus, maskierte Client-Daten, Redirect URI, Token-Hinweis sowie Zeitstempel
+- Der Informationsblock `OAuth-/Provider-Informationen` zeigt nur statische Redirect-/Scope-Hinweise und fuehrt keine Redirects aus
+- Copy-Buttons kopieren nur vorbereitete Redirect-URIs oder Scope-Listen in die Zwischenablage
+- Aktionen im Backend:
+  - `Bearbeiten`
+  - `Deaktivieren`
+  - `Testmodus`
+  - `Loeschen`
+- Alle Aktionen bleiben durch `manage_options` und Nonces abgesichert
+- Secrets werden nur maskiert angezeigt; ein leeres Secret-Feld beim Bearbeiten behaelt den vorhandenen Wert bei
+- Es werden keine Tokens, Secrets oder Passwoerter in Logs geschrieben
+- In dieser Stufe werden keine OAuth-Redirects aktiviert und keine externen Provider-Verbindungen aufgebaut
+- Dokumentationsstatus und Safe-Mode-Hinweise dienen nur der Vorbereitung einer spaeteren OAuth-Ausbaustufe
 
 ## Recovery-/Safe-Mode
 
@@ -189,6 +208,11 @@ Spaeter:
 
 ## Logging
 
+- `connection_created` bei neuer vorbereiteter Verbindung
+- `connection_updated` bei bearbeiteter Verbindung
+- `connection_disabled` bei manueller Deaktivierung
+- `connection_deleted` bei Loeschung
+- `connection_test_mode_set` bei Umschalten auf vorbereiteten Testmodus
 - `sync_job_paused` bei manueller Pausierung
 - `sync_job_resumed` bei manueller Fortsetzung
 - `sync_job_manual_simulation` bei manuell ausgeloster Safe-Mode-Simulation
@@ -212,6 +236,7 @@ Spaeter:
 
 ## Naechste Ausbaustufen
 
+- Sichere OAuth-Verbindungs-UI mit restriktiven Redirect- und Scope-Vorgaben
 - Provider-spezifische OAuth- und Token-Refresh-Implementierungen
 - Hintergrund-Worker fuer echte, idempotente Sync-Laeufe
 - Diff-/Konfliktlogik und Dry-Run-Berichte
