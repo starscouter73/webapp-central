@@ -490,7 +490,10 @@ final class CloudAdmin
 
         $selectedConnectionId = (int) ($selectedConnection['id'] ?? 0);
         $explorerFiles = self::buildExplorerRows($selectedProvider, $selectedConnection, $jobs, $logs, $fileCache);
-        $health = self::buildExplorerHealth($jobs, $logs, $safeModeEnabled);
+        $previewRows = self::buildExplorerPreviewRows($explorerFiles, $selectedProvider, $selectedConnection, $jobs, $logs);
+        $conflictRows = self::buildExplorerConflictRows($previewRows, $selectedProvider);
+        $health = self::buildExplorerHealth($jobs, $logs, $previewRows, $safeModeEnabled);
+        $detailPanel = self::buildExplorerDetailPanel($explorerFiles, $previewRows, $selectedProvider, $selectedConnection);
 
         echo '<div style="margin-bottom:16px;padding:12px 16px;border:1px solid #dcdcde;background:#fff;">';
         echo '<strong>Safe-Mode aktiv.</strong> Explorer-Daten stammen nur aus Cache-, DB- und Mockquellen. Es werden keine Provider-Requests, OAuth-Flows oder Dateioperationen ausgeloest.';
@@ -593,8 +596,9 @@ final class CloudAdmin
         echo '<thead><tr><th>Dateiname</th><th>Typ</th><th>Groesse</th><th>Provider</th><th>Sync-Richtung</th><th>Status</th><th>Letzte Aenderung</th><th>Letzter Sync</th><th>Konfliktstatus</th></tr></thead><tbody>';
 
         foreach ($explorerFiles as $row) {
+            $fileKey = md5($row['name'] . '|' . $row['provider'] . '|' . $row['last_sync']);
             echo '<tr>';
-            echo '<td>' . esc_html($row['name']) . '</td>';
+            echo '<td><button type="button" class="button-link cc-explorer-file-trigger" data-file-key="' . esc_attr($fileKey) . '" style="font-weight:600;text-align:left;">' . esc_html($row['name']) . '</button></td>';
             echo '<td>' . esc_html($row['type']) . '</td>';
             echo '<td>' . esc_html($row['size']) . '</td>';
             echo '<td>' . esc_html($row['provider']) . '</td>';
@@ -612,9 +616,82 @@ final class CloudAdmin
 
         echo '</tbody></table>';
         echo '</div>';
+        echo '<div id="cc-file-detail-panel" style="margin-top:16px;border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
+        echo '<h3 style="margin-top:0;">Datei-Detailpanel</h3>';
+        echo '<p style="margin-top:0;color:#50575e;">Datei im Explorer anklicken, um virtuelle Sync- und Konfliktdetails anzuzeigen.</p>';
+        echo '<div id="cc-file-detail-content">';
+        echo self::renderExplorerDetailHtml($detailPanel['initial']);
         echo '</div>';
         echo '</div>';
         echo '</div>';
+
+        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;margin-top:16px;">';
+        echo '<div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">';
+        echo '<div>';
+        echo '<h2 style="margin-top:0;">Sync Preview / Dry Run</h2>';
+        echo '<p style="margin-top:0;color:#50575e;">Geplanter Sync, virtuelle Konflikte und Warteschlange bleiben reine Simulation. Keine Dateioperationen werden ausgefuehrt.</p>';
+        echo '</div>';
+        echo '<div>' . self::renderStatusBadge('preview') . ' ' . self::renderStatusBadge('safe-mode') . '</div>';
+        echo '</div>';
+        echo '<div style="overflow:auto;">';
+        echo '<table class="widefat striped">';
+        echo '<thead><tr><th>Datei</th><th>Quelle</th><th>Ziel</th><th>Aktion</th><th>Status</th><th>Groesse</th><th>Zeitstempel</th></tr></thead><tbody>';
+
+        foreach ($previewRows as $previewRow) {
+            echo '<tr>';
+            echo '<td>' . esc_html($previewRow['file']) . '</td>';
+            echo '<td><code>' . esc_html($previewRow['source']) . '</code></td>';
+            echo '<td><code>' . esc_html($previewRow['target']) . '</code></td>';
+            echo '<td>' . esc_html($previewRow['action']) . '</td>';
+            echo '<td>' . self::renderStatusBadge($previewRow['status']) . '</td>';
+            echo '<td>' . esc_html($previewRow['size']) . '</td>';
+            echo '<td>' . esc_html($previewRow['timestamp']) . '</td>';
+            echo '</tr>';
+        }
+
+        if (empty($previewRows)) {
+            echo '<tr><td colspan="7">Noch keine simulierten Preview-Daten verfuegbar.</td></tr>';
+        }
+
+        echo '</tbody></table>';
+        echo '</div>';
+        echo '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px;">';
+        echo '<div style="border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
+        echo '<h3 style="margin-top:0;">Virtuelle Konflikte</h3>';
+        echo '<table class="widefat striped"><thead><tr><th>Datei</th><th>Lokaler Zustand</th><th>Cloud-Zustand</th><th>Konfliktstatus</th></tr></thead><tbody>';
+
+        foreach ($conflictRows as $conflictRow) {
+            echo '<tr>';
+            echo '<td>' . esc_html($conflictRow['file']) . '</td>';
+            echo '<td>' . esc_html($conflictRow['local']) . '</td>';
+            echo '<td>' . esc_html($conflictRow['cloud']) . '</td>';
+            echo '<td>' . self::renderStatusBadge($conflictRow['status']) . '</td>';
+            echo '</tr>';
+        }
+
+        if (empty($conflictRows)) {
+            echo '<tr><td colspan="4">Keine virtuellen Konflikte im aktuellen Preview-Fenster.</td></tr>';
+        }
+
+        echo '</tbody></table>';
+        echo '</div>';
+        echo '<div style="border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
+        echo '<h3 style="margin-top:0;">Virtuelle Warteschlange</h3>';
+        echo '<ul style="margin:0;padding-left:18px;">';
+        foreach ($previewRows as $previewRow) {
+            echo '<li style="margin-bottom:6px;">';
+            echo '<strong>' . esc_html($previewRow['file']) . '</strong> - ' . esc_html($previewRow['action']) . ' - ' . self::renderStatusBadge($previewRow['status']);
+            echo '</li>';
+        }
+        if (empty($previewRows)) {
+            echo '<li>Keine Eintraege in der virtuellen Queue.</li>';
+        }
+        echo '</ul>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        self::renderExplorerScript($detailPanel['map']);
     }
 
     private static function renderLogs(): void
@@ -686,6 +763,9 @@ final class CloudAdmin
             'offline' => ['#e5e7eb', '#374151'],
             'safe-mode' => ['#e0f2fe', '#075985'],
             'keiner' => ['#f3f4f6', '#111827'],
+            'preview' => ['#f3e8ff', '#7e22ce'],
+            'queued' => ['#dbeafe', '#1d4ed8'],
+            'readonly' => ['#f3f4f6', '#111827'],
         ];
 
         [$background, $color] = $styles[$status] ?? ['#f3f4f6', '#111827'];
@@ -962,6 +1042,65 @@ final class CloudAdmin
         return $rows;
     }
 
+    private static function buildExplorerPreviewRows(array $explorerFiles, string $selectedProvider, ?array $selectedConnection, array $jobs, array $logs): array
+    {
+        $providerLabel = self::getProviderGuides()[$selectedProvider]['title'] ?? $selectedProvider;
+        $sourceRoot = '/cloud/' . strtolower(str_replace(' ', '-', $providerLabel));
+        $targetRoot = '/local/sync-preview';
+        $connectionName = (string) ($selectedConnection['name'] ?? 'Standardverbindung');
+        $logMap = self::buildExplorerLogMap($logs);
+        $rows = [];
+        $actions = ['download (simuliert)', 'upload (simuliert)', 'update (simuliert)', 'konflikt', 'ignoriert'];
+        $statuses = ['preview', 'queued', 'safe-mode', 'konflikt', 'readonly'];
+
+        foreach ($explorerFiles as $index => $file) {
+            $rows[] = [
+                'file' => $file['name'],
+                'source' => $sourceRoot . '/' . rawurlencode($connectionName) . '/' . $file['name'],
+                'target' => $targetRoot . '/' . $file['name'],
+                'action' => $actions[$index % count($actions)],
+                'status' => $statuses[$index % count($statuses)],
+                'size' => $file['size'],
+                'timestamp' => $file['last_sync'] !== '-' ? $file['last_sync'] : ($logMap['last_worker'] ?: current_time('mysql')),
+                'provider' => $providerLabel,
+                'last_sync' => $file['last_sync'],
+                'direction' => $file['direction'],
+                'conflict' => $file['conflict'],
+            ];
+        }
+
+        return $rows;
+    }
+
+    private static function buildExplorerConflictRows(array $previewRows, string $selectedProvider): array
+    {
+        $conflicts = [];
+
+        foreach ($previewRows as $previewRow) {
+            if (!in_array($previewRow['status'], ['konflikt', 'readonly'], true) && $previewRow['conflict'] !== 'konflikt') {
+                continue;
+            }
+
+            $conflicts[] = [
+                'file' => $previewRow['file'],
+                'local' => $previewRow['status'] === 'readonly' ? 'Neuere lokale Version' : 'Doppelte Datei erkannt',
+                'cloud' => $previewRow['status'] === 'konflikt' ? 'Neuere Cloud-Version' : 'Cloud-Version unveraendert',
+                'status' => 'konflikt',
+            ];
+        }
+
+        if (empty($conflicts) && $selectedProvider === 'google_drive') {
+            $conflicts[] = [
+                'file' => 'dokumentation.docx',
+                'local' => 'Neuere lokale Version',
+                'cloud' => 'Neuere Cloud-Version',
+                'status' => 'konflikt',
+            ];
+        }
+
+        return $conflicts;
+    }
+
     private static function buildExplorerLogMap(array $logs): array
     {
         $lastSimulation = '';
@@ -1033,14 +1172,36 @@ final class CloudAdmin
         return $fallbackStatus;
     }
 
-    private static function buildExplorerHealth(array $jobs, array $logs, bool $safeModeEnabled): array
+    private static function buildExplorerHealth(array $jobs, array $logs, array $previewRows, bool $safeModeEnabled): array
     {
         $pendingJobs = 0;
         $queueSize = count($jobs);
+        $processed = 0;
+        $simulated = 0;
+        $conflicts = 0;
+        $ignored = 0;
 
         foreach ($jobs as $job) {
             if ((string) ($job['status'] ?? '') === 'geplant') {
                 $pendingJobs++;
+            }
+        }
+
+        foreach ($previewRows as $previewRow) {
+            if ($previewRow['status'] === 'queued') {
+                $processed++;
+            }
+
+            if ($previewRow['status'] === 'preview' || $previewRow['status'] === 'safe-mode') {
+                $simulated++;
+            }
+
+            if ($previewRow['status'] === 'konflikt') {
+                $conflicts++;
+            }
+
+            if ($previewRow['action'] === 'ignoriert' || $previewRow['status'] === 'readonly') {
+                $ignored++;
             }
         }
 
@@ -1051,6 +1212,26 @@ final class CloudAdmin
                 'label' => 'Pending Jobs',
                 'value' => (string) $pendingJobs,
                 'note' => 'Status geplant in der Queue',
+            ],
+            [
+                'label' => 'Verarbeitet',
+                'value' => (string) $processed,
+                'note' => 'Virtuell als queued markiert',
+            ],
+            [
+                'label' => 'Simuliert',
+                'value' => (string) $simulated,
+                'note' => 'Preview- und Safe-Mode-Eintraege',
+            ],
+            [
+                'label' => 'Konflikt',
+                'value' => (string) $conflicts,
+                'note' => 'Virtuelle Konfliktfaelle',
+            ],
+            [
+                'label' => 'Ignoriert',
+                'value' => (string) $ignored,
+                'note' => 'Read-only oder ignorierte Aenderungen',
             ],
             [
                 'label' => 'Letzte Simulation',
@@ -1077,6 +1258,101 @@ final class CloudAdmin
                 'value' => $logMap['last_worker'] !== '' ? $logMap['last_worker'] : '-',
                 'note' => 'cron_idle oder cron_simulation',
             ],
+            [
+                'label' => 'Letzte Queue-Aktualisierung',
+                'value' => $logMap['last_worker'] !== '' ? $logMap['last_worker'] : current_time('mysql'),
+                'note' => 'Nur virtuelle Queue-Metadaten',
+            ],
         ];
+    }
+
+    private static function buildExplorerDetailPanel(array $explorerFiles, array $previewRows, string $selectedProvider, ?array $selectedConnection): array
+    {
+        $providerLabel = self::getProviderGuides()[$selectedProvider]['title'] ?? $selectedProvider;
+        $connectionName = (string) ($selectedConnection['name'] ?? 'Standardverbindung');
+        $map = [];
+
+        foreach ($explorerFiles as $index => $file) {
+            $preview = $previewRows[$index] ?? null;
+            $key = md5($file['name'] . '|' . $file['provider'] . '|' . $file['last_sync']);
+            $detail = [
+                'file_name' => $file['name'],
+                'provider' => $providerLabel,
+                'virtual_source' => (string) ($preview['source'] ?? '/cloud/' . $file['name']),
+                'virtual_target' => (string) ($preview['target'] ?? '/local/' . $file['name']),
+                'size' => $file['size'],
+                'last_sync' => $file['last_sync'],
+                'status' => $file['status'],
+                'simulated_action' => (string) ($preview['action'] ?? 'update (simuliert)'),
+                'conflict_status' => $file['conflict'],
+                'checksum' => 'sim-' . substr(md5($connectionName . '|' . $file['name']), 0, 12),
+            ];
+            $map[$key] = $detail;
+        }
+
+        $initial = reset($map);
+
+        if (!is_array($initial)) {
+            $initial = [
+                'file_name' => 'Keine Datei gewaehlt',
+                'provider' => $providerLabel,
+                'virtual_source' => '-',
+                'virtual_target' => '-',
+                'size' => '-',
+                'last_sync' => '-',
+                'status' => 'safe-mode',
+                'simulated_action' => 'preview',
+                'conflict_status' => 'keiner',
+                'checksum' => 'sim-000000000000',
+            ];
+        }
+
+        return [
+            'initial' => $initial,
+            'map' => $map,
+        ];
+    }
+
+    private static function renderExplorerDetailHtml(array $detail): string
+    {
+        $html = '<table class="widefat striped"><tbody>';
+        $html .= '<tr><td style="width:180px;"><strong>Dateiname</strong></td><td>' . esc_html((string) $detail['file_name']) . '</td></tr>';
+        $html .= '<tr><td><strong>Provider</strong></td><td>' . esc_html((string) $detail['provider']) . '</td></tr>';
+        $html .= '<tr><td><strong>Virtueller Quellpfad</strong></td><td><code>' . esc_html((string) $detail['virtual_source']) . '</code></td></tr>';
+        $html .= '<tr><td><strong>Virtueller Zielpfad</strong></td><td><code>' . esc_html((string) $detail['virtual_target']) . '</code></td></tr>';
+        $html .= '<tr><td><strong>Groesse</strong></td><td>' . esc_html((string) $detail['size']) . '</td></tr>';
+        $html .= '<tr><td><strong>Letzter Sync</strong></td><td>' . esc_html((string) $detail['last_sync']) . '</td></tr>';
+        $html .= '<tr><td><strong>Status</strong></td><td>' . self::renderStatusBadge((string) $detail['status']) . '</td></tr>';
+        $html .= '<tr><td><strong>Simulierte Aktion</strong></td><td>' . esc_html((string) $detail['simulated_action']) . '</td></tr>';
+        $html .= '<tr><td><strong>Konfliktstatus</strong></td><td>' . self::renderStatusBadge((string) $detail['conflict_status']) . '</td></tr>';
+        $html .= '<tr><td><strong>Hash / Checksum</strong></td><td><code>' . esc_html((string) $detail['checksum']) . '</code></td></tr>';
+        $html .= '</tbody></table>';
+
+        return $html;
+    }
+
+    private static function renderExplorerScript(array $detailMap): void
+    {
+        echo '<script>';
+        echo '(function(){';
+        echo 'const detailRoot=document.getElementById("cc-file-detail-content");';
+        echo 'const detailMap=' . wp_json_encode($detailMap) . ';';
+        echo 'if(!detailRoot||!detailMap){return;}';
+        echo 'const renderBadge=function(label){return \'<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:#f3f4f6;color:#111827;font-weight:600;">\'+label+\'</span>\';};';
+        echo 'const renderTable=function(detail){return \'<table class="widefat striped"><tbody>\''
+            . '+\'<tr><td style="width:180px;"><strong>Dateiname</strong></td><td>\'+detail.file_name+\'</td></tr>\''
+            . '+\'<tr><td><strong>Provider</strong></td><td>\'+detail.provider+\'</td></tr>\''
+            . '+\'<tr><td><strong>Virtueller Quellpfad</strong></td><td><code>\'+detail.virtual_source+\'</code></td></tr>\''
+            . '+\'<tr><td><strong>Virtueller Zielpfad</strong></td><td><code>\'+detail.virtual_target+\'</code></td></tr>\''
+            . '+\'<tr><td><strong>Groesse</strong></td><td>\'+detail.size+\'</td></tr>\''
+            . '+\'<tr><td><strong>Letzter Sync</strong></td><td>\'+detail.last_sync+\'</td></tr>\''
+            . '+\'<tr><td><strong>Status</strong></td><td>\'+renderBadge(detail.status)+\'</td></tr>\''
+            . '+\'<tr><td><strong>Simulierte Aktion</strong></td><td>\'+detail.simulated_action+\'</td></tr>\''
+            . '+\'<tr><td><strong>Konfliktstatus</strong></td><td>\'+renderBadge(detail.conflict_status)+\'</td></tr>\''
+            . '+\'<tr><td><strong>Hash / Checksum</strong></td><td><code>\'+detail.checksum+\'</code></td></tr>\''
+            . '+\'</tbody></table>\';};';
+        echo 'document.querySelectorAll(".cc-explorer-file-trigger").forEach(function(button){button.addEventListener("click",function(){const key=button.getAttribute("data-file-key")||""; if(!detailMap[key]){return;} detailRoot.innerHTML=renderTable(detailMap[key]);});});';
+        echo '})();';
+        echo '</script>';
     }
 }

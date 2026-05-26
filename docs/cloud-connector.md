@@ -182,6 +182,42 @@ Es werden folgende WordPress-Tabellen angelegt:
 - Es werden keine echten Cloud-Dateien geladen, keine Dateisystemscans ausgefuehrt und keine Provider angefragt
 - Safe-Mode bleibt auch im Explorer zwingend aktiv; die Ansicht bleibt read-only und loest keine Dateioperationen aus
 
+## Sync Preview / Dry Run
+
+- Der Explorer enthaelt zusaetzlich einen Bereich `Sync Preview / Dry Run`
+- Dieser Bereich simuliert:
+  - geplante Aenderungen
+  - virtuelle Konflikte
+  - virtuelle Warteschlangen-Eintraege
+  - Datei-Details mit simulierten Pfaden und Checksummen
+- Die Preview-Tabelle zeigt:
+  - Datei
+  - Quelle
+  - Ziel
+  - Aktion
+  - Status
+  - Groesse
+  - Zeitstempel
+- Simulierte Aktionen:
+  - `upload (simuliert)`
+  - `download (simuliert)`
+  - `update (simuliert)`
+  - `konflikt`
+  - `ignoriert`
+- Verwendete Preview-Badges:
+  - `preview`
+  - `safe-mode`
+  - `konflikt`
+  - `queued`
+  - `readonly`
+- Das Datei-Detailpanel arbeitet rein clientseitig und nutzt nur bereits gerenderte Mock-/Cache-Daten
+- Es gibt:
+  - keinen echten Dry-Run gegen Provider
+  - keine Requests an externe APIs
+  - keine Dateisystemveraenderung
+  - keine Upload-, Download-, Move- oder Delete-Operation
+- Virtuelle Konflikte sind nur fachliche Vorschau fuer spaetere Produktpfade und bleiben folgenlos
+
 ## Recovery-/Safe-Mode
 
 - Safe-Mode bleibt der funktionale Standard fuer alle Provider.
@@ -256,6 +292,7 @@ Spaeter:
 - `sync_job_manual_simulation` bei manuell ausgeloster Safe-Mode-Simulation
 - `cron_simulation` bei erfolgreicher Worker-Simulation eines faelligen Jobs
 - Fuer den Explorer sind keine zusaetzlichen Runtime-Logs erforderlich; die Ansicht konsumiert nur bestehende, nicht-sensitive Daten
+- Fuer Preview und Dry Run sind optionale spaetere UI-Logs denkbar, in dieser Stufe aber nicht erforderlich
 
 ## Geplante Migrationen
 
@@ -272,6 +309,7 @@ Spaeter:
 - Kein echter Hintergrund-Sync trotz registriertem Worker; V1 fuehrt ausschliesslich Safe-Mode-Simulationen aus
 - Keine OAuth-Implementierung, kein Token-Refresh, keine externen API-Requests
 - Explorer-Daten sind nur eine Mischung aus Cache-, Log- und Mockdaten, keine echte Cloud-Dateiliste
+- Sync Preview und Konfliktansicht sind reine UI-Simulation ohne Provider- oder Dateizugriff
 - Log-Rotation ist nur als einfache Aufbewahrungsbereinigung vorbereitet, nicht als vollwertiges Monitoring
 
 ## Naechste Ausbaustufen
