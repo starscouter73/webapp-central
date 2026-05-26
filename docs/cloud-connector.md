@@ -211,6 +211,35 @@ Es werden folgende WordPress-Tabellen angelegt:
   - `queued`
   - `readonly`
 - Das Datei-Detailpanel arbeitet rein clientseitig und nutzt nur bereits gerenderte Mock-/Cache-Daten
+- Der Explorer enthaelt zusaetzlich reine Safe-Mode-Drag-&-Drop-Interaktionen:
+  - Drag von Explorer-Dateizeilen
+  - visuelle Drop-Zonen fuer virtuelle Ordner, Preview, Queue und Konfliktbereich
+  - clientseitige Inline-Feedbacks statt echter Dateisystemaktionen
+  - Aktivitaets-Historie fuer simulierte Queue-, Move- und Konfliktvorgaenge
+- Virtuelle Drop-Zonen:
+  - `/`
+  - `/Dokumente`
+  - `/Uploads`
+  - `/Archiv`
+  - `/Sync Queue`
+  - `Sync Preview / Dry Run`
+  - `Virtuelle Warteschlange`
+  - `Virtuelle Konflikte`
+- Nach einem Drop wird nur eine Safe-Mode-Vorschau erzeugt:
+  - Datei
+  - Quelle
+  - Ziel
+  - simulierte Aktion
+  - Status `Safe-Mode Preview`
+  - Hinweis, dass keine echte Dateioperation ausgefuehrt wurde
+- Readonly-/Blocked-Faelle bleiben folgenlos:
+  - Drag darf sichtbar bleiben
+  - der Drop erzeugt nur einen Blockierhinweis
+  - keine Queue-, Datei- oder Provider-Aktion wird wirklich ausgefuehrt
+- Fallback-Buttons fuer Tastatur und Barrierefreiheit:
+  - `Zur Queue simulieren`
+  - `Konflikt simulieren`
+  - `Move simulieren`
 - Es gibt:
   - keinen echten Dry-Run gegen Provider
   - keine Requests an externe APIs
