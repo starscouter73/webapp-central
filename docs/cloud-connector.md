@@ -19,7 +19,7 @@ Wenn `OpenSSL` oder `random_bytes()` nicht verfuegbar sind, bleibt das Plugin ak
 ## Architektur
 
 - Eigenstaendiges WordPress-Plugin unter `custom/plugins/cloud-connector`
-- Eigene Admin-Oberflaeche mit Tabs fuer Uebersicht, Anbieter, Verbindungen, Dateien, Sync-Jobs, Automatisierung, Logs und Einstellungen
+- Eigene Admin-Oberflaeche mit Tabs fuer Uebersicht, Verbindungen, Sync-Jobs, Automatisierung, Explorer, Logs und Einstellungen
 - Provider-Registry mit austauschbaren Provider-Klassen
 - Eigene Datenhaltung ueber WordPress-Tabellen
 - Logging und Safe-Mode als zentrale Querschnittsfunktionen
@@ -144,6 +144,44 @@ Es werden folgende WordPress-Tabellen angelegt:
 - In dieser Stufe werden keine OAuth-Redirects aktiviert und keine externen Provider-Verbindungen aufgebaut
 - Dokumentationsstatus und Safe-Mode-Hinweise dienen nur der Vorbereitung einer spaeteren OAuth-Ausbaustufe
 
+## Explorer-Tab
+
+- Tab `Explorer` bildet einen ersten Cloud- bzw. Sync-Explorer im WordPress-Backend ab
+- Das Layout ist zweispaltig:
+  - links Provider-, Verbindungs- und virtuelle Ordnerstruktur
+  - rechts Datei-/Sync-Ansicht mit Queue- und Health-Kennzahlen
+- Angezeigt werden nur Demo-, Cache- und DB-Daten:
+  - vorbereitete Provider-Verbindungen
+  - bestehende Sync-Jobs
+  - letzte Worker-/Simulationslogs
+  - vorhandene Cache-Eintraege aus `cloud_file_cache`
+  - feste Mockdateien fuer eine produktnahe Erstansicht
+- Virtuelle Ordner:
+  - `/`
+  - `/Dokumente`
+  - `/Uploads`
+  - `/Archiv`
+  - `/Sync Queue`
+- Dateitabelle zeigt:
+  - Dateiname
+  - Typ
+  - Groesse
+  - Provider
+  - Sync-Richtung
+  - Status
+  - Letzte Aenderung
+  - Letzter Sync
+  - Konfliktstatus
+- Queue-/Health-Widget zeigt:
+  - Pending Jobs
+  - letzte Simulation
+  - letzte Fehler
+  - Queue-Groesse
+  - Safe-Mode-Status
+  - letzter Worker-Lauf
+- Es werden keine echten Cloud-Dateien geladen, keine Dateisystemscans ausgefuehrt und keine Provider angefragt
+- Safe-Mode bleibt auch im Explorer zwingend aktiv; die Ansicht bleibt read-only und loest keine Dateioperationen aus
+
 ## Recovery-/Safe-Mode
 
 - Safe-Mode bleibt der funktionale Standard fuer alle Provider.
@@ -217,6 +255,7 @@ Spaeter:
 - `sync_job_resumed` bei manueller Fortsetzung
 - `sync_job_manual_simulation` bei manuell ausgeloster Safe-Mode-Simulation
 - `cron_simulation` bei erfolgreicher Worker-Simulation eines faelligen Jobs
+- Fuer den Explorer sind keine zusaetzlichen Runtime-Logs erforderlich; die Ansicht konsumiert nur bestehende, nicht-sensitive Daten
 
 ## Geplante Migrationen
 
@@ -232,6 +271,7 @@ Spaeter:
 - Keine produktiven Upload-, Download-, Move-, Delete- oder Sync-Prozesse
 - Kein echter Hintergrund-Sync trotz registriertem Worker; V1 fuehrt ausschliesslich Safe-Mode-Simulationen aus
 - Keine OAuth-Implementierung, kein Token-Refresh, keine externen API-Requests
+- Explorer-Daten sind nur eine Mischung aus Cache-, Log- und Mockdaten, keine echte Cloud-Dateiliste
 - Log-Rotation ist nur als einfache Aufbewahrungsbereinigung vorbereitet, nicht als vollwertiges Monitoring
 
 ## Naechste Ausbaustufen

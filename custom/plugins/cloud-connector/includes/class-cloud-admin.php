@@ -49,11 +49,10 @@ final class CloudAdmin
         $currentTab = sanitize_key($_GET['tab'] ?? 'overview');
         $tabs = [
             'overview' => 'Uebersicht',
-            'providers' => 'Anbieter',
             'connections' => 'Verbindungen',
-            'files' => 'Dateien',
             'sync-jobs' => 'Sync-Jobs',
             'automation' => 'Automatisierung',
+            'explorer' => 'Explorer',
             'logs' => 'Logs',
             'settings' => 'Einstellungen',
         ];
@@ -87,6 +86,9 @@ final class CloudAdmin
                 break;
             case 'automation':
                 self::renderAutomation();
+                break;
+            case 'explorer':
+                self::renderExplorer();
                 break;
             case 'logs':
                 self::renderLogs();
@@ -449,6 +451,172 @@ final class CloudAdmin
         echo '</ul>';
     }
 
+    private static function renderExplorer(): void
+    {
+        $guides = self::getProviderGuides();
+        $connections = CloudStorage::getConnections();
+        $jobs = CloudStorage::getJobs();
+        $logs = CloudStorage::getLogs(20);
+        $fileCache = CloudStorage::getFileCache();
+        $safeModeEnabled = CloudStorage::getSetting('safe_mode', '1') === '1';
+        $selectedProvider = sanitize_key(wp_unslash($_GET['explorer_provider'] ?? ''));
+        $providerKeys = array_keys($guides);
+
+        if ($selectedProvider === '' || !isset($guides[$selectedProvider])) {
+            $selectedProvider = $providerKeys[0] ?? 'google_drive';
+        }
+
+        $selectedConnectionId = absint(wp_unslash($_GET['explorer_connection'] ?? 0));
+        $providerConnections = array_values(array_filter(
+            $connections,
+            static fn(array $connection): bool => (string) ($connection['provider_slug'] ?? '') === $selectedProvider
+        ));
+
+        if ($selectedConnectionId > 0) {
+            $selectedConnection = null;
+
+            foreach ($providerConnections as $connection) {
+                if ((int) $connection['id'] === $selectedConnectionId) {
+                    $selectedConnection = $connection;
+                    break;
+                }
+            }
+            if ($selectedConnection === null) {
+                $selectedConnection = $providerConnections[0] ?? null;
+            }
+        } else {
+            $selectedConnection = $providerConnections[0] ?? null;
+        }
+
+        $selectedConnectionId = (int) ($selectedConnection['id'] ?? 0);
+        $explorerFiles = self::buildExplorerRows($selectedProvider, $selectedConnection, $jobs, $logs, $fileCache);
+        $health = self::buildExplorerHealth($jobs, $logs, $safeModeEnabled);
+
+        echo '<div style="margin-bottom:16px;padding:12px 16px;border:1px solid #dcdcde;background:#fff;">';
+        echo '<strong>Safe-Mode aktiv.</strong> Explorer-Daten stammen nur aus Cache-, DB- und Mockquellen. Es werden keine Provider-Requests, OAuth-Flows oder Dateioperationen ausgeloest.';
+        echo '</div>';
+
+        echo '<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">';
+        echo '<div style="flex:1 1 300px;min-width:300px;max-width:360px;">';
+        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;">';
+        echo '<h2 style="margin-top:0;">Provider / Verbindungen</h2>';
+        echo '<p style="margin-top:0;color:#50575e;">Virtuelle Ordnerstruktur ohne Live-Abfrage.</p>';
+
+        foreach ($guides as $providerSlug => $guide) {
+            $providerUrl = esc_url(add_query_arg([
+                'page' => self::MENU_SLUG,
+                'tab' => 'explorer',
+                'explorer_provider' => $providerSlug,
+            ], admin_url('admin.php')));
+            $providerClass = $providerSlug === $selectedProvider ? 'background:#f0f6fc;border-color:#72aee6;' : '';
+
+            echo '<div style="margin-bottom:12px;padding:12px;border:1px solid #dcdcde;' . esc_attr($providerClass) . '">';
+            echo '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">';
+            echo '<a href="' . $providerUrl . '" style="font-weight:600;text-decoration:none;">' . esc_html((string) $guide['title']) . '</a>';
+            echo self::renderStatusBadge(self::providerGuideToExplorerStatus($providerSlug));
+            echo '</div>';
+
+            $connectionList = array_values(array_filter(
+                $connections,
+                static fn(array $connection): bool => (string) ($connection['provider_slug'] ?? '') === $providerSlug
+            ));
+
+            echo '<div style="margin-top:10px;"><strong style="display:block;margin-bottom:6px;">Verbindungen</strong>';
+
+            if (empty($connectionList)) {
+                echo '<div style="color:#646970;">Keine vorbereiteten Verbindungen.</div>';
+            } else {
+                echo '<ul style="margin:0;padding-left:18px;">';
+
+                foreach ($connectionList as $connection) {
+                    $connectionUrl = esc_url(add_query_arg([
+                        'page' => self::MENU_SLUG,
+                        'tab' => 'explorer',
+                        'explorer_provider' => $providerSlug,
+                        'explorer_connection' => (int) $connection['id'],
+                    ], admin_url('admin.php')));
+                    $isSelectedConnection = $providerSlug === $selectedProvider && (int) $connection['id'] === $selectedConnectionId;
+
+                    echo '<li style="margin-bottom:4px;">';
+                    echo '<a href="' . $connectionUrl . '" style="text-decoration:none;' . ($isSelectedConnection ? 'font-weight:600;' : '') . '">' . esc_html((string) $connection['name']) . '</a> ';
+                    echo self::renderStatusBadge((string) $connection['status']);
+                    echo '</li>';
+                }
+
+                echo '</ul>';
+            }
+
+            echo '</div>';
+            echo '<div style="margin-top:10px;"><strong style="display:block;margin-bottom:6px;">Virtuelle Ordner</strong>';
+            echo '<ul style="margin:0;padding-left:18px;">';
+
+            foreach (['/', '/Dokumente', '/Uploads', '/Archiv', '/Sync Queue'] as $folder) {
+                echo '<li><code>' . esc_html($folder) . '</code></li>';
+            }
+
+            echo '</ul></div>';
+            echo '</div>';
+        }
+
+        echo '</div>';
+        echo '</div>';
+
+        echo '<div style="flex:2 1 640px;min-width:320px;">';
+        echo '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;">';
+
+        foreach ($health as $card) {
+            echo '<div style="border:1px solid #dcdcde;background:#fff;padding:14px;">';
+            echo '<div style="font-size:12px;text-transform:uppercase;color:#646970;margin-bottom:8px;">' . esc_html($card['label']) . '</div>';
+            echo '<div style="font-size:22px;font-weight:600;line-height:1.2;">' . esc_html($card['value']) . '</div>';
+            if ($card['note'] !== '') {
+                echo '<div style="margin-top:6px;color:#50575e;">' . esc_html($card['note']) . '</div>';
+            }
+            echo '</div>';
+        }
+
+        echo '</div>';
+        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;">';
+        echo '<div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">';
+        echo '<div>';
+        echo '<h2 style="margin-top:0;">Explorer</h2>';
+        echo '<p style="margin-top:0;color:#50575e;">';
+        echo esc_html((string) $guides[$selectedProvider]['title']);
+        if ($selectedConnection) {
+            echo ' / ' . esc_html((string) $selectedConnection['name']);
+        }
+        echo '</p>';
+        echo '</div>';
+        echo '<div>' . self::renderStatusBadge('safe-mode') . '</div>';
+        echo '</div>';
+        echo '<div style="overflow:auto;">';
+        echo '<table class="widefat striped">';
+        echo '<thead><tr><th>Dateiname</th><th>Typ</th><th>Groesse</th><th>Provider</th><th>Sync-Richtung</th><th>Status</th><th>Letzte Aenderung</th><th>Letzter Sync</th><th>Konfliktstatus</th></tr></thead><tbody>';
+
+        foreach ($explorerFiles as $row) {
+            echo '<tr>';
+            echo '<td>' . esc_html($row['name']) . '</td>';
+            echo '<td>' . esc_html($row['type']) . '</td>';
+            echo '<td>' . esc_html($row['size']) . '</td>';
+            echo '<td>' . esc_html($row['provider']) . '</td>';
+            echo '<td><code>' . esc_html($row['direction']) . '</code></td>';
+            echo '<td>' . self::renderStatusBadge($row['status']) . '</td>';
+            echo '<td>' . esc_html($row['modified']) . '</td>';
+            echo '<td>' . esc_html($row['last_sync']) . '</td>';
+            echo '<td>' . self::renderStatusBadge($row['conflict']) . '</td>';
+            echo '</tr>';
+        }
+
+        if (empty($explorerFiles)) {
+            echo '<tr><td colspan="9">Keine Explorer-Daten verfuegbar.</td></tr>';
+        }
+
+        echo '</tbody></table>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+
     private static function renderLogs(): void
     {
         $logs = CloudStorage::getLogs();
@@ -511,6 +679,13 @@ final class CloudAdmin
             'aktiv' => ['#dcfce7', '#166534'],
             'inaktiv' => ['#e5e7eb', '#374151'],
             'testmodus' => ['#fef3c7', '#92400e'],
+            'synchronisiert' => ['#dcfce7', '#166534'],
+            'ausstehend' => ['#fef3c7', '#92400e'],
+            'konflikt' => ['#fee2e2', '#991b1b'],
+            'simuliert' => ['#ede9fe', '#6d28d9'],
+            'offline' => ['#e5e7eb', '#374151'],
+            'safe-mode' => ['#e0f2fe', '#075985'],
+            'keiner' => ['#f3f4f6', '#111827'],
         ];
 
         [$background, $color] = $styles[$status] ?? ['#f3f4f6', '#111827'];
@@ -725,6 +900,182 @@ final class CloudAdmin
                 'status_label' => 'kein OAuth erforderlich',
                 'docs_status' => 'vorbereitet',
                 'docs_note' => 'Kein externer Provider-Handshake erforderlich.',
+            ],
+        ];
+    }
+
+    private static function providerGuideToExplorerStatus(string $providerSlug): string
+    {
+        if (in_array($providerSlug, ['webdav', 'sftp', 'local_storage'], true)) {
+            return 'offline';
+        }
+
+        return 'safe-mode';
+    }
+
+    private static function buildExplorerRows(string $selectedProvider, ?array $selectedConnection, array $jobs, array $logs, array $fileCache): array
+    {
+        $providerLabel = self::getProviderGuides()[$selectedProvider]['title'] ?? $selectedProvider;
+        $selectedConnectionId = (int) ($selectedConnection['id'] ?? 0);
+        $connectionFileCache = array_values(array_filter(
+            $fileCache,
+            static fn(array $row): bool => $selectedConnectionId > 0 ? (int) ($row['connection_id'] ?? 0) === $selectedConnectionId : true
+        ));
+        $jobForProvider = null;
+
+        foreach ($jobs as $job) {
+            if ((string) ($job['provider_slug'] ?? '') === $selectedProvider) {
+                $jobForProvider = $job;
+                break;
+            }
+        }
+
+        $logMap = self::buildExplorerLogMap($logs);
+        $defaults = [
+            ['name' => 'angebot-final.pdf', 'type' => 'PDF', 'size_bytes' => 348160, 'status' => 'synchronisiert', 'conflict' => 'keiner'],
+            ['name' => 'pv-anlage-plan.xlsx', 'type' => 'XLSX', 'size_bytes' => 892928, 'status' => 'ausstehend', 'conflict' => 'keiner'],
+            ['name' => 'kundenmappe.zip', 'type' => 'ZIP', 'size_bytes' => 5242880, 'status' => 'simuliert', 'conflict' => 'keiner'],
+            ['name' => 'bild-hallenberg.webp', 'type' => 'WEBP', 'size_bytes' => 215040, 'status' => 'offline', 'conflict' => 'keiner'],
+            ['name' => 'dokumentation.docx', 'type' => 'DOCX', 'size_bytes' => 471040, 'status' => 'safe-mode', 'conflict' => 'konflikt'],
+        ];
+        $rows = [];
+
+        foreach ($defaults as $index => $default) {
+            $cacheRow = $connectionFileCache[$index] ?? null;
+            $name = (string) ($cacheRow['name'] ?? $default['name']);
+            $mimeType = (string) ($cacheRow['mime_type'] ?? '');
+            $lastModified = (string) ($cacheRow['last_modified'] ?? current_time('mysql'));
+            $sizeBytes = isset($cacheRow['size_bytes']) ? (int) $cacheRow['size_bytes'] : (int) $default['size_bytes'];
+            $rows[] = [
+                'name' => $name,
+                'type' => $cacheRow ? strtoupper((string) pathinfo($name, PATHINFO_EXTENSION)) : $default['type'],
+                'size' => size_format($sizeBytes),
+                'provider' => $providerLabel,
+                'direction' => (string) ($jobForProvider['direction'] ?? ($index % 2 === 0 ? 'cloud_to_local' : 'local_to_cloud')),
+                'status' => self::deriveExplorerFileStatus($default['status'], $jobForProvider, $mimeType, $logMap),
+                'modified' => $lastModified,
+                'last_sync' => (string) ($jobForProvider['last_run'] ?? ($logMap['last_simulation'] ?: '-')),
+                'conflict' => self::deriveExplorerConflictStatus($default['conflict'], $jobForProvider),
+            ];
+        }
+
+        return $rows;
+    }
+
+    private static function buildExplorerLogMap(array $logs): array
+    {
+        $lastSimulation = '';
+        $lastWorker = '';
+        $lastError = '';
+
+        foreach ($logs as $log) {
+            $action = (string) ($log['action'] ?? '');
+
+            if ($lastSimulation === '' && in_array($action, ['cron_simulation', 'sync_job_manual_simulation'], true)) {
+                $lastSimulation = (string) ($log['created_at'] ?? '');
+            }
+
+            if ($lastWorker === '' && in_array($action, ['cron_simulation', 'cron_idle'], true)) {
+                $lastWorker = (string) ($log['created_at'] ?? '');
+            }
+
+            if ($lastError === '' && (string) ($log['level'] ?? '') === 'error') {
+                $lastError = (string) ($log['message'] ?? '');
+            }
+        }
+
+        return [
+            'last_simulation' => $lastSimulation,
+            'last_worker' => $lastWorker,
+            'last_error' => $lastError,
+        ];
+    }
+
+    private static function deriveExplorerFileStatus(string $fallbackStatus, ?array $job, string $mimeType, array $logMap): string
+    {
+        if ($job) {
+            $jobStatus = (string) ($job['status'] ?? '');
+
+            if ($jobStatus === 'laeuft') {
+                return 'simuliert';
+            }
+
+            if ($jobStatus === 'fehlerhaft') {
+                return 'offline';
+            }
+
+            if ($jobStatus === 'geplant') {
+                return 'ausstehend';
+            }
+
+            if ($jobStatus === 'erfolgreich') {
+                return 'synchronisiert';
+            }
+        }
+
+        if ($mimeType === 'application/zip') {
+            return 'simuliert';
+        }
+
+        if ($logMap['last_simulation'] === '' && $fallbackStatus === 'safe-mode') {
+            return 'safe-mode';
+        }
+
+        return $fallbackStatus;
+    }
+
+    private static function deriveExplorerConflictStatus(string $fallbackStatus, ?array $job): string
+    {
+        if ($job && (string) ($job['status'] ?? '') === 'fehlerhaft') {
+            return 'konflikt';
+        }
+
+        return $fallbackStatus;
+    }
+
+    private static function buildExplorerHealth(array $jobs, array $logs, bool $safeModeEnabled): array
+    {
+        $pendingJobs = 0;
+        $queueSize = count($jobs);
+
+        foreach ($jobs as $job) {
+            if ((string) ($job['status'] ?? '') === 'geplant') {
+                $pendingJobs++;
+            }
+        }
+
+        $logMap = self::buildExplorerLogMap($logs);
+
+        return [
+            [
+                'label' => 'Pending Jobs',
+                'value' => (string) $pendingJobs,
+                'note' => 'Status geplant in der Queue',
+            ],
+            [
+                'label' => 'Letzte Simulation',
+                'value' => $logMap['last_simulation'] !== '' ? $logMap['last_simulation'] : '-',
+                'note' => 'Aus Worker- oder Manuellogik',
+            ],
+            [
+                'label' => 'Letzte Fehler',
+                'value' => $logMap['last_error'] !== '' ? '1' : '0',
+                'note' => $logMap['last_error'] !== '' ? $logMap['last_error'] : 'Keine Fehler im letzten Logfenster',
+            ],
+            [
+                'label' => 'Queue-Groesse',
+                'value' => (string) $queueSize,
+                'note' => 'Alle bekannten Sync-Jobs',
+            ],
+            [
+                'label' => 'Safe-Mode',
+                'value' => $safeModeEnabled ? 'Aktiv' : 'Deaktiviert',
+                'note' => 'Explorerdaten bleiben read-only',
+            ],
+            [
+                'label' => 'Letzter Worker-Lauf',
+                'value' => $logMap['last_worker'] !== '' ? $logMap['last_worker'] : '-',
+                'note' => 'cron_idle oder cron_simulation',
             ],
         ];
     }
