@@ -131,6 +131,8 @@ Es werden folgende WordPress-Tabellen angelegt:
 - Tab `Verbindungen` dient in dieser Stufe nur der sicheren Vorbereitung von Provider-Konfigurationen
 - Unterstuetzt werden Google Drive, Dropbox, OneDrive, Local Storage sowie vorbereitete Nextcloud-/WebDAV- und SFTP-Konfigurationen
 - Die Uebersicht zeigt ID, Provider, Anzeigename, Status, Modus, maskierte Client-Daten, Redirect URI, Token-Hinweis sowie Zeitstempel
+- Der Informationsblock `OAuth-/Provider-Informationen` zeigt nur statische Redirect-/Scope-Hinweise und fuehrt keine Redirects aus
+- Copy-Buttons kopieren nur vorbereitete Redirect-URIs oder Scope-Listen in die Zwischenablage
 - Aktionen im Backend:
   - `Bearbeiten`
   - `Deaktivieren`
@@ -140,6 +142,7 @@ Es werden folgende WordPress-Tabellen angelegt:
 - Secrets werden nur maskiert angezeigt; ein leeres Secret-Feld beim Bearbeiten behaelt den vorhandenen Wert bei
 - Es werden keine Tokens, Secrets oder Passwoerter in Logs geschrieben
 - In dieser Stufe werden keine OAuth-Redirects aktiviert und keine externen Provider-Verbindungen aufgebaut
+- Dokumentationsstatus und Safe-Mode-Hinweise dienen nur der Vorbereitung einer spaeteren OAuth-Ausbaustufe
 
 ## Recovery-/Safe-Mode
 

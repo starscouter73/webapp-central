@@ -188,6 +188,8 @@ final class CloudAdmin
         $editConnection = $editId ? CloudStorage::getConnection($editId) : null;
         $config = $editConnection ? CloudCrypto::decryptConfig((string) $editConnection['config_encrypted']) : [];
         $selectedConnectionStatus = ($editConnection['status'] ?? '') === 'aktiv' ? 'aktiv' : 'inaktiv';
+        $providerGuides = self::getProviderGuides();
+        $selectedProviderSlug = (string) ($editConnection['provider_slug'] ?? ($providers[0]['slug'] ?? 'google_drive'));
 
         echo '<h2>Verbindungen</h2>';
         echo '<p>Safe-Mode bleibt aktiv. Diese UI speichert nur vorbereitete Provider-Verbindungen und loest keine OAuth- oder API-Aufrufe aus.</p>';
@@ -252,6 +254,40 @@ final class CloudAdmin
         echo '</tbody></table>';
         submit_button($editConnection ? 'Verbindung aktualisieren' : 'Verbindung speichern');
         echo '</form>';
+
+        echo '<div style="margin-top:24px;padding:16px;border:1px solid #dcdcde;background:#fff;">';
+        echo '<h2 style="margin-top:0;">OAuth-/Provider-Informationen</h2>';
+        echo '<p>Noch kein produktiver OAuth-Flow aktiv. Die folgenden Angaben dienen nur der sicheren Vorbereitung im Safe-Mode.</p>';
+        echo '<p><label for="cc_provider_guide_select"><strong>Infoprovider</strong></label> ';
+        echo '<select id="cc_provider_guide_select" style="min-width:240px;">';
+
+        foreach ($providerGuides as $slug => $guide) {
+            echo '<option value="' . esc_attr($slug) . '"' . selected($slug, $selectedProviderSlug, false) . '>' . esc_html((string) $guide['title']) . '</option>';
+        }
+
+        echo '</select></p>';
+
+        foreach ($providerGuides as $slug => $guide) {
+            $display = $slug === $selectedProviderSlug ? 'block' : 'none';
+            $redirectUri = (string) ($guide['redirect_uri'] ?? '');
+            $scopes = isset($guide['scopes']) && is_array($guide['scopes']) ? $guide['scopes'] : [];
+            $scopeText = implode("\n", array_map('strval', $scopes));
+
+            echo '<div class="cc-provider-guide" data-provider-guide="' . esc_attr($slug) . '" style="display:' . esc_attr($display) . ';margin-top:16px;">';
+            echo '<h3 style="margin-bottom:8px;">' . esc_html((string) $guide['title']) . '</h3>';
+            echo '<p>' . self::renderInfoBadge((string) $guide['status_label']) . ' ' . self::renderInfoBadge((string) $guide['docs_status']) . '</p>';
+            echo '<table class="widefat striped"><tbody>';
+            echo '<tr><td style="width:180px;"><strong>Redirect URI</strong></td><td>' . self::renderProviderGuideValue($redirectUri) . '</td><td style="width:140px;">' . self::renderCopyButton($redirectUri, 'Redirect URI kopieren') . '</td></tr>';
+            echo '<tr><td><strong>Empfohlene Scopes</strong></td><td>' . self::renderScopeList($scopes) . '</td><td>' . self::renderCopyButton($scopeText, 'Scopes kopieren') . '</td></tr>';
+            echo '<tr><td><strong>Hinweis</strong></td><td colspan="2">' . esc_html((string) $guide['hint']) . '</td></tr>';
+            echo '<tr><td><strong>Dokumentationsstatus</strong></td><td colspan="2">' . esc_html((string) $guide['docs_note']) . '</td></tr>';
+            echo '<tr><td><strong>Safe-Mode</strong></td><td colspan="2">Aktiv - keine Redirect-Ausfuehrung, keine Token-Anforderung, keine externen API-Calls.</td></tr>';
+            echo '</tbody></table>';
+            echo '</div>';
+        }
+
+        echo '</div>';
+        self::renderProviderGuideScript($selectedProviderSlug);
     }
 
     private static function renderFiles(): void
@@ -553,5 +589,143 @@ final class CloudAdmin
         }
 
         return 'Safe';
+    }
+
+    private static function renderInfoBadge(string $label): string
+    {
+        $styles = [
+            'vorbereitet' => ['#dbeafe', '#1d4ed8'],
+            'geplant' => ['#fef3c7', '#92400e'],
+            'kein OAuth erforderlich' => ['#dcfce7', '#166534'],
+        ];
+
+        [$background, $color] = $styles[$label] ?? ['#f3f4f6', '#111827'];
+
+        return sprintf(
+            '<span style="display:inline-block;margin-right:8px;padding:2px 8px;border-radius:999px;background:%s;color:%s;font-weight:600;">%s</span>',
+            esc_attr($background),
+            esc_attr($color),
+            esc_html($label)
+        );
+    }
+
+    private static function renderProviderGuideValue(string $value): string
+    {
+        if ($value === '') {
+            return '-';
+        }
+
+        return '<code>' . esc_html($value) . '</code>';
+    }
+
+    private static function renderScopeList(array $scopes): string
+    {
+        if (empty($scopes)) {
+            return 'Keine OAuth-Scopes erforderlich.';
+        }
+
+        $items = array_map(
+            static fn($scope): string => '<li><code>' . esc_html((string) $scope) . '</code></li>',
+            $scopes
+        );
+
+        return '<ul style="margin:0;padding-left:18px;">' . implode('', $items) . '</ul>';
+    }
+
+    private static function renderCopyButton(string $value, string $label): string
+    {
+        if ($value === '') {
+            return '<span style="color:#646970;">Nicht erforderlich</span>';
+        }
+
+        return '<button type="button" class="button button-secondary cc-copy-button" data-copy-label="' . esc_attr($label) . '" data-copy-value="' . esc_attr($value) . '">' . esc_html($label) . '</button>';
+    }
+
+    private static function renderProviderGuideScript(string $selectedProviderSlug): void
+    {
+        echo '<script>';
+        echo '(function(){';
+        echo 'const providerSelect=document.getElementById("provider_slug");';
+        echo 'const guideSelect=document.getElementById("cc_provider_guide_select");';
+        echo 'const guides=Array.from(document.querySelectorAll("[data-provider-guide]"));';
+        echo 'const toggleGuide=function(slug){guides.forEach(function(node){node.style.display=node.getAttribute("data-provider-guide")===slug?"block":"none";}); if(guideSelect){guideSelect.value=slug;}};';
+        echo 'const initialSlug=(providerSelect&&providerSelect.value)?providerSelect.value:(guideSelect&&guideSelect.value?guideSelect.value:"' . esc_js($selectedProviderSlug) . '");';
+        echo 'toggleGuide(initialSlug);';
+        echo 'if(providerSelect){providerSelect.addEventListener("change",function(){toggleGuide(providerSelect.value);});}';
+        echo 'if(guideSelect){guideSelect.addEventListener("change",function(){toggleGuide(guideSelect.value);});}';
+        echo 'document.querySelectorAll(".cc-copy-button").forEach(function(button){button.addEventListener("click",function(){const value=button.getAttribute("data-copy-value")||\"\"; const originalLabel=button.getAttribute(\"data-copy-label\")||button.textContent; if(!value){return;} if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(value);} button.textContent=\"Kopiert\"; window.setTimeout(function(){button.textContent=originalLabel;},1200);});});';
+        echo '})();';
+        echo '</script>';
+    }
+
+    private static function getProviderGuides(): array
+    {
+        $redirectUri = 'https://www.webapp-central.de/wp-admin/admin.php?page=cloud_connector';
+
+        return [
+            'google_drive' => [
+                'title' => 'Google Drive',
+                'redirect_uri' => $redirectUri,
+                'scopes' => [
+                    'https://www.googleapis.com/auth/drive.metadata.readonly',
+                    'https://www.googleapis.com/auth/drive.file',
+                ],
+                'hint' => 'Nur vorbereitende Angaben. Es wird kein OAuth-Redirect erzeugt und kein Token angefordert.',
+                'status_label' => 'vorbereitet',
+                'docs_status' => 'geplant',
+                'docs_note' => 'Scopes und Redirect sind fuer eine spaetere OAuth-Stufe vorgemerkt.',
+            ],
+            'dropbox' => [
+                'title' => 'Dropbox',
+                'redirect_uri' => $redirectUri,
+                'scopes' => [
+                    'files.metadata.read',
+                    'files.content.write',
+                ],
+                'hint' => 'V1 zeigt nur die spaeteren Scope-Anforderungen. Noch kein produktiver OAuth-Flow aktiv.',
+                'status_label' => 'vorbereitet',
+                'docs_status' => 'geplant',
+                'docs_note' => 'Nur Informationsdarstellung fuer die spaetere App-Konfiguration.',
+            ],
+            'onedrive' => [
+                'title' => 'OneDrive',
+                'redirect_uri' => $redirectUri,
+                'scopes' => [
+                    'Files.ReadWrite',
+                    'offline_access',
+                ],
+                'hint' => 'Die Microsoft-Scopes werden nur angezeigt. Es werden keine Redirects, Tokens oder API-Requests ausgeloest.',
+                'status_label' => 'vorbereitet',
+                'docs_status' => 'geplant',
+                'docs_note' => 'Azure-App-Registrierung bleibt fuer spaetere Ausbauphasen dokumentiert.',
+            ],
+            'webdav' => [
+                'title' => 'WebDAV / Nextcloud',
+                'redirect_uri' => '',
+                'scopes' => [],
+                'hint' => 'Verwendet typischerweise URL + Benutzername + Passwort oder App-Token.',
+                'status_label' => 'kein OAuth erforderlich',
+                'docs_status' => 'vorbereitet',
+                'docs_note' => 'Credential-basierter Provider ohne OAuth, weiterhin nur als Safe-Mode-Vorbereitung.',
+            ],
+            'sftp' => [
+                'title' => 'SFTP',
+                'redirect_uri' => '',
+                'scopes' => [],
+                'hint' => 'Verwendet Host, Benutzername, Passwort oder SSH-Key.',
+                'status_label' => 'kein OAuth erforderlich',
+                'docs_status' => 'vorbereitet',
+                'docs_note' => 'Nur Informationskarte; noch kein eigener Verbindungsprovider im Formular.',
+            ],
+            'local_storage' => [
+                'title' => 'Local Storage',
+                'redirect_uri' => '',
+                'scopes' => [],
+                'hint' => 'Lokale Pfade benoetigen keinen OAuth-Flow. Auch hier bleibt alles im Safe-Mode.',
+                'status_label' => 'kein OAuth erforderlich',
+                'docs_status' => 'vorbereitet',
+                'docs_note' => 'Kein externer Provider-Handshake erforderlich.',
+            ],
+        ];
     }
 }
