@@ -88,37 +88,39 @@ final class CloudConnectorPlugin
         $connectionId = isset($_POST['id']) ? absint($_POST['id']) : 0;
         $existing = $connectionId ? CloudStorage::getConnection($connectionId) : null;
         $existingConfig = $existing ? CloudCrypto::decryptConfig((string) $existing['config_encrypted']) : [];
-        $submittedConfig = [
-            'client_id' => sanitize_text_field(wp_unslash($_POST['client_id'] ?? '')),
-            'client_secret' => sanitize_text_field(wp_unslash($_POST['client_secret'] ?? '')),
-            'access_token' => sanitize_text_field(wp_unslash($_POST['access_token'] ?? '')),
-            'refresh_token' => sanitize_text_field(wp_unslash($_POST['refresh_token'] ?? '')),
-            'root_path' => sanitize_text_field(wp_unslash($_POST['root_path'] ?? '')),
-            'local_path' => sanitize_text_field(wp_unslash($_POST['local_path'] ?? '')),
-            'endpoint' => esc_url_raw(wp_unslash($_POST['endpoint'] ?? '')),
-            'username' => sanitize_text_field(wp_unslash($_POST['username'] ?? '')),
-            'password' => sanitize_text_field(wp_unslash($_POST['password'] ?? '')),
-            'host' => sanitize_text_field(wp_unslash($_POST['host'] ?? '')),
-            'port' => sanitize_text_field(wp_unslash($_POST['port'] ?? '')),
-        ];
+        $submittedConfig = $existingConfig;
+        $submittedConfig['client_id'] = sanitize_text_field(wp_unslash($_POST['client_id'] ?? ''));
+        $submittedConfig['redirect_uri'] = esc_url_raw(wp_unslash($_POST['redirect_uri'] ?? ''));
+        $submittedConfig['notes'] = sanitize_textarea_field(wp_unslash($_POST['notes'] ?? ''));
 
-        foreach (['client_secret', 'access_token', 'refresh_token', 'password'] as $secretKey) {
-            if (($submittedConfig[$secretKey] ?? '') === '' && !empty($existingConfig[$secretKey])) {
-                $submittedConfig[$secretKey] = $existingConfig[$secretKey];
-            }
+        $submittedSecret = sanitize_text_field(wp_unslash($_POST['client_secret'] ?? ''));
+
+        if ($submittedSecret !== '') {
+            $submittedConfig['client_secret'] = $submittedSecret;
+        } elseif (empty($submittedConfig['client_secret'])) {
+            $submittedConfig['client_secret'] = '';
         }
+
+        $allowedStatuses = ['aktiv', 'inaktiv'];
+        $status = sanitize_key(wp_unslash($_POST['status'] ?? 'inaktiv'));
+        $status = in_array($status, $allowedStatuses, true) ? $status : 'inaktiv';
 
         $id = CloudStorage::saveConnection([
             'id' => $connectionId,
-            'provider_slug' => wp_unslash($_POST['provider_slug'] ?? ''),
-            'name' => wp_unslash($_POST['name'] ?? ''),
-            'status' => 'disconnected',
+            'provider_slug' => sanitize_key(wp_unslash($_POST['provider_slug'] ?? '')),
+            'name' => sanitize_text_field(wp_unslash($_POST['name'] ?? '')),
+            'status' => $status,
             'safe_mode' => 1,
+            'last_connected_at' => $existing['last_connected_at'] ?? null,
+            'last_error' => $existing['last_error'] ?? '',
             'config' => $submittedConfig,
         ]);
 
-        CloudLogger::log('info', 'save_connection', 'Verbindung gespeichert.', ['connection_id' => $id]);
-        CloudAdmin::redirectWithNotice('connections', 'connection_saved');
+        $logAction = $connectionId > 0 ? 'connection_updated' : 'connection_created';
+        $message = $connectionId > 0 ? 'Verbindung aktualisiert.' : 'Verbindung vorbereitet angelegt.';
+
+        CloudLogger::log('info', $logAction, $message, ['connection_id' => $id, 'provider_slug' => sanitize_key(wp_unslash($_POST['provider_slug'] ?? ''))]);
+        CloudAdmin::redirectWithNotice('connections', $connectionId > 0 ? 'connection_updated' : 'connection_created');
     }
 
     public static function deleteConnection(): void
@@ -131,7 +133,7 @@ final class CloudConnectorPlugin
 
         $id = absint($_POST['id'] ?? 0);
         CloudStorage::deleteConnection($id);
-        CloudLogger::log('warning', 'delete_connection', 'Verbindung entfernt.', ['connection_id' => $id]);
+        CloudLogger::log('warning', 'connection_deleted', 'Verbindung entfernt.', ['connection_id' => $id]);
         CloudAdmin::redirectWithNotice('connections', 'connection_deleted');
     }
 
@@ -151,40 +153,38 @@ final class CloudConnectorPlugin
             CloudAdmin::redirectWithNotice('connections', 'connection_missing', true);
         }
 
-        $provider = CloudProviderRegistry::get($connection['provider_slug']);
         $config = CloudCrypto::decryptConfig((string) $connection['config_encrypted']);
+        $notice = 'connection_updated';
 
-        if ($action === 'connect' && $provider) {
-            $result = $provider->connect($config);
-            $status = is_wp_error($result) ? 'error' : 'connected';
+        if ($action === 'deactivate') {
             CloudStorage::saveConnection([
                 'id' => $id,
                 'provider_slug' => $connection['provider_slug'],
                 'name' => $connection['name'],
-                'status' => $status,
-                'safe_mode' => (int) $connection['safe_mode'],
-                'last_connected_at' => current_time('mysql'),
-                'last_error' => is_wp_error($result) ? $result->get_error_message() : '',
-                'config' => $config,
-            ]);
-            CloudLogger::log('info', 'connect', 'Verbindung getestet (Simulation).', ['connection_id' => $id, 'status' => $status]);
-        }
-
-        if ($action === 'disconnect') {
-            CloudStorage::saveConnection([
-                'id' => $id,
-                'provider_slug' => $connection['provider_slug'],
-                'name' => $connection['name'],
-                'status' => 'disconnected',
+                'status' => 'inaktiv',
                 'safe_mode' => (int) $connection['safe_mode'],
                 'last_connected_at' => $connection['last_connected_at'],
                 'last_error' => '',
                 'config' => $config,
             ]);
-            CloudLogger::log('info', 'disconnect', 'Verbindung getrennt.', ['connection_id' => $id]);
+            CloudLogger::log('info', 'connection_disabled', 'Verbindung deaktiviert.', ['connection_id' => $id]);
+            $notice = 'connection_disabled';
+        } elseif ($action === 'set_test_mode') {
+            CloudStorage::saveConnection([
+                'id' => $id,
+                'provider_slug' => $connection['provider_slug'],
+                'name' => $connection['name'],
+                'status' => 'testmodus',
+                'safe_mode' => 1,
+                'last_connected_at' => $connection['last_connected_at'],
+                'last_error' => '',
+                'config' => $config,
+            ]);
+            CloudLogger::log('info', 'connection_test_mode_set', 'Verbindung auf Testmodus gesetzt.', ['connection_id' => $id]);
+            $notice = 'connection_test_mode_set';
         }
 
-        CloudAdmin::redirectWithNotice('connections', 'connection_updated');
+        CloudAdmin::redirectWithNotice('connections', $notice);
     }
 
     public static function saveJob(): void

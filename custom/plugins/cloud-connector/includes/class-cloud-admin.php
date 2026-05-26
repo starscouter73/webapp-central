@@ -120,8 +120,11 @@ final class CloudAdmin
     {
         $messages = [
             'connection_saved' => 'Verbindung gespeichert.',
+            'connection_created' => 'Verbindung vorbereitet gespeichert.',
             'connection_deleted' => 'Verbindung geloescht.',
-            'connection_updated' => 'Verbindungsstatus aktualisiert.',
+            'connection_updated' => 'Verbindung aktualisiert.',
+            'connection_disabled' => 'Verbindung deaktiviert.',
+            'connection_test_mode_set' => 'Verbindung auf Testmodus gesetzt.',
             'connection_missing' => 'Verbindung nicht gefunden.',
             'provider_missing' => 'Anbieter nicht gefunden.',
             'job_saved' => 'Sync-Job gespeichert.',
@@ -184,29 +187,42 @@ final class CloudAdmin
         $editId = absint($_GET['edit_connection'] ?? 0);
         $editConnection = $editId ? CloudStorage::getConnection($editId) : null;
         $config = $editConnection ? CloudCrypto::decryptConfig((string) $editConnection['config_encrypted']) : [];
+        $selectedConnectionStatus = ($editConnection['status'] ?? '') === 'aktiv' ? 'aktiv' : 'inaktiv';
 
         echo '<h2>Verbindungen</h2>';
-        echo '<table class="widefat striped"><thead><tr><th>Name</th><th>Anbieter</th><th>Status</th><th>Safe-Mode</th><th>Secrets</th><th>Aktionen</th></tr></thead><tbody>';
+        echo '<p>Safe-Mode bleibt aktiv. Diese UI speichert nur vorbereitete Provider-Verbindungen und loest keine OAuth- oder API-Aufrufe aus.</p>';
+        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Anbieter</th><th>Anzeigename</th><th>Status</th><th>Modus</th><th>Client ID</th><th>Client Secret</th><th>Redirect URI</th><th>Token vorhanden</th><th>Erstellt am</th><th>Aktualisiert am</th><th>Aktionen</th></tr></thead><tbody>';
 
         foreach ($connections as $connection) {
-            $summary = self::maskConnectionSummary(CloudCrypto::decryptConfig((string) $connection['config_encrypted']));
+            $rowConfig = CloudCrypto::decryptConfig((string) $connection['config_encrypted']);
             $editUrl = esc_url(add_query_arg(['page' => self::MENU_SLUG, 'tab' => 'connections', 'edit_connection' => (int) $connection['id']], admin_url('admin.php')));
+            $hasToken = !empty($rowConfig['access_token']) || !empty($rowConfig['refresh_token']);
 
             echo '<tr>';
-            echo '<td>' . esc_html($connection['name']) . '</td>';
+            echo '<td>' . esc_html((string) $connection['id']) . '</td>';
             echo '<td><code>' . esc_html($connection['provider_slug']) . '</code></td>';
-            echo '<td>' . esc_html($connection['status']) . '</td>';
-            echo '<td>' . (!empty($connection['safe_mode']) ? 'Ja' : 'Nein') . '</td>';
-            echo '<td>' . esc_html($summary) . '</td>';
+            echo '<td>' . esc_html($connection['name']) . '</td>';
+            echo '<td>' . self::renderStatusBadge((string) $connection['status']) . '</td>';
+            echo '<td>' . esc_html(self::describeConnectionMode($connection, $rowConfig)) . '</td>';
+            echo '<td><code>' . esc_html(self::maskCredential((string) ($rowConfig['client_id'] ?? ''))) . '</code></td>';
+            echo '<td><code>' . esc_html(self::maskCredential((string) ($rowConfig['client_secret'] ?? ''))) . '</code></td>';
+            echo '<td>' . self::renderOptionalUrl((string) ($rowConfig['redirect_uri'] ?? '')) . '</td>';
+            echo '<td>' . esc_html($hasToken ? 'Ja' : 'Nein') . '</td>';
+            echo '<td>' . esc_html((string) ($connection['created_at'] ?: '-')) . '</td>';
+            echo '<td>' . esc_html((string) ($connection['updated_at'] ?: '-')) . '</td>';
             echo '<td>';
             echo '<a class="button button-secondary" href="' . $editUrl . '">Bearbeiten</a> ';
-            self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'connect'], 'Test-Connect');
+            self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'set_test_mode'], 'Testmodus');
             echo ' ';
-            self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'disconnect'], 'Disconnect');
+            self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'deactivate'], 'Deaktivieren');
             echo ' ';
             self::inlinePostButton('admin-post.php?action=cc_delete_connection', 'cc_delete_connection', ['id' => (int) $connection['id']], 'Loeschen');
             echo '</td>';
             echo '</tr>';
+        }
+
+        if (empty($connections)) {
+            echo '<tr><td colspan="12">Noch keine vorbereiteten Verbindungen vorhanden.</td></tr>';
         }
 
         echo '</tbody></table>';
@@ -224,18 +240,15 @@ final class CloudAdmin
         }
 
         echo '</select></td></tr>';
-        echo '<tr><th><label for="name">Name</label></th><td><input class="regular-text" id="name" name="name" value="' . esc_attr((string) ($editConnection['name'] ?? '')) . '"></td></tr>';
+        echo '<tr><th><label for="name">Anzeigename</label></th><td><input class="regular-text" id="name" name="name" value="' . esc_attr((string) ($editConnection['name'] ?? '')) . '"></td></tr>';
+        echo '<tr><th><label for="status">Status</label></th><td><select id="status" name="status">';
+        echo '<option value="aktiv"' . selected('aktiv', $selectedConnectionStatus, false) . '>Aktiv</option>';
+        echo '<option value="inaktiv"' . selected('inaktiv', $selectedConnectionStatus, false) . '>Inaktiv</option>';
+        echo '</select><p class="description">Safe-Mode bleibt auch bei aktivem Status eingeschaltet.</p></td></tr>';
         echo '<tr><th><label for="client_id">Client ID</label></th><td><input class="regular-text" id="client_id" name="client_id" value="' . esc_attr((string) ($config['client_id'] ?? '')) . '"></td></tr>';
-        echo '<tr><th><label for="client_secret">Client Secret</label></th><td><input class="regular-text" id="client_secret" name="client_secret" value=""></td></tr>';
-        echo '<tr><th><label for="access_token">Access Token</label></th><td><input class="regular-text" id="access_token" name="access_token" value=""></td></tr>';
-        echo '<tr><th><label for="refresh_token">Refresh Token</label></th><td><input class="regular-text" id="refresh_token" name="refresh_token" value=""></td></tr>';
-        echo '<tr><th><label for="root_path">Root Path</label></th><td><input class="regular-text" id="root_path" name="root_path" value="' . esc_attr((string) ($config['root_path'] ?? '')) . '"></td></tr>';
-        echo '<tr><th><label for="local_path">Local Path</label></th><td><input class="regular-text" id="local_path" name="local_path" value="' . esc_attr((string) ($config['local_path'] ?? '')) . '"></td></tr>';
-        echo '<tr><th><label for="endpoint">Endpoint</label></th><td><input class="regular-text" id="endpoint" name="endpoint" value="' . esc_attr((string) ($config['endpoint'] ?? '')) . '"></td></tr>';
-        echo '<tr><th><label for="username">Username</label></th><td><input class="regular-text" id="username" name="username" value="' . esc_attr((string) ($config['username'] ?? '')) . '"></td></tr>';
-        echo '<tr><th><label for="password">Password</label></th><td><input class="regular-text" id="password" name="password" value=""></td></tr>';
-        echo '<tr><th><label for="host">Host</label></th><td><input class="regular-text" id="host" name="host" value="' . esc_attr((string) ($config['host'] ?? '')) . '"></td></tr>';
-        echo '<tr><th><label for="port">Port</label></th><td><input class="small-text" id="port" name="port" value="' . esc_attr((string) ($config['port'] ?? '')) . '"></td></tr>';
+        echo '<tr><th><label for="client_secret">Client Secret</label></th><td><input class="regular-text" id="client_secret" name="client_secret" value=""><p class="description">Leer lassen, um das bestehende Secret beizubehalten.</p></td></tr>';
+        echo '<tr><th><label for="redirect_uri">Redirect URI</label></th><td><input class="regular-text" id="redirect_uri" name="redirect_uri" value="' . esc_attr((string) ($config['redirect_uri'] ?? '')) . '"></td></tr>';
+        echo '<tr><th><label for="notes">Notizen</label></th><td><textarea class="large-text" rows="4" id="notes" name="notes">' . esc_textarea((string) ($config['notes'] ?? '')) . '</textarea><p class="description">Google Drive, Dropbox, OneDrive, Local Storage sowie vorbereitete Nextcloud-/WebDAV- und SFTP-Konfigurationen bleiben in dieser Stufe ohne echten OAuth- oder API-Handshake.</p></td></tr>';
         echo '</tbody></table>';
         submit_button($editConnection ? 'Verbindung aktualisieren' : 'Verbindung speichern');
         echo '</form>';
@@ -459,6 +472,9 @@ final class CloudAdmin
             'erfolgreich' => ['#dcfce7', '#166534'],
             'fehlerhaft' => ['#fee2e2', '#991b1b'],
             'laeuft' => ['#fef3c7', '#92400e'],
+            'aktiv' => ['#dcfce7', '#166534'],
+            'inaktiv' => ['#e5e7eb', '#374151'],
+            'testmodus' => ['#fef3c7', '#92400e'],
         ];
 
         [$background, $color] = $styles[$status] ?? ['#f3f4f6', '#111827'];
@@ -496,5 +512,46 @@ final class CloudAdmin
         }
 
         return substr($value, 0, 2) . str_repeat('*', max(2, $length - 4)) . substr($value, -2);
+    }
+
+    private static function maskCredential(string $value): string
+    {
+        $trimmed = trim($value);
+
+        if ($trimmed === '') {
+            return '-';
+        }
+
+        $length = strlen($trimmed);
+
+        if ($length <= 4) {
+            return str_repeat('*', $length);
+        }
+
+        return substr($trimmed, 0, 3) . str_repeat('*', max(4, $length - 5)) . substr($trimmed, -2);
+    }
+
+    private static function renderOptionalUrl(string $url): string
+    {
+        if ($url === '') {
+            return '-';
+        }
+
+        return '<code>' . esc_html($url) . '</code>';
+    }
+
+    private static function describeConnectionMode(array $connection, array $config): string
+    {
+        $status = (string) ($connection['status'] ?? '');
+
+        if ($status === 'testmodus') {
+            return 'Test';
+        }
+
+        if ($status === 'aktiv' && (!empty($config['client_id']) || !empty($config['client_secret']))) {
+            return 'Live vorbereitet';
+        }
+
+        return 'Safe';
     }
 }
