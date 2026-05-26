@@ -18,6 +18,7 @@ require_once __DIR__ . '/includes/interfaces/class-cloud-provider-interface.php'
 require_once __DIR__ . '/includes/class-cloud-crypto.php';
 require_once __DIR__ . '/includes/class-cloud-logger.php';
 require_once __DIR__ . '/includes/class-cloud-job-runner.php';
+require_once __DIR__ . '/includes/class-cloud-readonly-provider-service.php';
 require_once __DIR__ . '/includes/class-cloud-storage.php';
 require_once __DIR__ . '/includes/class-cloud-provider-registry.php';
 require_once __DIR__ . '/includes/providers/class-abstract-provider.php';

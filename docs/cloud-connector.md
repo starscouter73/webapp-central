@@ -59,6 +59,21 @@ Die Provider liefern in V1 nur sichere Demo- bzw. Simulationsantworten. Es finde
 - Dateioperationen werden protokolliert, aber nicht produktiv ausgefuehrt
 - Destruktive Aktionen bleiben auch bei gesetztem Einstellungsflag ohne produktive Implementierung deaktiviert
 
+## Verbindungsmodi
+
+- `safe_mode`
+  - Default
+  - keine externen Provider-Requests
+  - nur vorbereitete Konfiguration, Cache, DB und Mockdaten
+- `readonly_live`
+  - nur fuer explizit freigegebene readonly Metadaten-Tests
+  - aktuell nur fuer Google Drive vorbereitet
+  - nur kleine Metadatenliste, keine Dateioperationen
+- `disabled`
+  - blockiert Provider-Kommunikation fuer die Verbindung
+
+Safe-Mode bleibt der globale Standard. `readonly_live` ist eine eng begrenzte Ausnahme fuer einen expliziten Admin-Test.
+
 ## Aktivierungsverhalten
 
 - Bei Aktivierung versucht das Plugin ausschliesslich, seine eigenen Tabellen anzulegen oder zu aktualisieren.
@@ -131,18 +146,52 @@ Es werden folgende WordPress-Tabellen angelegt:
 - Tab `Verbindungen` dient in dieser Stufe nur der sicheren Vorbereitung von Provider-Konfigurationen
 - Unterstuetzt werden Google Drive, Dropbox, OneDrive, Local Storage sowie vorbereitete Nextcloud-/WebDAV- und SFTP-Konfigurationen
 - Die Uebersicht zeigt ID, Provider, Anzeigename, Status, Modus, maskierte Client-Daten, Redirect URI, Token-Hinweis sowie Zeitstempel
+- Google Drive kann zusaetzlich fuer einen expliziten readonly Live-Test vorbereitet werden
 - Der Informationsblock `OAuth-/Provider-Informationen` zeigt nur statische Redirect-/Scope-Hinweise und fuehrt keine Redirects aus
+- Fuer Google Drive wird eine vorbereitete readonly OAuth-URL angezeigt, aber nicht automatisch aufgerufen
 - Copy-Buttons kopieren nur vorbereitete Redirect-URIs oder Scope-Listen in die Zwischenablage
 - Aktionen im Backend:
   - `Bearbeiten`
+  - `Readonly-Verbindung testen`
   - `Deaktivieren`
   - `Testmodus`
   - `Loeschen`
 - Alle Aktionen bleiben durch `manage_options` und Nonces abgesichert
 - Secrets werden nur maskiert angezeigt; ein leeres Secret-Feld beim Bearbeiten behaelt den vorhandenen Wert bei
+- Access- und Refresh-Token koennen gespeichert werden, werden aber nie im Klartext angezeigt
 - Es werden keine Tokens, Secrets oder Passwoerter in Logs geschrieben
-- In dieser Stufe werden keine OAuth-Redirects aktiviert und keine externen Provider-Verbindungen aufgebaut
+- In dieser Stufe werden keine automatischen OAuth-Redirects aktiviert
+- Externe Provider-Verbindungen werden nur ueber die explizite Aktion `Readonly-Verbindung testen` aufgebaut
 - Dokumentationsstatus und Safe-Mode-Hinweise dienen nur der Vorbereitung einer spaeteren OAuth-Ausbaustufe
+
+## Readonly Live Mode
+
+`readonly_live` ist der erste kontrollierte Live-Pfad fuer echte Provider-Kommunikation.
+
+Erlaubte Operationen:
+
+- Token pruefen
+- falls noetig Access-Token ueber Google Refresh-Token erneuern
+- maximal 5 Dateimetadaten lesen
+- Health-/Statuspruefung der Verbindung
+
+Verbotene Operationen:
+
+- Upload
+- Download auf das Dateisystem
+- Delete
+- Move
+- echter Sync
+- rekursive Traversals
+- Hintergrundsynchronisation
+- Worker-/Queue-Anbindung
+- Auto-Refresh
+
+Google-Drive-Scope:
+
+- `https://www.googleapis.com/auth/drive.metadata.readonly`
+
+Es werden bewusst keine Schreibscopes vorbereitet.
 
 ## Explorer-Tab
 
@@ -181,6 +230,15 @@ Es werden folgende WordPress-Tabellen angelegt:
   - letzter Worker-Lauf
 - Es werden keine echten Cloud-Dateien geladen, keine Dateisystemscans ausgefuehrt und keine Provider angefragt
 - Safe-Mode bleibt auch im Explorer zwingend aktiv; die Ansicht bleibt read-only und loest keine Dateioperationen aus
+- Fuer Verbindungen im Modus `readonly_live` wird stattdessen ein separater readonly Live-Explorer gerendert:
+  - klar als `READONLY LIVE` markiert
+  - Warnhinweis `Nur Metadatenzugriff`
+  - nur kleine Test-Dateiliste mit:
+    - Name
+    - Typ
+    - Groesse
+    - geaendert am
+  - keine Queue-, Preview-, Drag-&-Drop- oder Worker-Anbindung
 
 ## Sync Preview / Dry Run
 
@@ -275,9 +333,24 @@ Spaeter:
 
 - Google Cloud Projekt anlegen
 - Drive API aktivieren
-- OAuth-Client oder Service-Account gemaess spaeterem Sync-Modell definieren
-- Redirect- und Scopes spaeter restriktiv dokumentieren
+- OAuth-Client fuer den readonly Metadatenzugriff definieren
+- Redirect-URI im Cloud-Connector hinterlegen
+- nur Scope `drive.metadata.readonly` verwenden
 - Zugangsdaten erst nach expliziter Freigabe fuer Live-Calls verwenden
+
+## Readonly Live Sicherheitsgrenzen
+
+- `maxResults=5`
+- nur ein flacher Metadaten-List-Request
+- keine rekursiven Vollscans
+- kein Background-Worker
+- kein Auto-Refresh
+- defensiver Timeout ueber die Plugin-Einstellung, hart begrenzt
+- kein Token im HTML
+- kein Token im JavaScript
+- kein Token im Log
+- keine Secrets im Frontend
+- keine Queue-/Worker-Verknuepfung
 
 ## API-Setup Dropbox
 
@@ -316,6 +389,9 @@ Spaeter:
 - `connection_disabled` bei manueller Deaktivierung
 - `connection_deleted` bei Loeschung
 - `connection_test_mode_set` bei Umschalten auf vorbereiteten Testmodus
+- `readonly_connection_tested` bei explizitem Start des readonly Live-Tests
+- `readonly_provider_connected` bei erfolgreichem readonly Metadatenzugriff
+- `readonly_provider_failed` bei fehlgeschlagenem readonly Live-Test
 - `sync_job_paused` bei manueller Pausierung
 - `sync_job_resumed` bei manueller Fortsetzung
 - `sync_job_manual_simulation` bei manuell ausgeloster Safe-Mode-Simulation

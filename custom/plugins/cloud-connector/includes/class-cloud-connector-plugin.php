@@ -89,11 +89,16 @@ final class CloudConnectorPlugin
         $existing = $connectionId ? CloudStorage::getConnection($connectionId) : null;
         $existingConfig = $existing ? CloudCrypto::decryptConfig((string) $existing['config_encrypted']) : [];
         $submittedConfig = $existingConfig;
+        $allowedModes = ['safe_mode', 'readonly_live', 'disabled'];
+        $submittedMode = sanitize_key(wp_unslash($_POST['connection_mode'] ?? 'safe_mode'));
+        $submittedConfig['connection_mode'] = in_array($submittedMode, $allowedModes, true) ? $submittedMode : 'safe_mode';
         $submittedConfig['client_id'] = sanitize_text_field(wp_unslash($_POST['client_id'] ?? ''));
         $submittedConfig['redirect_uri'] = esc_url_raw(wp_unslash($_POST['redirect_uri'] ?? ''));
         $submittedConfig['notes'] = sanitize_textarea_field(wp_unslash($_POST['notes'] ?? ''));
 
         $submittedSecret = sanitize_text_field(wp_unslash($_POST['client_secret'] ?? ''));
+        $submittedAccessToken = sanitize_text_field(wp_unslash($_POST['access_token'] ?? ''));
+        $submittedRefreshToken = sanitize_text_field(wp_unslash($_POST['refresh_token'] ?? ''));
 
         if ($submittedSecret !== '') {
             $submittedConfig['client_secret'] = $submittedSecret;
@@ -101,9 +106,24 @@ final class CloudConnectorPlugin
             $submittedConfig['client_secret'] = '';
         }
 
+        if ($submittedAccessToken !== '') {
+            $submittedConfig['access_token'] = $submittedAccessToken;
+        } elseif (empty($submittedConfig['access_token'])) {
+            $submittedConfig['access_token'] = '';
+        }
+
+        if ($submittedRefreshToken !== '') {
+            $submittedConfig['refresh_token'] = $submittedRefreshToken;
+        } elseif (empty($submittedConfig['refresh_token'])) {
+            $submittedConfig['refresh_token'] = '';
+        }
+
         $allowedStatuses = ['aktiv', 'inaktiv'];
         $status = sanitize_key(wp_unslash($_POST['status'] ?? 'inaktiv'));
         $status = in_array($status, $allowedStatuses, true) ? $status : 'inaktiv';
+        if ($submittedConfig['connection_mode'] === 'disabled') {
+            $status = 'inaktiv';
+        }
 
         $id = CloudStorage::saveConnection([
             'id' => $connectionId,
@@ -157,6 +177,7 @@ final class CloudConnectorPlugin
         $notice = 'connection_updated';
 
         if ($action === 'deactivate') {
+            $config['connection_mode'] = 'disabled';
             CloudStorage::saveConnection([
                 'id' => $id,
                 'provider_slug' => $connection['provider_slug'],
@@ -170,6 +191,7 @@ final class CloudConnectorPlugin
             CloudLogger::log('info', 'connection_disabled', 'Verbindung deaktiviert.', ['connection_id' => $id]);
             $notice = 'connection_disabled';
         } elseif ($action === 'set_test_mode') {
+            $config['connection_mode'] = 'safe_mode';
             CloudStorage::saveConnection([
                 'id' => $id,
                 'provider_slug' => $connection['provider_slug'],
@@ -180,8 +202,38 @@ final class CloudConnectorPlugin
                 'last_error' => '',
                 'config' => $config,
             ]);
-            CloudLogger::log('info', 'connection_test_mode_set', 'Verbindung auf Testmodus gesetzt.', ['connection_id' => $id]);
+            CloudLogger::log('info', 'connection_test_mode_set', 'Verbindung auf Safe-Mode gesetzt.', ['connection_id' => $id]);
             $notice = 'connection_test_mode_set';
+        } elseif ($action === 'test_readonly_connection') {
+            $result = CloudReadonlyProviderService::testConnection($connection);
+
+            if (is_wp_error($result)) {
+                CloudStorage::replaceFileCache($id, []);
+                CloudStorage::saveConnection([
+                    'id' => $id,
+                    'provider_slug' => $connection['provider_slug'],
+                    'name' => $connection['name'],
+                    'status' => $connection['status'],
+                    'safe_mode' => (int) $connection['safe_mode'],
+                    'last_connected_at' => $connection['last_connected_at'],
+                    'last_error' => $result->get_error_message(),
+                    'config' => $config,
+                ]);
+                CloudAdmin::redirectWithNotice('connections', 'readonly_connection_failed', true);
+            }
+
+            CloudStorage::replaceFileCache($id, $result['files']);
+            CloudStorage::saveConnection([
+                'id' => $id,
+                'provider_slug' => $connection['provider_slug'],
+                'name' => $connection['name'],
+                'status' => $result['status'],
+                'safe_mode' => (int) $connection['safe_mode'],
+                'last_connected_at' => $result['last_connected_at'],
+                'last_error' => '',
+                'config' => $result['config'],
+            ]);
+            $notice = 'readonly_connection_tested';
         }
 
         CloudAdmin::redirectWithNotice('connections', $notice);
