@@ -54,6 +54,7 @@ final class CloudAdmin
             'automation' => 'Automatisierung',
             'explorer' => 'Explorer',
             'network' => 'Netzwerk',
+            'architecture' => 'Architektur',
             'logs' => 'Logs',
             'settings' => 'Einstellungen',
         ];
@@ -93,6 +94,9 @@ final class CloudAdmin
                 break;
             case 'network':
                 self::renderNetwork();
+                break;
+            case 'architecture':
+                self::renderArchitecture();
                 break;
             case 'logs':
                 self::renderLogs();
@@ -864,6 +868,99 @@ final class CloudAdmin
         echo 'nodes[0].style.outline="2px solid #72aee6";nodes[0].style.outlineOffset="2px";';
         echo '})();';
         echo '</script>';
+    }
+
+    private static function renderArchitecture(): void
+    {
+        $phases = self::getArchitecturePhases();
+        $stats = self::getArchitectureStats();
+
+        echo '<div style="margin-bottom:16px;padding:12px 16px;border:1px solid #dcdcde;background:#fff;">';
+        echo '<strong>Technische Architekturuebersicht.</strong> Diese Ansicht ist rein statisch und dient nur Review, Runtime-Einordnung und technischer Konsolidierung.';
+        echo '</div>';
+        echo '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;">';
+        foreach ($stats as $stat) {
+            echo '<div style="border:1px solid #dcdcde;background:#fff;padding:14px;">';
+            echo '<div style="font-size:12px;text-transform:uppercase;color:#646970;margin-bottom:8px;">' . esc_html($stat['label']) . '</div>';
+            echo '<div style="font-size:24px;font-weight:700;">' . esc_html((string) $stat['value']) . '</div>';
+            echo '</div>';
+        }
+        echo '</div>';
+
+        echo '<div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr);gap:16px;align-items:start;">';
+        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;">';
+        echo '<h2 style="margin-top:0;">PR-Stufen</h2>';
+        echo '<table class="widefat striped"><thead><tr><th>PR</th><th>Titel</th><th>Status</th><th>Risiko</th><th>Runtime</th><th>Live-Deploy</th><th>Provider-Live</th><th>Dateioperationen</th><th>Review</th></tr></thead><tbody>';
+        foreach ($phases as $phase) {
+            echo '<tr>';
+            echo '<td><strong>' . esc_html($phase['pr']) . '</strong></td>';
+            echo '<td><div><strong>' . esc_html($phase['title']) . '</strong></div><div style="margin-top:4px;color:#50575e;">' . esc_html($phase['description']) . '</div></td>';
+            echo '<td>' . self::renderStatusBadge($phase['status']) . '</td>';
+            echo '<td>' . self::renderStatusBadge($phase['risk']) . '</td>';
+            echo '<td>' . self::renderStatusBadge($phase['runtime']) . '</td>';
+            echo '<td>' . self::renderStatusBadge($phase['deploy']) . '</td>';
+            echo '<td>' . self::renderStatusBadge($phase['provider_live']) . '</td>';
+            echo '<td>' . self::renderStatusBadge($phase['file_ops']) . '</td>';
+            echo '<td>' . self::renderStatusBadge($phase['review']) . '</td>';
+            echo '</tr>';
+        }
+        echo '</tbody></table>';
+        echo '</div>';
+
+        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;">';
+        echo '<h2 style="margin-top:0;">Architekturblöcke</h2>';
+        echo '<div style="display:grid;grid-template-columns:1fr;gap:10px;">';
+        foreach (self::getArchitectureBlocks() as $block) {
+            echo '<div style="border:1px solid #dcdcde;border-radius:12px;padding:12px;background:#f8fbff;">';
+            echo '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">';
+            echo '<strong>' . esc_html($block['title']) . '</strong>';
+            echo self::renderStatusBadge($block['status']);
+            echo '</div>';
+            echo '<p style="margin:8px 0 0 0;color:#50575e;">' . esc_html($block['description']) . '</p>';
+            echo '</div>';
+        }
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    }
+
+    private static function getArchitecturePhases(): array
+    {
+        return [
+            ['pr' => 'PR #2', 'title' => 'Safe-Mode-Core', 'description' => 'Grundschutz, blockierte Dateioperationen und sichere Verwaltungsbasis.', 'status' => 'aktiv', 'risk' => 'safe-mode', 'runtime' => 'runtime-validiert', 'deploy' => 'live', 'provider_live' => 'nein', 'file_ops' => 'nein', 'review' => 'bereit'],
+            ['pr' => 'PR #3', 'title' => 'Provider-Verbindungen', 'description' => 'Verbindungs-UI, Scope-Hinweise und vorbereitete Providerkonfiguration.', 'status' => 'aktiv', 'risk' => 'safe-mode', 'runtime' => 'validiert', 'deploy' => 'live', 'provider_live' => 'nein', 'file_ops' => 'nein', 'review' => 'bereit'],
+            ['pr' => 'PR #4', 'title' => 'Explorer', 'description' => 'Explorer-Oberflaeche mit virtuellen Ordnern und Cache-/Mockdaten.', 'status' => 'aktiv', 'risk' => 'safe-mode', 'runtime' => 'runtime-validiert', 'deploy' => 'live', 'provider_live' => 'nein', 'file_ops' => 'nein', 'review' => 'bereit'],
+            ['pr' => 'PR #5', 'title' => 'Sync Preview', 'description' => 'Dry Run, Konfliktvorschau und virtuelle Queue-/Health-Metriken.', 'status' => 'aktiv', 'risk' => 'safe-mode', 'runtime' => 'runtime-validiert', 'deploy' => 'live', 'provider_live' => 'nein', 'file_ops' => 'nein', 'review' => 'bereit'],
+            ['pr' => 'PR #6', 'title' => 'Drag & Drop', 'description' => 'Clientseitige Safe-Mode-DnD-Simulation mit readonly/blocking-Logik.', 'status' => 'aktiv', 'risk' => 'safe-mode', 'runtime' => 'runtime-validiert', 'deploy' => 'live', 'provider_live' => 'nein', 'file_ops' => 'nein', 'review' => 'bereit'],
+            ['pr' => 'PR #7', 'title' => 'Readonly Connectivity', 'description' => 'Readonly-Live-Vorbereitung mit Google-Metadatenscope und gekapseltem Service.', 'status' => 'readonly', 'risk' => 'geplant', 'runtime' => 'teilweise', 'deploy' => 'nein', 'provider_live' => 'ja', 'file_ops' => 'nein', 'review' => 'draft'],
+            ['pr' => 'PR #8', 'title' => 'Network Map', 'description' => 'Visuelle Mesh-/Netzwerkansicht fuer Schutzschichten und Systemknoten.', 'status' => 'aktiv', 'risk' => 'safe-mode', 'runtime' => 'runtime-validiert', 'deploy' => 'live', 'provider_live' => 'nein', 'file_ops' => 'nein', 'review' => 'draft'],
+        ];
+    }
+
+    private static function getArchitectureBlocks(): array
+    {
+        return [
+            ['title' => 'Safe-Mode-Schicht', 'status' => 'safe-mode', 'description' => 'Blockiert echte Dateioperationen und kapselt Simulation, Preview und UI-Schreibschutz.'],
+            ['title' => 'Readonly-Live-Schicht', 'status' => 'readonly', 'description' => 'Erlaubt nur begrenzte Provider-Metadatenzugriffe ohne Queue-, Worker- oder Dateisystemwirkung.'],
+            ['title' => 'Explorer-UI', 'status' => 'aktiv', 'description' => 'Admin-Explorer fuer Cache, Mockdaten, readonly Listen und Detailansichten.'],
+            ['title' => 'Worker', 'status' => 'blocked', 'description' => 'Bestehende Simulationsworker bleiben von readonly-live und Netzwerk-/Architekturansichten getrennt.'],
+            ['title' => 'Queue', 'status' => 'blocked', 'description' => 'Virtuelle Warteschlange nur fuer Safe-Mode-Simulationen, nicht fuer echte Providerkommunikation.'],
+            ['title' => 'Preview', 'status' => 'safe-mode', 'description' => 'Dry-Run- und Konfliktvorschau ohne echte Sync-Ausfuehrung.'],
+            ['title' => 'Provider', 'status' => 'readonly', 'description' => 'Google readonly vorbereitet, weitere Provider nur als geplante oder inaktive Knoten.'],
+            ['title' => 'Logs', 'status' => 'aktiv', 'description' => 'Sanitisiertes Logging ohne Tokens, Secrets oder Frontend-Leaks.'],
+            ['title' => 'Netzwerkmap', 'status' => 'aktiv', 'description' => 'Mesh-Ansicht fuer Schutzschicht, Providerstatus und technische Systemtopologie.'],
+        ];
+    }
+
+    private static function getArchitectureStats(): array
+    {
+        return [
+            ['label' => 'Provider', 'value' => 6],
+            ['label' => 'Safe-Mode-Komponenten', 'value' => 5],
+            ['label' => 'Readonly-Live-Komponenten', 'value' => 2],
+            ['label' => 'UI-Module', 'value' => 6],
+            ['label' => 'Simulierte Systeme', 'value' => 4],
+        ];
     }
 
     private static function renderNetworkDetailHtml(array $node): string

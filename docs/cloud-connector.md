@@ -286,6 +286,60 @@ Interaktion:
 
 Die Mesh-Ansicht dient nur der Verstaendlichmachung von Schutzschichten, readonly Live-Abgrenzung und blockierten Systempfaden.
 
+## Architekturuebersicht
+
+- Neuer Tab `Architektur`
+- Rein statische Technik- und Reviewansicht
+- Keine GitHub-API
+- Keine Provider-Calls
+- Keine OAuth-Calls
+- Keine Dateioperationen
+- Keine Queue-/Worker-Manipulation
+
+Dargestellte Entwicklungsphasen:
+
+- PR #2 `Safe-Mode-Core`
+- PR #3 `Provider-Verbindungen`
+- PR #4 `Explorer`
+- PR #5 `Sync Preview`
+- PR #6 `Drag & Drop`
+- PR #7 `Readonly Connectivity`
+- PR #8 `Network Map`
+
+Je Phase werden angezeigt:
+
+- Titel
+- Kurzbeschreibung
+- Status
+- Risiko-Level
+- Runtime-validiert ja/nein
+- Live-Deploy ja/nein
+- echte Provider-Kommunikation ja/nein
+- Dateioperationen ja/nein
+- Review-/Merge-Status
+
+Architekturblöcke:
+
+- Safe-Mode-Schicht
+- Readonly-Live-Schicht
+- Explorer-UI
+- Worker
+- Queue
+- Preview
+- Provider
+- Logs
+- Netzwerkmap
+
+Review-/Runtime-Modell:
+
+- `draft`
+- `getestet`
+- `runtime-validiert`
+- `bereit fuer Review`
+- `noch nicht merge-freigegeben`
+
+Die Architekturansicht dient nur der technischen Orientierung und Konsolidierung des bisherigen Ausbaustands.
+
 ## Sync Preview / Dry Run
 
 - Der Explorer enthaelt zusaetzlich einen Bereich `Sync Preview / Dry Run`
