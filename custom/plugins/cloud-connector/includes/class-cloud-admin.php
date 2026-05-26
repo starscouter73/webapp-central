@@ -127,6 +127,9 @@ final class CloudAdmin
             'job_saved' => 'Sync-Job gespeichert.',
             'job_deleted' => 'Sync-Job geloescht.',
             'job_updated' => 'Sync-Job aktualisiert.',
+            'job_paused' => 'Sync-Job pausiert.',
+            'job_resumed' => 'Sync-Job fortgesetzt.',
+            'job_simulation_started' => 'Safe-Mode-Simulationslauf ausgelost.',
             'job_missing' => 'Sync-Job nicht gefunden.',
             'files_refreshed' => 'Dateiliste aus Demo-/Cache-Daten aktualisiert.',
             'settings_saved' => 'Einstellungen gespeichert.',
@@ -289,23 +292,33 @@ final class CloudAdmin
         $editId = absint($_GET['edit_job'] ?? 0);
         $editJob = $editId ? CloudStorage::getJob($editId) : null;
 
-        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Anbieter</th><th>Richtung</th><th>Status</th><th>Letzter Lauf</th><th>Naechster Lauf</th><th>Dateien</th><th>Aktionen</th></tr></thead><tbody>';
+        echo '<p>Safe-Mode aktiv - keine echten Dateioperationen. Manuelle Simulationen laufen ausschliesslich ueber den bestehenden Worker.</p>';
+        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Anbieter</th><th>Richtung</th><th>Status</th><th>Naechster Lauf</th><th>Letzter Lauf</th><th>Dateien</th><th>Letzte Fehlermeldung</th><th>Erstellt am</th><th>Aktualisiert am</th><th>Aktionen</th></tr></thead><tbody>';
 
         foreach ($jobs as $job) {
             $editUrl = esc_url(add_query_arg(['page' => self::MENU_SLUG, 'tab' => 'sync-jobs', 'edit_job' => (int) $job['id']], admin_url('admin.php')));
+            $isPaused = ($job['status'] ?? '') === 'pausiert';
+
             echo '<tr>';
             echo '<td>' . esc_html((string) $job['id']) . '</td>';
             echo '<td><code>' . esc_html($job['provider_slug']) . '</code></td>';
             echo '<td>' . esc_html($job['direction']) . '</td>';
-            echo '<td>' . esc_html($job['status']) . '</td>';
-            echo '<td>' . esc_html((string) ($job['last_run'] ?: '-')) . '</td>';
+            echo '<td>' . self::renderStatusBadge((string) $job['status']) . '</td>';
             echo '<td>' . esc_html((string) ($job['next_run'] ?: '-')) . '</td>';
+            echo '<td>' . esc_html((string) ($job['last_run'] ?: '-')) . '</td>';
             echo '<td>' . esc_html((string) $job['file_count']) . '</td>';
+            echo '<td>' . esc_html((string) ($job['error_text'] ?: '-')) . '</td>';
+            echo '<td>' . esc_html((string) ($job['created_at'] ?: '-')) . '</td>';
+            echo '<td>' . esc_html((string) ($job['updated_at'] ?: '-')) . '</td>';
             echo '<td>';
             echo '<a class="button button-secondary" href="' . $editUrl . '">Bearbeiten</a> ';
             self::inlinePostButton('admin-post.php?action=cc_job_action', 'cc_job_action', ['id' => (int) $job['id'], 'job_action' => 'simulate'], 'Simulation');
             echo ' ';
-            self::inlinePostButton('admin-post.php?action=cc_job_action', 'cc_job_action', ['id' => (int) $job['id'], 'job_action' => 'pause'], 'Pausieren');
+            if ($isPaused) {
+                self::inlinePostButton('admin-post.php?action=cc_job_action', 'cc_job_action', ['id' => (int) $job['id'], 'job_action' => 'resume'], 'Fortsetzen');
+            } else {
+                self::inlinePostButton('admin-post.php?action=cc_job_action', 'cc_job_action', ['id' => (int) $job['id'], 'job_action' => 'pause'], 'Pausieren');
+            }
             echo ' ';
             self::inlinePostButton('admin-post.php?action=cc_delete_job', 'cc_delete_job', ['id' => (int) $job['id']], 'Loeschen');
             echo '</td>';
@@ -313,7 +326,7 @@ final class CloudAdmin
         }
 
         if (empty($jobs)) {
-            echo '<tr><td colspan="8">Noch keine Jobs vorhanden.</td></tr>';
+            echo '<tr><td colspan="11">Noch keine Jobs vorhanden.</td></tr>';
         }
 
         echo '</tbody></table>';
@@ -436,6 +449,26 @@ final class CloudAdmin
 
         echo '<button type="submit" class="button button-secondary">' . esc_html($label) . '</button>';
         echo '</form>';
+    }
+
+    private static function renderStatusBadge(string $status): string
+    {
+        $styles = [
+            'geplant' => ['#dbeafe', '#1d4ed8'],
+            'pausiert' => ['#e5e7eb', '#374151'],
+            'erfolgreich' => ['#dcfce7', '#166534'],
+            'fehlerhaft' => ['#fee2e2', '#991b1b'],
+            'laeuft' => ['#fef3c7', '#92400e'],
+        ];
+
+        [$background, $color] = $styles[$status] ?? ['#f3f4f6', '#111827'];
+
+        return sprintf(
+            '<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:%s;color:%s;font-weight:600;">%s</span>',
+            esc_attr($background),
+            esc_attr($color),
+            esc_html($status)
+        );
     }
 
     private static function maskConnectionSummary(array $config): string
