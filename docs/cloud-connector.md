@@ -240,6 +240,52 @@ Es werden bewusst keine Schreibscopes vorbereitet.
     - geaendert am
   - keine Queue-, Preview-, Drag-&-Drop- oder Worker-Anbindung
 
+## Netzwerk-/Mesh-Ansicht
+
+- Neuer Tab `Netzwerk`
+- Rein visuelle Topologie fuer den Cloud Connector
+- Keine aktiven Operationen aus der Map
+- Keine Provider-Calls
+- Kein OAuth-Flow
+- Kein Sync
+- Keine Dateioperationen
+
+Gezeigte Nodes:
+
+- Cloud Connector
+- Safe-Mode
+- Readonly Live
+- Google Drive
+- Dropbox
+- OneDrive
+- WebDAV / Nextcloud
+- SFTP
+- Server Storage
+- Explorer
+- Sync Preview
+- Drag & Drop
+- Queue
+- Worker
+- Logs
+- Verbindungen
+
+Statusmodell je Node:
+
+- Titel
+- Status-Badge
+- Kurzbeschreibung
+- erlaubte Operationen
+- blockierte Operationen
+
+Interaktion:
+
+- Klick auf eine Node aktualisiert nur clientseitig die Detailkarte
+- kein fetch
+- kein AJAX
+- kein DB-Schreiben
+
+Die Mesh-Ansicht dient nur der Verstaendlichmachung von Schutzschichten, readonly Live-Abgrenzung und blockierten Systempfaden.
+
 ## Sync Preview / Dry Run
 
 - Der Explorer enthaelt zusaetzlich einen Bereich `Sync Preview / Dry Run`
