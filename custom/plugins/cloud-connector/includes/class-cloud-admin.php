@@ -61,6 +61,7 @@ final class CloudAdmin
         echo '<div class="wrap">';
         echo '<h1>Cloud Connector</h1>';
         self::renderNotices();
+        self::renderUiShellStyles();
         echo '<h2 class="nav-tab-wrapper">';
 
         foreach ($tabs as $tab => $label) {
@@ -200,8 +201,13 @@ final class CloudAdmin
         $providerGuides = self::getProviderGuides();
         $selectedProviderSlug = (string) ($editConnection['provider_slug'] ?? ($providers[0]['slug'] ?? 'google_drive'));
 
-        echo '<h2>Verbindungen</h2>';
-        echo '<p>Safe-Mode bleibt global Standard. Nur Verbindungen im Modus <strong>READONLY LIVE</strong> duerfen bei einer expliziten Admin-Aktion einen begrenzten Metadaten-Test gegen den Provider ausfuehren.</p>';
+        echo '<div class="cc-app-shell">';
+        echo '<div class="cc-app-banner"><strong>App Shell aktiv.</strong> Provider-Verbindungen, Readonly-Hinweise und Statusmodule bleiben visuell zusammengefasst. Safe-Mode bleibt global Standard.</div>';
+        echo '<div class="cc-app-card">';
+        echo '<div class="cc-app-header">';
+        echo '<div class="cc-app-header-copy"><h2>Verbindungen</h2><p class="cc-app-muted">Nur Verbindungen im Modus <strong>READONLY LIVE</strong> duerfen bei einer expliziten Admin-Aktion einen begrenzten Metadaten-Test gegen den Provider ausfuehren.</p></div>';
+        echo '<div class="cc-app-badge-row">' . self::renderStatusBadge('aktiv') . ' ' . self::renderConnectionModeBadge('safe_mode') . '</div>';
+        echo '</div>';
         echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Anbieter</th><th>Anzeigename</th><th>Status</th><th>Modus</th><th>Client ID</th><th>Client Secret</th><th>Redirect URI</th><th>Token vorhanden</th><th>Letzte Live-Pruefung</th><th>Erstellt am</th><th>Aktualisiert am</th><th>Aktionen</th></tr></thead><tbody>';
 
         foreach ($connections as $connection) {
@@ -242,7 +248,12 @@ final class CloudAdmin
         }
 
         echo '</tbody></table>';
-        echo '<h2 style="margin-top:24px;">' . ($editConnection ? 'Verbindung bearbeiten' : 'Neue Verbindung') . '</h2>';
+        echo '</div>';
+        echo '<div class="cc-app-card">';
+        echo '<div class="cc-app-header">';
+        echo '<div class="cc-app-header-copy"><h2>' . ($editConnection ? 'Verbindung bearbeiten' : 'Neue Verbindung') . '</h2><p class="cc-app-muted">Maskierte Zugangsdaten, klarer Verbindungsmodus und keine automatischen Live-Aktionen.</p></div>';
+        echo '<div class="cc-app-badge-row">' . self::renderInfoBadge('vorbereitet') . '</div>';
+        echo '</div>';
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
         wp_nonce_field('cc_save_connection');
         echo '<input type="hidden" name="action" value="cc_save_connection">';
@@ -275,10 +286,13 @@ final class CloudAdmin
         echo '</tbody></table>';
         submit_button($editConnection ? 'Verbindung aktualisieren' : 'Verbindung speichern');
         echo '</form>';
+        echo '</div>';
 
-        echo '<div style="margin-top:24px;padding:16px;border:1px solid #dcdcde;background:#fff;">';
-        echo '<h2 style="margin-top:0;">OAuth-/Provider-Informationen</h2>';
-        echo '<p>Produktive Schreibpfade bleiben deaktiviert. Fuer Google Drive wird nur ein readonly OAuth-Setup mit reinem Metadatenzugriff vorbereitet.</p>';
+        echo '<div class="cc-app-card cc-app-card-soft">';
+        echo '<div class="cc-app-header">';
+        echo '<div class="cc-app-header-copy"><h2>OAuth-/Provider-Informationen</h2><p class="cc-app-muted">Produktive Schreibpfade bleiben deaktiviert. Fuer Google Drive wird nur ein readonly OAuth-Setup mit reinem Metadatenzugriff vorbereitet.</p></div>';
+        echo '<div class="cc-app-badge-row">' . self::renderInfoBadge('vorbereitet') . ' ' . self::renderStatusBadge('readonly') . '</div>';
+        echo '</div>';
         echo '<p><label for="cc_provider_guide_select"><strong>Infoprovider</strong></label> ';
         echo '<select id="cc_provider_guide_select" style="min-width:240px;">';
 
@@ -313,6 +327,7 @@ final class CloudAdmin
 
         echo '</div>';
         self::renderProviderGuideScript($selectedProviderSlug);
+        echo '</div>';
     }
 
     private static function renderFiles(): void
@@ -521,7 +536,8 @@ final class CloudAdmin
         $detailPanel = self::buildExplorerDetailPanel($explorerFiles, $previewRows, $selectedProvider, $selectedConnection);
         $activityEntries = self::buildExplorerActivityEntries($previewRows);
 
-        echo '<div style="margin-bottom:16px;padding:12px 16px;border:1px solid #dcdcde;background:#fff;">';
+        echo '<div class="cc-app-shell">';
+        echo '<div class="cc-app-banner">';
         if ($selectedConnectionMode === 'readonly_live') {
             echo '<strong>READONLY LIVE aktiv.</strong> Diese Verbindung darf nur einen streng begrenzten Metadatenzugriff gegen den Provider ausfuehren. Keine Dateioperationen, keine Queue, kein Worker, kein echter Sync.';
         } else {
@@ -529,11 +545,13 @@ final class CloudAdmin
         }
         echo '</div>';
 
-        echo '<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">';
-        echo '<div style="flex:1 1 300px;min-width:300px;max-width:360px;">';
-        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;">';
-        echo '<h2 style="margin-top:0;">Provider / Verbindungen</h2>';
-        echo '<p style="margin-top:0;color:#50575e;">Virtuelle Ordnerstruktur ohne Live-Abfrage.</p>';
+        echo '<div class="cc-app-grid">';
+        echo '<div class="cc-app-sidebar">';
+        echo '<div class="cc-app-card cc-app-card-sticky">';
+        echo '<div class="cc-app-header">';
+        echo '<div class="cc-app-header-copy"><h2>Provider / Verbindungen</h2><p class="cc-app-muted">Virtuelle Ordnerstruktur ohne Live-Abfrage.</p></div>';
+        echo '<div class="cc-app-badge-row">' . self::renderStatusBadge($selectedConnectionMode === 'readonly_live' ? 'readonly' : 'safe-mode') . '</div>';
+        echo '</div>';
 
         foreach ($guides as $providerSlug => $guide) {
             $providerUrl = esc_url(add_query_arg([
@@ -543,8 +561,8 @@ final class CloudAdmin
             ], admin_url('admin.php')));
             $providerClass = $providerSlug === $selectedProvider ? 'background:#f0f6fc;border-color:#72aee6;' : '';
 
-            echo '<div style="margin-bottom:12px;padding:12px;border:1px solid #dcdcde;' . esc_attr($providerClass) . '">';
-            echo '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">';
+            echo '<div class="cc-app-card cc-app-card-soft" style="' . esc_attr($providerClass) . '">';
+            echo '<div class="cc-app-header">';
             echo '<a href="' . $providerUrl . '" style="font-weight:600;text-decoration:none;">' . esc_html((string) $guide['title']) . '</a>';
             echo self::renderStatusBadge(self::providerGuideToExplorerStatus($providerSlug));
             echo '</div>';
@@ -587,7 +605,7 @@ final class CloudAdmin
 
             foreach (['/', '/Dokumente', '/Uploads', '/Archiv', '/Sync Queue'] as $folder) {
                 echo '<li style="margin-bottom:6px;">';
-                echo '<button type="button" class="button-link cc-drop-zone" data-drop-zone="folder" data-drop-target="' . esc_attr($folder) . '" style="display:block;width:100%;padding:10px 12px;border:1px dashed #c3c4c7;border-radius:8px;background:#f6f7f7;text-align:left;">';
+                echo '<button type="button" class="button-link cc-drop-zone cc-app-drop-zone" data-drop-zone="folder" data-drop-target="' . esc_attr($folder) . '" style="display:block;width:100%;text-align:left;">';
                 echo '<strong style="display:block;"><code>' . esc_html($folder) . '</code></strong>';
                 echo '<span style="display:block;margin-top:4px;color:#646970;">Safe-Mode Drop-Zone fuer simulierte Move-Previews</span>';
                 echo '</button>';
@@ -603,15 +621,17 @@ final class CloudAdmin
 
         if ($selectedConnectionMode === 'readonly_live') {
             self::renderReadonlyLiveExplorer($selectedProvider, $selectedConnection, $fileCache);
+            echo '</div>';
+            echo '</div>';
 
             return;
         }
 
-        echo '<div style="flex:2 1 640px;min-width:320px;">';
-        echo '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;">';
+        echo '<div class="cc-app-main">';
+        echo '<div class="cc-app-metrics">';
 
         foreach ($health as $card) {
-            echo '<div data-health-label="' . esc_attr($card['label']) . '" style="border:1px solid #dcdcde;background:#fff;padding:14px;">';
+            echo '<div class="cc-app-card cc-app-card-soft" data-health-label="' . esc_attr($card['label']) . '">';
             echo '<div style="font-size:12px;text-transform:uppercase;color:#646970;margin-bottom:8px;">' . esc_html($card['label']) . '</div>';
             echo '<div data-health-value style="font-size:22px;font-weight:600;line-height:1.2;">' . esc_html($card['value']) . '</div>';
             if ($card['note'] !== '') {
@@ -623,20 +643,20 @@ final class CloudAdmin
         }
 
         echo '</div>';
-        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;">';
-        echo '<div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">';
-        echo '<div>';
-        echo '<h2 style="margin-top:0;">Explorer</h2>';
-        echo '<p style="margin-top:0;color:#50575e;">';
+        echo '<div class="cc-app-card">';
+        echo '<div class="cc-app-header">';
+        echo '<div class="cc-app-header-copy">';
+        echo '<h2>Explorer</h2>';
+        echo '<p class="cc-app-muted">';
         echo esc_html((string) $guides[$selectedProvider]['title']);
         if ($selectedConnection) {
             echo ' / ' . esc_html((string) $selectedConnection['name']);
         }
         echo '</p>';
         echo '</div>';
-        echo '<div>' . self::renderStatusBadge('safe-mode') . '</div>';
+        echo '<div class="cc-app-badge-row">' . self::renderStatusBadge('safe-mode') . '</div>';
         echo '</div>';
-        echo '<div id="cc-dnd-feedback" style="display:none;margin:0 0 16px 0;padding:12px 14px;border:1px solid #c3c4c7;background:#f6f7f7;"></div>';
+        echo '<div id="cc-dnd-feedback" class="cc-app-card cc-app-card-soft" style="display:none;margin:0 0 16px 0;"></div>';
         echo '<div style="overflow:auto;">';
         echo '<table class="widefat striped">';
         echo '<thead><tr><th>Dateiname</th><th>Typ</th><th>Groesse</th><th>Provider</th><th>Sync-Richtung</th><th>Status</th><th>Letzte Aenderung</th><th>Letzter Sync</th><th>Konfliktstatus</th><th>Safe-Mode Aktionen</th></tr></thead><tbody>';
@@ -674,9 +694,9 @@ final class CloudAdmin
 
         echo '</tbody></table>';
         echo '</div>';
-        echo '<div id="cc-file-detail-panel" style="margin-top:16px;border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
+        echo '<div id="cc-file-detail-panel" class="cc-app-card cc-app-card-soft">';
         echo '<h3 style="margin-top:0;">Datei-Detailpanel</h3>';
-        echo '<p style="margin-top:0;color:#50575e;">Datei im Explorer anklicken oder per Drag-and-Drop simuliert verschieben. Safe-Mode bleibt read-only.</p>';
+        echo '<p class="cc-app-muted">Datei im Explorer anklicken oder per Drag-and-Drop simuliert verschieben. Safe-Mode bleibt read-only.</p>';
         echo '<div id="cc-detail-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">';
         echo '<button type="button" class="button button-secondary cc-detail-action" data-sim-action="queue">Zur Queue simulieren</button>';
         echo '<button type="button" class="button button-secondary cc-detail-action" data-sim-action="conflict">Konflikt simulieren</button>';
@@ -688,13 +708,13 @@ final class CloudAdmin
         echo '</div>';
         echo '</div>';
 
-        echo '<div id="cc-preview-drop-zone" class="cc-drop-zone" data-drop-zone="preview" data-drop-target="/local/sync-preview" style="border:1px solid #dcdcde;background:#fff;padding:16px;margin-top:16px;">';
-        echo '<div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">';
-        echo '<div>';
-        echo '<h2 style="margin-top:0;">Sync Preview / Dry Run</h2>';
-        echo '<p style="margin-top:0;color:#50575e;">Geplanter Sync, virtuelle Konflikte und Warteschlange bleiben reine Simulation. Keine Dateioperationen werden ausgefuehrt.</p>';
+        echo '<div id="cc-preview-drop-zone" class="cc-drop-zone cc-app-card" data-drop-zone="preview" data-drop-target="/local/sync-preview" style="margin-top:16px;">';
+        echo '<div class="cc-app-header">';
+        echo '<div class="cc-app-header-copy">';
+        echo '<h2>Sync Preview / Dry Run</h2>';
+        echo '<p class="cc-app-muted">Geplanter Sync, virtuelle Konflikte und Warteschlange bleiben reine Simulation. Keine Dateioperationen werden ausgefuehrt.</p>';
         echo '</div>';
-        echo '<div>' . self::renderStatusBadge('preview') . ' ' . self::renderStatusBadge('safe-mode') . '</div>';
+        echo '<div class="cc-app-badge-row">' . self::renderStatusBadge('preview') . ' ' . self::renderStatusBadge('safe-mode') . '</div>';
         echo '</div>';
         echo '<div style="overflow:auto;">';
         echo '<table class="widefat striped">';
@@ -718,8 +738,8 @@ final class CloudAdmin
 
         echo '</tbody></table>';
         echo '</div>';
-        echo '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px;">';
-        echo '<div id="cc-conflict-drop-zone" class="cc-drop-zone" data-drop-zone="conflict" data-drop-target="Virtuelle Konflikte" style="border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
+        echo '<div class="cc-app-grid" style="margin-top:16px;">';
+        echo '<div id="cc-conflict-drop-zone" class="cc-drop-zone cc-app-card cc-app-card-soft" data-drop-zone="conflict" data-drop-target="Virtuelle Konflikte">';
         echo '<h3 style="margin-top:0;">Virtuelle Konflikte</h3>';
         echo '<table class="widefat striped"><thead><tr><th>Datei</th><th>Lokaler Zustand</th><th>Cloud-Zustand</th><th>Konfliktstatus</th></tr></thead><tbody id="cc-conflict-body">';
 
@@ -738,7 +758,7 @@ final class CloudAdmin
 
         echo '</tbody></table>';
         echo '</div>';
-        echo '<div id="cc-queue-drop-zone" class="cc-drop-zone" data-drop-zone="queue" data-drop-target="Virtuelle Warteschlange" style="border:1px solid #dcdcde;background:#f6f7f7;padding:16px;">';
+        echo '<div id="cc-queue-drop-zone" class="cc-drop-zone cc-app-card cc-app-card-soft" data-drop-zone="queue" data-drop-target="Virtuelle Warteschlange">';
         echo '<h3 style="margin-top:0;">Virtuelle Warteschlange</h3>';
         echo '<ul id="cc-queue-list" style="margin:0;padding-left:18px;">';
         foreach ($previewRows as $previewRow) {
@@ -763,6 +783,7 @@ final class CloudAdmin
         echo '</div>';
         echo '</div>';
         self::renderExplorerScript($detailPanel['map'], $previewRows, $conflictRows, $health, $activityEntries);
+        echo '</div>';
     }
 
     private static function renderReadonlyLiveExplorer(string $selectedProvider, ?array $selectedConnection, array $fileCache): void
@@ -773,21 +794,21 @@ final class CloudAdmin
             static fn(array $row): bool => (int) ($row['connection_id'] ?? 0) === $connectionId
         ));
 
-        echo '<div style="flex:2 1 640px;min-width:320px;">';
-        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;">';
-        echo '<div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">';
-        echo '<div>';
-        echo '<h2 style="margin-top:0;">Readonly Live Explorer</h2>';
-        echo '<p style="margin-top:0;color:#50575e;">';
+        echo '<div class="cc-app-main">';
+        echo '<div class="cc-app-card">';
+        echo '<div class="cc-app-header">';
+        echo '<div class="cc-app-header-copy">';
+        echo '<h2>Readonly Live Explorer</h2>';
+        echo '<p class="cc-app-muted">';
         echo esc_html((string) (self::getProviderGuides()[$selectedProvider]['title'] ?? $selectedProvider));
         if ($selectedConnection) {
             echo ' / ' . esc_html((string) $selectedConnection['name']);
         }
         echo '</p>';
         echo '</div>';
-        echo '<div>' . self::renderConnectionModeBadge('readonly_live') . '</div>';
+        echo '<div class="cc-app-badge-row">' . self::renderConnectionModeBadge('readonly_live') . ' ' . self::renderStatusBadge('readonly') . '</div>';
         echo '</div>';
-        echo '<div style="margin:0 0 16px 0;padding:12px 14px;border:1px solid #c3c4c7;background:#f6f7f7;">';
+        echo '<div class="cc-app-card cc-app-card-soft" style="margin:0 0 16px 0;">';
         echo '<strong>Nur Metadatenzugriff.</strong> Diese Verbindung erlaubt nur readonly Metadatenzugriff. Es werden keine Dateiaenderungen durchgefuehrt.';
         echo '</div>';
         echo '<table class="widefat striped" style="margin-bottom:16px;"><tbody>';
@@ -822,20 +843,24 @@ final class CloudAdmin
         $nodes = self::getNetworkNodes();
         $initial = $nodes[0] ?? [];
 
-        echo '<div style="margin-bottom:16px;padding:12px 16px;border:1px solid #dcdcde;background:#fff;">';
+        echo '<div class="cc-app-shell">';
+        echo '<div class="cc-app-banner">';
         echo '<strong>Readonly Netzwerkansicht.</strong> Diese Mesh-Ansicht ist reine Statusvisualisierung. Keine Provider-Calls, keine Dateioperationen, keine Worker-Anbindung.';
         echo '</div>';
-        echo '<div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:16px;align-items:start;">';
-        echo '<div style="border:1px solid #dcdcde;background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%);padding:18px;overflow:hidden;">';
-        echo '<h2 style="margin-top:0;">Cloud Connector Mesh</h2>';
-        echo '<p style="margin-top:0;color:#50575e;">Safe-Mode als Schutzschicht, Readonly Live als streng begrenzter Providerpfad und alle Systemkomponenten als Topologie.</p>';
-        echo '<div class="cc-network-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;position:relative;">';
+        echo '<div class="cc-app-grid">';
+        echo '<div class="cc-app-main">';
+        echo '<div class="cc-app-card cc-app-card-tint">';
+        echo '<div class="cc-app-header">';
+        echo '<div class="cc-app-header-copy"><h2>Cloud Connector Mesh</h2><p class="cc-app-muted">Safe-Mode als Schutzschicht, Readonly Live als streng begrenzter Providerpfad und alle Systemkomponenten als Topologie.</p></div>';
+        echo '<div class="cc-app-badge-row">' . self::renderStatusBadge('safe-mode') . ' ' . self::renderStatusBadge('readonly') . '</div>';
+        echo '</div>';
+        echo '<div class="cc-network-grid cc-app-network-grid">';
 
         foreach ($nodes as $node) {
             $allowed = implode(' | ', array_map('strval', $node['allowed']));
             $blocked = implode(' | ', array_map('strval', $node['blocked']));
-            echo '<button type="button" class="cc-network-node" data-node-title="' . esc_attr((string) $node['title']) . '" data-node-status="' . esc_attr((string) $node['status']) . '" data-node-description="' . esc_attr((string) $node['description']) . '" data-node-allowed="' . esc_attr($allowed) . '" data-node-blocked="' . esc_attr($blocked) . '" style="text-align:left;border:1px solid #dcdcde;border-radius:14px;padding:14px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,0.06);cursor:pointer;">';
-            echo '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">';
+            echo '<button type="button" class="cc-network-node cc-app-network-node" data-node-title="' . esc_attr((string) $node['title']) . '" data-node-status="' . esc_attr((string) $node['status']) . '" data-node-description="' . esc_attr((string) $node['description']) . '" data-node-allowed="' . esc_attr($allowed) . '" data-node-blocked="' . esc_attr($blocked) . '" style="text-align:left;">';
+            echo '<div class="cc-app-header">';
             echo '<strong>' . esc_html((string) $node['title']) . '</strong>';
             echo self::renderStatusBadge((string) $node['status']);
             echo '</div>';
@@ -847,7 +872,8 @@ final class CloudAdmin
 
         echo '</div>';
         echo '</div>';
-        echo '<div style="border:1px solid #dcdcde;background:#fff;padding:16px;position:sticky;top:16px;">';
+        echo '<div class="cc-app-sidebar">';
+        echo '<div class="cc-app-card cc-app-card-sticky">';
         echo '<h2 style="margin-top:0;">Node-Details</h2>';
         echo '<div id="cc-network-detail">';
         echo self::renderNetworkDetailHtml($initial);
@@ -864,6 +890,8 @@ final class CloudAdmin
         echo 'nodes[0].style.outline="2px solid #72aee6";nodes[0].style.outlineOffset="2px";';
         echo '})();';
         echo '</script>';
+        echo '</div>';
+        echo '</div>';
     }
 
     private static function renderNetworkDetailHtml(array $node): string
@@ -959,6 +987,34 @@ final class CloudAdmin
         echo '</form>';
     }
 
+    private static function renderUiShellStyles(): void
+    {
+        echo '<style id="cc-ui-shell-styles">';
+        echo '.cc-app-shell{display:grid;gap:16px;margin-top:16px;}';
+        echo '.cc-app-banner,.cc-app-card{border:1px solid #dcdcde;border-radius:16px;background:#fff;box-shadow:0 10px 30px rgba(15,23,42,.05);}';
+        echo '.cc-app-banner{padding:14px 16px;background:linear-gradient(145deg,#f8fbff 0%,#ffffff 100%);}';
+        echo '.cc-app-card{padding:16px;}';
+        echo '.cc-app-card-soft{background:#f8fafc;}';
+        echo '.cc-app-card-tint{background:linear-gradient(180deg,#f8fbff 0%,#ffffff 100%);}';
+        echo '.cc-app-card-sticky{position:sticky;top:16px;}';
+        echo '.cc-app-grid{display:grid;grid-template-columns:minmax(280px,340px) minmax(0,1fr);gap:16px;align-items:start;}';
+        echo '.cc-app-sidebar,.cc-app-main{min-width:0;}';
+        echo '.cc-app-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px;}';
+        echo '.cc-app-header-copy{display:grid;gap:6px;min-width:0;}';
+        echo '.cc-app-header-copy h2,.cc-app-header-copy h3{margin:0;}';
+        echo '.cc-app-muted{margin:0;color:#50575e;}';
+        echo '.cc-app-badge-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}';
+        echo '.cc-app-drop-zone{padding:10px 12px;border:1px dashed #c3c4c7;border-radius:10px;background:#f6f7f7;}';
+        echo '.cc-app-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;}';
+        echo '.cc-app-network-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;position:relative;}';
+        echo '.cc-app-network-node{border:1px solid #dcdcde;border-radius:14px;padding:14px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.06);cursor:pointer;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease;}';
+        echo '.cc-app-network-node:hover{transform:translateY(-1px);border-color:#72aee6;box-shadow:0 12px 30px rgba(15,23,42,.09);}';
+        echo '.cc-app-badge{display:inline-flex;align-items:center;min-height:24px;padding:3px 10px;border-radius:999px;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;}';
+        echo '@media (max-width:960px){.cc-app-grid{grid-template-columns:minmax(0,1fr);}.cc-app-card-sticky{position:static;}}';
+        echo '@media (max-width:640px){.cc-app-card,.cc-app-banner{padding:14px;}.widefat td,.widefat th{white-space:normal;}}';
+        echo '</style>';
+    }
+
     private static function renderStatusBadge(string $status): string
     {
         $styles = [
@@ -985,12 +1041,7 @@ final class CloudAdmin
 
         [$background, $color] = $styles[$status] ?? ['#f3f4f6', '#111827'];
 
-        return sprintf(
-            '<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:%s;color:%s;font-weight:600;">%s</span>',
-            esc_attr($background),
-            esc_attr($color),
-            esc_html($status)
-        );
+        return self::renderBadgePill($status, $background, $color, false);
     }
 
     private static function renderExplorerActionButtons(string $fileKey, bool $disabled = false): string
@@ -1089,12 +1140,7 @@ final class CloudAdmin
         ];
         [$background, $color] = $styles[$mode] ?? ['#f3f4f6', '#111827'];
 
-        return sprintf(
-            '<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:%s;color:%s;font-weight:700;">%s</span>',
-            esc_attr($background),
-            esc_attr($color),
-            esc_html($labels[$mode] ?? strtoupper($mode))
-        );
+        return self::renderBadgePill((string) ($labels[$mode] ?? strtoupper($mode)), $background, $color, true);
     }
 
     private static function renderInfoBadge(string $label): string
@@ -1107,12 +1153,15 @@ final class CloudAdmin
 
         [$background, $color] = $styles[$label] ?? ['#f3f4f6', '#111827'];
 
-        return sprintf(
-            '<span style="display:inline-block;margin-right:8px;padding:2px 8px;border-radius:999px;background:%s;color:%s;font-weight:600;">%s</span>',
-            esc_attr($background),
-            esc_attr($color),
-            esc_html($label)
-        );
+        return self::renderBadgePill($label, $background, $color, true);
+    }
+
+    private static function renderBadgePill(string $label, string $background, string $color, bool $uppercase = false): string
+    {
+        $style = 'background:' . esc_attr($background) . ';color:' . esc_attr($color) . ';';
+        $style .= $uppercase ? 'text-transform:uppercase;' : '';
+
+        return '<span class="cc-app-badge" style="' . $style . '">' . esc_html($label) . '</span>';
     }
 
     private static function renderProviderGuideValue(string $value): string
