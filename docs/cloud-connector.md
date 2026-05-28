@@ -250,6 +250,24 @@ Es werden bewusst keine Schreibscopes vorbereitet.
 - Kein Sync
 - Keine Dateioperationen
 
+## UI-Shell-Konzept
+
+- Verbindungen, Explorer, Readonly-Live-Bereich und Netzwerkansicht werden als zusammenhaengende App-Shell behandelt
+- Ziel ist eine klarere UI-Hierarchie statt vieler isolierter WordPress-Boxen
+- wiederkehrende Shell-Bausteine:
+  - Bereichsheader
+  - Statuszeilen
+  - Karten und Sidepanels
+  - Badge-Zonen fuer Modus, Status und Sicherheitsgrenzen
+  - Detailpanels fuer readonly und Netzwerkstatus
+- Theme-/Website-UI und Cloud-/Portal-UI bleiben weiterhin fachlich getrennt gedacht
+- diese Konsolidierung ist rein visuell:
+  - keine neuen Features
+  - keine neuen Tabs
+  - keine Provider-, OAuth-, Worker- oder Queue-Logik
+  - keine Dateioperationen
+  - keine Aenderung der Safe-Mode-Schutzgrenzen
+
 Gezeigte Nodes:
 
 - Cloud Connector
