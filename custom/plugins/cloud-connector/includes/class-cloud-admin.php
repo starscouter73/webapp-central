@@ -882,7 +882,7 @@ final class CloudAdmin
         echo '</div>';
         echo '<script>';
         echo '(function(){const detail=document.getElementById("cc-network-detail");const nodes=document.querySelectorAll(".cc-network-node");if(!detail||!nodes.length){return;}';
-        echo 'const esc=function(value){return String(value).replace(/[&<>"\']/g,function(char){if(char==="&"){return "&amp;";}if(char==="<"){return "&lt;";}if(char===">"){return "&gt;";}if(char===\'"\'){return "&quot;";}return "&#039;";});};';
+        echo 'const esc=function(value){return String(value).replace(/[&<>"\']/g,function(char){const code=char.charCodeAt(0);if(code===38){return "&amp;";}if(code===60){return "&lt;";}if(code===62){return "&gt;";}if(code===34){return "&quot;";}return "&#039;";});};';
         echo 'const badge=function(label){const palette={aktiv:["#dcfce7","#166534"],"safe-mode":["#e0f2fe","#075985"],readonly:["#f3f4f6","#111827"],blocked:["#fee2e2","#991b1b"],geplant:["#dbeafe","#1d4ed8"],inaktiv:["#e5e7eb","#374151"]};const colors=palette[label]||["#f3f4f6","#111827"];return \'<span style="display:inline-block;padding:2px 8px;border-radius:999px;background:\'+colors[0]+\';color:\'+colors[1]+\';font-weight:700;">\'+esc(label)+\'</span>\';};';
         echo 'const list=function(value){return String(value||"").split(" | ").filter(Boolean).map(function(item){return "<li>"+esc(item)+"</li>";}).join("")||"<li>-</li>";};';
         echo 'const render=function(node){detail.innerHTML="<h3 style=\"margin-top:0;\">"+esc(node.title)+"</h3><p style=\"margin:0 0 12px 0;\">"+badge(node.status)+"</p><p style=\"color:#50575e;\">"+esc(node.description)+"</p><div style=\"display:grid;grid-template-columns:1fr;gap:12px;\"><div><strong>Erlaubt</strong><ul style=\"margin:8px 0 0 18px;\">"+list(node.allowed)+"</ul></div><div><strong>Blockiert</strong><ul style=\"margin:8px 0 0 18px;\">"+list(node.blocked)+"</ul></div></div>";};';
@@ -1208,7 +1208,7 @@ final class CloudAdmin
         echo 'toggleGuide(initialSlug);';
         echo 'if(providerSelect){providerSelect.addEventListener("change",function(){toggleGuide(providerSelect.value);});}';
         echo 'if(guideSelect){guideSelect.addEventListener("change",function(){toggleGuide(guideSelect.value);});}';
-        echo 'document.querySelectorAll(".cc-copy-button").forEach(function(button){button.addEventListener("click",function(){const value=button.getAttribute("data-copy-value")||\"\"; const originalLabel=button.getAttribute(\"data-copy-label\")||button.textContent; if(!value){return;} if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(value);} button.textContent=\"Kopiert\"; window.setTimeout(function(){button.textContent=originalLabel;},1200);});});';
+        echo 'document.querySelectorAll(".cc-copy-button").forEach(function(button){button.addEventListener("click",function(){const value=button.getAttribute("data-copy-value")||""; const originalLabel=button.getAttribute("data-copy-label")||button.textContent; if(!value){return;} if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(value);} button.textContent="Kopiert"; window.setTimeout(function(){button.textContent=originalLabel;},1200);});});';
         echo '})();';
         echo '</script>';
     }
@@ -1691,7 +1691,7 @@ final class CloudAdmin
             . '+\'<tr><td><strong>Konfliktstatus</strong></td><td>\'+renderBadge(detail.conflict_status)+\'</td></tr>\''
             . '+\'<tr><td><strong>Hash / Checksum</strong></td><td><code>\'+detail.checksum+\'</code></td></tr>\''
             . '+\'</tbody></table>\';};';
-        echo 'const escapeHtml=function(value){return String(value).replace(/[&<>"\']/g,function(char){if(char==="&"){return "&amp;";} if(char==="<"){return "&lt;";} if(char===">"){return "&gt;";} if(char===\'"\'){return "&quot;";} return "&#039;";});};';
+        echo 'const escapeHtml=function(value){return String(value).replace(/[&<>"\']/g,function(char){const code=char.charCodeAt(0); if(code===38){return "&amp;";} if(code===60){return "&lt;";} if(code===62){return "&gt;";} if(code===34){return "&quot;";} return "&#039;";});};';
         echo 'const state={activeKey:Object.keys(detailMap)[0]||"",previewRows:initialPreviewRows.slice(),conflictRows:initialConflictRows.slice(),activity:initialActivity.slice(),health:initialHealth.slice()};';
         echo 'const activityMessage=function(file,action,target,blocked){if(blocked){return file+" fuer "+target+" geblockt (Safe-Mode)";} if(action==="queue"){return file+" in Queue gezogen";} if(action==="conflict"){return "Konfliktmarkierung fuer "+file+" simuliert";} if(action==="move"){return "Simulierter Move fuer "+file+" vorbereitet";} return file+" zur Preview hinzugefuegt";};';
         echo 'const folderTargets={"/":"preview","/Dokumente":"move","/Uploads":"move","/Archiv":"move","/Sync Queue":"queue"};';
