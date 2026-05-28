@@ -14,6 +14,7 @@ final class CloudConnectorPlugin
         add_action('plugins_loaded', [self::class, 'maybeUpgrade']);
         add_action('init', [self::class, 'ensureAutomationHook']);
         add_action('admin_menu', [self::class, 'registerAdmin']);
+        add_action('admin_enqueue_scripts', [self::class, 'enqueueAdminAssets']);
         add_action('admin_notices', [self::class, 'renderAdminNotices']);
         add_action('admin_post_cc_save_connection', [self::class, 'saveConnection']);
         add_action('admin_post_cc_delete_connection', [self::class, 'deleteConnection']);
@@ -69,6 +70,11 @@ final class CloudConnectorPlugin
     public static function registerAdmin(): void
     {
         CloudAdmin::registerMenu();
+    }
+
+    public static function enqueueAdminAssets(string $hookSuffix): void
+    {
+        CloudAdmin::enqueueAssets($hookSuffix);
     }
 
     public static function ensureAutomationHook(): void

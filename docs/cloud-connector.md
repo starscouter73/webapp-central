@@ -268,6 +268,14 @@ Es werden bewusst keine Schreibscopes vorbereitet.
   - keine Dateioperationen
   - keine Aenderung der Safe-Mode-Schutzgrenzen
 
+## Admin-Stylesheet-Foundation
+
+- das Plugin besitzt jetzt ein eigenes Admin-Stylesheet unter `custom/plugins/cloud-connector/assets/cloud-connector-admin.css`
+- geladen wird es nur im WordPress-Admin auf Cloud-Connector-Seiten
+- ausgelagert werden vorerst nur kleine App-Shell-Grundlagen wie Shell-Container, Panels, Header, Statuszeilen, Badges, Grids und Sticky-Sidepanel
+- dies ist bewusst noch keine vollstaendige CSS-Migration aus `class-cloud-admin.php`
+- der Schritt bereitet eine spaetere, sauberere UI-/CSS-Konsolidierung vor, ohne die bestehende Plugin-Funktionalitaet zu veraendern
+
 Gezeigte Nodes:
 
 - Cloud Connector
