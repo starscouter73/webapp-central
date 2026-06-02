@@ -25,7 +25,7 @@ final class CloudReadonlyProviderService
 
     public static function getGoogleReadonlyRedirectUri(): string
     {
-        return (string) admin_url('admin-post.php?action=cc_google_readonly_oauth_callback');
+        return (string) admin_url('admin.php');
     }
 
     public static function prepareGoogleConfig(array $config): array

@@ -213,7 +213,7 @@ final class CloudAdmin
         $providers = CloudStorage::getProviders();
         $editId = absint($_GET['edit_connection'] ?? 0);
         $editConnection = $editId ? CloudStorage::getConnection($editId) : null;
-        $config = $editConnection ? CloudCrypto::decryptConfig((string) $editConnection['config_encrypted']) : [];
+        $config = $editConnection ? self::normalizeConnectionConfig((string) ($editConnection['provider_slug'] ?? ''), CloudCrypto::decryptConfig((string) $editConnection['config_encrypted'])) : [];
         $connectionMode = self::getConnectionMode($editConnection, $config);
         $selectedConnectionStatus = ($editConnection['status'] ?? '') === 'aktiv' ? 'aktiv' : 'inaktiv';
         $providerGuides = self::getProviderGuides();
@@ -229,7 +229,7 @@ final class CloudAdmin
         echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Anbieter</th><th>Anzeigename</th><th>Status</th><th>Modus</th><th>Client ID</th><th>Client Secret</th><th>Redirect URI</th><th>Token vorhanden</th><th>Letzte Live-Pruefung</th><th>Erstellt am</th><th>Aktualisiert am</th><th>Aktionen</th></tr></thead><tbody>';
 
         foreach ($connections as $connection) {
-            $rowConfig = CloudCrypto::decryptConfig((string) $connection['config_encrypted']);
+            $rowConfig = self::normalizeConnectionConfig((string) ($connection['provider_slug'] ?? ''), CloudCrypto::decryptConfig((string) $connection['config_encrypted']));
             $editUrl = esc_url(add_query_arg(['page' => self::MENU_SLUG, 'tab' => 'connections', 'edit_connection' => (int) $connection['id']], admin_url('admin.php')));
             $hasToken = !empty($rowConfig['access_token']) || !empty($rowConfig['refresh_token']);
             $isGoogleDrive = (string) $connection['provider_slug'] === 'google_drive';
@@ -556,7 +556,7 @@ final class CloudAdmin
         }
 
         $selectedConnectionId = (int) ($selectedConnection['id'] ?? 0);
-        $selectedConnectionConfig = $selectedConnection ? CloudCrypto::decryptConfig((string) $selectedConnection['config_encrypted']) : [];
+        $selectedConnectionConfig = $selectedConnection ? self::normalizeConnectionConfig((string) ($selectedConnection['provider_slug'] ?? ''), CloudCrypto::decryptConfig((string) $selectedConnection['config_encrypted'])) : [];
         $selectedConnectionMode = self::getConnectionMode($selectedConnection, $selectedConnectionConfig);
         $explorerFiles = self::buildExplorerRows($selectedProvider, $selectedConnection, $jobs, $logs, $fileCache);
         $previewRows = self::buildExplorerPreviewRows($explorerFiles, $selectedProvider, $selectedConnection, $jobs, $logs);
@@ -616,7 +616,7 @@ final class CloudAdmin
                         'explorer_connection' => (int) $connection['id'],
                     ], admin_url('admin.php')));
                     $isSelectedConnection = $providerSlug === $selectedProvider && (int) $connection['id'] === $selectedConnectionId;
-                    $connectionConfig = CloudCrypto::decryptConfig((string) ($connection['config_encrypted'] ?? ''));
+                    $connectionConfig = self::normalizeConnectionConfig((string) ($connection['provider_slug'] ?? ''), CloudCrypto::decryptConfig((string) ($connection['config_encrypted'] ?? '')));
 
                     echo '<li style="margin-bottom:4px;">';
                     echo '<a href="' . $connectionUrl . '" style="text-decoration:none;' . ($isSelectedConnection ? 'font-weight:600;' : '') . '">' . esc_html((string) $connection['name']) . '</a> ';
@@ -1121,7 +1121,7 @@ final class CloudAdmin
         $resolvedConfig = $config;
 
         if ($resolvedConfig === null && is_array($connection)) {
-            $resolvedConfig = CloudCrypto::decryptConfig((string) ($connection['config_encrypted'] ?? ''));
+            $resolvedConfig = self::normalizeConnectionConfig((string) ($connection['provider_slug'] ?? ''), CloudCrypto::decryptConfig((string) ($connection['config_encrypted'] ?? '')));
         }
 
         return CloudReadonlyProviderService::normalizeMode((string) ($resolvedConfig['connection_mode'] ?? 'safe_mode'));
@@ -1286,6 +1286,15 @@ final class CloudAdmin
     private static function hasGoogleReadonlyCredentials(array $config): bool
     {
         return !empty($config['client_id']) && !empty($config['client_secret']);
+    }
+
+    private static function normalizeConnectionConfig(string $providerSlug, array $config): array
+    {
+        if ($providerSlug === 'google_drive') {
+            return CloudReadonlyProviderService::prepareGoogleConfig($config);
+        }
+
+        return $config;
     }
 
     private static function providerGuideToExplorerStatus(string $providerSlug): string

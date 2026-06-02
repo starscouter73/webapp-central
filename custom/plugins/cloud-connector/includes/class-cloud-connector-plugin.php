@@ -7,6 +7,7 @@ final class CloudConnectorPlugin
     private const VERSION = '0.1.0';
     private const NOTICE_OPTION = 'cloud_connector_admin_notice';
     private const GOOGLE_OAUTH_STATE_PREFIX = 'cloud_connector_google_oauth_state_';
+    private const GOOGLE_OAUTH_STATE_MARKER = 'cc_google_readonly_oauth';
     private const GOOGLE_OAUTH_STATE_TTL = 15 * MINUTE_IN_SECONDS;
 
     public static function bootstrap(string $pluginFile): void
@@ -15,6 +16,7 @@ final class CloudConnectorPlugin
         register_deactivation_hook($pluginFile, [self::class, 'deactivate']);
         add_action('plugins_loaded', [self::class, 'maybeUpgrade']);
         add_action('init', [self::class, 'ensureAutomationHook']);
+        add_action('admin_init', [self::class, 'maybeHandleGoogleReadonlyOauthCallback']);
         add_action('admin_menu', [self::class, 'registerAdmin']);
         add_action('admin_enqueue_scripts', [self::class, 'enqueueAdminAssets']);
         add_action('admin_notices', [self::class, 'renderAdminNotices']);
@@ -175,6 +177,7 @@ final class CloudConnectorPlugin
         set_transient(
             self::oauthStateKey($state),
             [
+                'flow' => self::GOOGLE_OAUTH_STATE_MARKER,
                 'connection_id' => (int) $connection['id'],
                 'user_id' => get_current_user_id(),
             ],
@@ -221,7 +224,21 @@ final class CloudConnectorPlugin
         exit;
     }
 
+    public static function maybeHandleGoogleReadonlyOauthCallback(): void
+    {
+        if (!self::isGoogleReadonlyOauthCallbackRequest()) {
+            return;
+        }
+
+        self::completeGoogleReadonlyOauthCallback();
+    }
+
     public static function handleGoogleReadonlyOauthCallback(): void
+    {
+        self::completeGoogleReadonlyOauthCallback();
+    }
+
+    private static function completeGoogleReadonlyOauthCallback(): void
     {
         if (!current_user_can('manage_options')) {
             wp_die('Keine Berechtigung.');
@@ -233,9 +250,9 @@ final class CloudConnectorPlugin
 
         $state = sanitize_text_field(wp_unslash($_GET['state'] ?? ''));
         $code = sanitize_text_field(wp_unslash($_GET['code'] ?? ''));
-        $storedState = is_string($state) ? get_transient(self::oauthStateKey($state)) : false;
+        $storedState = self::loadGoogleOauthState($state);
 
-        if (!is_array($storedState) || empty($storedState['connection_id']) || (int) ($storedState['user_id'] ?? 0) !== get_current_user_id()) {
+        if (!is_array($storedState)) {
             CloudLogger::log('error', 'oauth_failed', 'Google Readonly OAuth-Callback mit ungueltigem State abgewiesen.');
             CloudAdmin::redirectWithNotice('connections', 'oauth_invalid_state', true);
         }
@@ -283,6 +300,24 @@ final class CloudConnectorPlugin
         );
 
         CloudAdmin::redirectWithNotice('connections', 'oauth_completed');
+    }
+
+    private static function isGoogleReadonlyOauthCallbackRequest(): bool
+    {
+        global $pagenow;
+
+        if (!is_admin() || !is_string($pagenow) || $pagenow !== 'admin.php') {
+            return false;
+        }
+
+        $state = sanitize_text_field(wp_unslash($_GET['state'] ?? ''));
+        $code = sanitize_text_field(wp_unslash($_GET['code'] ?? ''));
+
+        if ($state === '' || $code === '') {
+            return false;
+        }
+
+        return self::isGoogleOauthStateFormat($state) && is_array(self::loadGoogleOauthState($state));
     }
 
     public static function deleteConnection(): void
@@ -560,19 +595,46 @@ final class CloudConnectorPlugin
         update_option(self::NOTICE_OPTION, sanitize_text_field($message), false);
     }
 
+    private static function loadGoogleOauthState(string $state): array|false
+    {
+        if (!self::isGoogleOauthStateFormat($state)) {
+            return false;
+        }
+
+        $storedState = get_transient(self::oauthStateKey($state));
+
+        if (
+            !is_array($storedState)
+            || ($storedState['flow'] ?? '') !== self::GOOGLE_OAUTH_STATE_MARKER
+            || empty($storedState['connection_id'])
+            || (int) ($storedState['user_id'] ?? 0) !== get_current_user_id()
+        ) {
+            return false;
+        }
+
+        return $storedState;
+    }
+
     private static function generateOauthState(): string
     {
         try {
-            return bin2hex(random_bytes(32));
+            $random = bin2hex(random_bytes(32));
         } catch (Throwable $exception) {
             unset($exception);
 
-            return wp_generate_password(64, false, false);
+            $random = wp_generate_password(64, false, false);
         }
+
+        return self::GOOGLE_OAUTH_STATE_MARKER . '_' . $random;
     }
 
     private static function oauthStateKey(string $state): string
     {
         return self::GOOGLE_OAUTH_STATE_PREFIX . hash('sha256', $state);
+    }
+
+    private static function isGoogleOauthStateFormat(string $state): bool
+    {
+        return str_starts_with($state, self::GOOGLE_OAUTH_STATE_MARKER . '_');
     }
 }
