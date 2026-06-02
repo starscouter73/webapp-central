@@ -23,8 +23,21 @@ final class CloudReadonlyProviderService
         return [self::GOOGLE_DRIVE_SCOPE];
     }
 
+    public static function getGoogleReadonlyRedirectUri(): string
+    {
+        return (string) admin_url('admin-post.php?action=cc_google_readonly_oauth_callback');
+    }
+
+    public static function prepareGoogleConfig(array $config): array
+    {
+        $config['redirect_uri'] = self::getGoogleReadonlyRedirectUri();
+
+        return $config;
+    }
+
     public static function buildPreparedGoogleAuthUrl(array $config): string
     {
+        $config = self::prepareGoogleConfig($config);
         $clientId = trim((string) ($config['client_id'] ?? ''));
         $redirectUri = trim((string) ($config['redirect_uri'] ?? ''));
 
@@ -44,6 +57,100 @@ final class CloudReadonlyProviderService
             ],
             self::GOOGLE_OAUTH_AUTHORIZE
         );
+    }
+
+    public static function buildGoogleOauthStartUrl(array $connection, string $state)
+    {
+        $providerSlug = sanitize_key((string) ($connection['provider_slug'] ?? ''));
+        $config = self::prepareGoogleConfig(CloudCrypto::decryptConfig((string) ($connection['config_encrypted'] ?? '')));
+        $clientId = trim((string) ($config['client_id'] ?? ''));
+        $clientSecret = trim((string) ($config['client_secret'] ?? ''));
+
+        if ($providerSlug !== 'google_drive') {
+            return new WP_Error('cloud_oauth_provider_unsupported', 'Google Readonly OAuth ist nur fuer Google Drive verfuegbar.');
+        }
+
+        if ($clientId === '' || $clientSecret === '') {
+            return new WP_Error('cloud_oauth_missing_credentials', 'Fuer Google Readonly OAuth werden Client ID und Client Secret benoetigt.');
+        }
+
+        $url = add_query_arg(
+            [
+                'client_id' => $clientId,
+                'redirect_uri' => trim((string) ($config['redirect_uri'] ?? '')),
+                'response_type' => 'code',
+                'scope' => self::GOOGLE_DRIVE_SCOPE,
+                'access_type' => 'offline',
+                'include_granted_scopes' => 'false',
+                'prompt' => 'consent',
+                'state' => $state,
+            ],
+            self::GOOGLE_OAUTH_AUTHORIZE
+        );
+
+        return is_string($url) && $url !== ''
+            ? $url
+            : new WP_Error('cloud_oauth_invalid_start_url', 'Die Google Readonly OAuth-URL konnte nicht vorbereitet werden.');
+    }
+
+    public static function exchangeGoogleAuthorizationCode(array $connection, string $code)
+    {
+        $providerSlug = sanitize_key((string) ($connection['provider_slug'] ?? ''));
+        $config = self::prepareGoogleConfig(CloudCrypto::decryptConfig((string) ($connection['config_encrypted'] ?? '')));
+        $clientId = trim((string) ($config['client_id'] ?? ''));
+        $clientSecret = trim((string) ($config['client_secret'] ?? ''));
+        $authorizationCode = trim($code);
+
+        if ($providerSlug !== 'google_drive') {
+            return new WP_Error('cloud_oauth_provider_unsupported', 'Google Readonly OAuth ist nur fuer Google Drive verfuegbar.');
+        }
+
+        if ($authorizationCode === '') {
+            return new WP_Error('cloud_oauth_missing_code', 'Der Google OAuth-Callback enthielt keinen Authorization Code.');
+        }
+
+        if ($clientId === '' || $clientSecret === '') {
+            return new WP_Error('cloud_oauth_missing_credentials', 'Fuer Google Readonly OAuth werden Client ID und Client Secret benoetigt.');
+        }
+
+        $response = wp_remote_post(
+            self::GOOGLE_OAUTH_TOKEN,
+            [
+                'timeout' => self::requestTimeout(),
+                'redirection' => 0,
+                'headers' => ['Accept' => 'application/json'],
+                'body' => [
+                    'client_id' => $clientId,
+                    'client_secret' => $clientSecret,
+                    'code' => $authorizationCode,
+                    'grant_type' => 'authorization_code',
+                    'redirect_uri' => trim((string) ($config['redirect_uri'] ?? '')),
+                ],
+                'user-agent' => 'webapp-central-cloud-connector/readonly-oauth',
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            return new WP_Error('cloud_oauth_exchange_failed', 'Der Google OAuth-Code konnte nicht gegen Tokens getauscht werden.');
+        }
+
+        $statusCode = (int) wp_remote_retrieve_response_code($response);
+        $payload = json_decode((string) wp_remote_retrieve_body($response), true);
+        $accessToken = is_array($payload) ? trim((string) ($payload['access_token'] ?? '')) : '';
+        $refreshToken = is_array($payload) ? trim((string) ($payload['refresh_token'] ?? '')) : '';
+
+        if ($statusCode < 200 || $statusCode >= 300 || $accessToken === '') {
+            return new WP_Error('cloud_oauth_exchange_invalid', 'Google lieferte keine gueltigen Readonly OAuth-Tokens.');
+        }
+
+        $config['access_token'] = $accessToken;
+        if ($refreshToken !== '') {
+            $config['refresh_token'] = $refreshToken;
+        }
+        $config['connection_mode'] = 'readonly_live';
+        $config['redirect_uri'] = self::getGoogleReadonlyRedirectUri();
+
+        return $config;
     }
 
     public static function testConnection(array $connection)

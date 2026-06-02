@@ -6,6 +6,8 @@ final class CloudConnectorPlugin
 {
     private const VERSION = '0.1.0';
     private const NOTICE_OPTION = 'cloud_connector_admin_notice';
+    private const GOOGLE_OAUTH_STATE_PREFIX = 'cloud_connector_google_oauth_state_';
+    private const GOOGLE_OAUTH_STATE_TTL = 15 * MINUTE_IN_SECONDS;
 
     public static function bootstrap(string $pluginFile): void
     {
@@ -19,6 +21,8 @@ final class CloudConnectorPlugin
         add_action('admin_post_cc_save_connection', [self::class, 'saveConnection']);
         add_action('admin_post_cc_delete_connection', [self::class, 'deleteConnection']);
         add_action('admin_post_cc_connection_action', [self::class, 'connectionAction']);
+        add_action('admin_post_cc_google_readonly_oauth_start', [self::class, 'startGoogleReadonlyOauth']);
+        add_action('admin_post_cc_google_readonly_oauth_callback', [self::class, 'handleGoogleReadonlyOauthCallback']);
         add_action('admin_post_cc_save_job', [self::class, 'saveJob']);
         add_action('admin_post_cc_delete_job', [self::class, 'deleteJob']);
         add_action('admin_post_cc_job_action', [self::class, 'jobAction']);
@@ -124,6 +128,10 @@ final class CloudConnectorPlugin
             $submittedConfig['refresh_token'] = '';
         }
 
+        if (sanitize_key(wp_unslash($_POST['provider_slug'] ?? '')) === 'google_drive') {
+            $submittedConfig = CloudReadonlyProviderService::prepareGoogleConfig($submittedConfig);
+        }
+
         $allowedStatuses = ['aktiv', 'inaktiv'];
         $status = sanitize_key(wp_unslash($_POST['status'] ?? 'inaktiv'));
         $status = in_array($status, $allowedStatuses, true) ? $status : 'inaktiv';
@@ -147,6 +155,134 @@ final class CloudConnectorPlugin
 
         CloudLogger::log('info', $logAction, $message, ['connection_id' => $id, 'provider_slug' => sanitize_key(wp_unslash($_POST['provider_slug'] ?? ''))]);
         CloudAdmin::redirectWithNotice('connections', $connectionId > 0 ? 'connection_updated' : 'connection_created');
+    }
+
+    public static function startGoogleReadonlyOauth(): void
+    {
+        CloudAdmin::assertAdminAction('cc_google_readonly_oauth_start');
+
+        if (!CloudStorage::schemaReady()) {
+            CloudAdmin::redirectWithNotice('connections', 'schema_incomplete', true);
+        }
+
+        $connection = CloudStorage::getConnection(absint($_POST['id'] ?? 0));
+
+        if (!$connection) {
+            CloudAdmin::redirectWithNotice('connections', 'connection_missing', true);
+        }
+
+        $state = self::generateOauthState();
+        set_transient(
+            self::oauthStateKey($state),
+            [
+                'connection_id' => (int) $connection['id'],
+                'user_id' => get_current_user_id(),
+            ],
+            self::GOOGLE_OAUTH_STATE_TTL
+        );
+
+        $url = CloudReadonlyProviderService::buildGoogleOauthStartUrl($connection, $state);
+
+        if (is_wp_error($url)) {
+            delete_transient(self::oauthStateKey($state));
+            CloudLogger::log(
+                'error',
+                'oauth_failed',
+                'Google Readonly OAuth konnte nicht gestartet werden.',
+                [
+                    'connection_id' => (int) $connection['id'],
+                    'provider_slug' => (string) $connection['provider_slug'],
+                    'error_code' => $url->get_error_code(),
+                ]
+            );
+            CloudAdmin::redirectWithNotice('connections', 'oauth_missing_requirements', true);
+        }
+
+        $config = CloudReadonlyProviderService::prepareGoogleConfig(CloudCrypto::decryptConfig((string) $connection['config_encrypted']));
+        CloudStorage::saveConnection([
+            'id' => (int) $connection['id'],
+            'provider_slug' => $connection['provider_slug'],
+            'name' => $connection['name'],
+            'status' => $connection['status'],
+            'safe_mode' => (int) $connection['safe_mode'],
+            'last_connected_at' => $connection['last_connected_at'],
+            'last_error' => '',
+            'config' => $config,
+        ]);
+
+        CloudLogger::log(
+            'info',
+            'oauth_started',
+            'Google Readonly OAuth wurde gestartet.',
+            ['connection_id' => (int) $connection['id'], 'provider_slug' => (string) $connection['provider_slug']]
+        );
+
+        wp_redirect($url);
+        exit;
+    }
+
+    public static function handleGoogleReadonlyOauthCallback(): void
+    {
+        if (!current_user_can('manage_options')) {
+            wp_die('Keine Berechtigung.');
+        }
+
+        if (!CloudStorage::schemaReady()) {
+            CloudAdmin::redirectWithNotice('connections', 'schema_incomplete', true);
+        }
+
+        $state = sanitize_text_field(wp_unslash($_GET['state'] ?? ''));
+        $code = sanitize_text_field(wp_unslash($_GET['code'] ?? ''));
+        $storedState = is_string($state) ? get_transient(self::oauthStateKey($state)) : false;
+
+        if (!is_array($storedState) || empty($storedState['connection_id']) || (int) ($storedState['user_id'] ?? 0) !== get_current_user_id()) {
+            CloudLogger::log('error', 'oauth_failed', 'Google Readonly OAuth-Callback mit ungueltigem State abgewiesen.');
+            CloudAdmin::redirectWithNotice('connections', 'oauth_invalid_state', true);
+        }
+
+        delete_transient(self::oauthStateKey($state));
+        $connection = CloudStorage::getConnection((int) $storedState['connection_id']);
+
+        if (!$connection) {
+            CloudLogger::log('error', 'oauth_failed', 'Google Readonly OAuth-Callback verweist auf eine fehlende Verbindung.', ['connection_id' => (int) $storedState['connection_id']]);
+            CloudAdmin::redirectWithNotice('connections', 'connection_missing', true);
+        }
+
+        $config = CloudReadonlyProviderService::exchangeGoogleAuthorizationCode($connection, $code);
+
+        if (is_wp_error($config)) {
+            CloudLogger::log(
+                'error',
+                'oauth_failed',
+                'Google Readonly OAuth-Callback fehlgeschlagen.',
+                [
+                    'connection_id' => (int) $connection['id'],
+                    'provider_slug' => (string) $connection['provider_slug'],
+                    'error_code' => $config->get_error_code(),
+                ]
+            );
+            CloudAdmin::redirectWithNotice('connections', 'oauth_failed', true);
+        }
+
+        CloudStorage::saveConnection([
+            'id' => (int) $connection['id'],
+            'provider_slug' => $connection['provider_slug'],
+            'name' => $connection['name'],
+            'status' => 'aktiv',
+            'safe_mode' => 1,
+            'last_connected_at' => $connection['last_connected_at'],
+            'last_error' => '',
+            'config' => $config,
+        ]);
+
+        CloudLogger::log(
+            'info',
+            'oauth_completed',
+            'Google Readonly OAuth erfolgreich abgeschlossen.',
+            ['connection_id' => (int) $connection['id'], 'provider_slug' => (string) $connection['provider_slug']]
+        );
+
+        CloudAdmin::redirectWithNotice('connections', 'oauth_completed');
     }
 
     public static function deleteConnection(): void
@@ -422,5 +558,21 @@ final class CloudConnectorPlugin
     private static function storeAdminNotice(string $message): void
     {
         update_option(self::NOTICE_OPTION, sanitize_text_field($message), false);
+    }
+
+    private static function generateOauthState(): string
+    {
+        try {
+            return bin2hex(random_bytes(32));
+        } catch (Throwable $exception) {
+            unset($exception);
+
+            return wp_generate_password(64, false, false);
+        }
+    }
+
+    private static function oauthStateKey(string $state): string
+    {
+        return self::GOOGLE_OAUTH_STATE_PREFIX . hash('sha256', $state);
     }
 }

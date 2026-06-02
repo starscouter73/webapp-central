@@ -144,6 +144,10 @@ final class CloudAdmin
             'connection_created' => 'Verbindung vorbereitet gespeichert.',
             'connection_deleted' => 'Verbindung geloescht.',
             'connection_updated' => 'Verbindung aktualisiert.',
+            'oauth_completed' => 'Google Readonly OAuth erfolgreich abgeschlossen. Die Verbindung ist jetzt fuer readonly Live vorbereitet.',
+            'oauth_failed' => 'Google Readonly OAuth ist fehlgeschlagen.',
+            'oauth_invalid_state' => 'Google Readonly OAuth wurde wegen ungueltigem State oder abgelaufener Sitzung abgebrochen.',
+            'oauth_missing_requirements' => 'Google Readonly OAuth kann nur mit Google Drive sowie vorhandener Client ID und Client Secret gestartet werden.',
             'connection_disabled' => 'Verbindung deaktiviert.',
             'connection_test_mode_set' => 'Verbindung auf Safe-Mode gesetzt.',
             'readonly_connection_tested' => 'Readonly-Verbindung erfolgreich getestet. Es wurden nur bis zu 5 Metadaten-Eintraege gelesen.',
@@ -228,6 +232,9 @@ final class CloudAdmin
             $rowConfig = CloudCrypto::decryptConfig((string) $connection['config_encrypted']);
             $editUrl = esc_url(add_query_arg(['page' => self::MENU_SLUG, 'tab' => 'connections', 'edit_connection' => (int) $connection['id']], admin_url('admin.php')));
             $hasToken = !empty($rowConfig['access_token']) || !empty($rowConfig['refresh_token']);
+            $isGoogleDrive = (string) $connection['provider_slug'] === 'google_drive';
+            $hasReadonlyCredentials = self::hasGoogleReadonlyCredentials($rowConfig);
+            $isReadonlyConnected = $hasToken && self::getConnectionMode($connection, $rowConfig) === 'readonly_live' && (string) $connection['status'] === 'aktiv';
 
             echo '<tr>';
             echo '<td>' . esc_html((string) $connection['id']) . '</td>';
@@ -244,10 +251,18 @@ final class CloudAdmin
             echo '<td>' . esc_html((string) ($connection['updated_at'] ?: '-')) . '</td>';
             echo '<td>';
             echo '<a class="button button-secondary" href="' . $editUrl . '">Bearbeiten</a> ';
-            if ((string) $connection['provider_slug'] === 'google_drive' && self::getConnectionMode($connection, $rowConfig) === 'readonly_live') {
-                self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'test_readonly_connection'], 'Readonly-Verbindung testen');
-                echo ' ';
+            if ($isGoogleDrive && $hasReadonlyCredentials && !$isReadonlyConnected) {
+                self::inlinePostButton('admin-post.php?action=cc_google_readonly_oauth_start', 'cc_google_readonly_oauth_start', ['id' => (int) $connection['id']], 'Google Readonly verbinden');
+                echo '<span style="display:block;margin-top:6px;color:#50575e;">Nur Metadatenzugriff. Keine Dateioperationen.</span>';
+            } elseif ($isGoogleDrive && $isReadonlyConnected) {
+                echo self::renderInfoBadge('readonly verbunden');
+                echo '<span style="display:block;margin-top:6px;color:#50575e;">Nur Metadatenzugriff. Keine Dateioperationen.</span>';
             }
+            if ($isGoogleDrive && self::getConnectionMode($connection, $rowConfig) === 'readonly_live') {
+                echo ' ';
+                self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'test_readonly_connection'], 'Readonly-Verbindung testen');
+            }
+            echo ' ';
             self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'set_test_mode'], 'Safe-Mode');
             echo ' ';
             self::inlinePostButton('admin-post.php?action=cc_connection_action', 'cc_connection_action', ['id' => (int) $connection['id'], 'connection_action' => 'deactivate'], 'Deaktivieren');
@@ -1135,6 +1150,7 @@ final class CloudAdmin
             'vorbereitet' => ['#dbeafe', '#1d4ed8'],
             'geplant' => ['#fef3c7', '#92400e'],
             'kein OAuth erforderlich' => ['#dcfce7', '#166534'],
+            'readonly verbunden' => ['#dcfce7', '#166534'],
         ];
 
         [$background, $color] = $styles[$label] ?? ['#f3f4f6', '#111827'];
@@ -1201,7 +1217,7 @@ final class CloudAdmin
 
     private static function getProviderGuides(): array
     {
-        $redirectUri = 'https://www.webapp-central.de/wp-admin/admin.php?page=cloud_connector';
+        $redirectUri = CloudReadonlyProviderService::getGoogleReadonlyRedirectUri();
 
         return [
             'google_drive' => [
@@ -1265,6 +1281,11 @@ final class CloudAdmin
                 'docs_note' => 'Kein externer Provider-Handshake erforderlich.',
             ],
         ];
+    }
+
+    private static function hasGoogleReadonlyCredentials(array $config): bool
+    {
+        return !empty($config['client_id']) && !empty($config['client_secret']);
     }
 
     private static function providerGuideToExplorerStatus(string $providerSlug): string
