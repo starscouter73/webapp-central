@@ -20,7 +20,7 @@ docs/        Projektbezogene Betriebs- und Arbeitsreferenzen
 .github/     GitHub Actions
 ```
 
-Unter `docs/` liegen ergänzende Referenzen für Entwicklung und Betrieb, darunter die Linux-Mint-Terminalreferenz.
+Unter `docs/` liegen ergänzende Referenzen für Entwicklung und Betrieb, darunter die Linux-Mint-Terminalreferenz unter `docs/linux-mint-terminal-reference.md`.
 
 ## Benutzerbereich (Basis)
 
