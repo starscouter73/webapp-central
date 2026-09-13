@@ -16,8 +16,11 @@
 public/      Webroot mit Seiten und Assets
 src/         Layout, Hilfsfunktionen, Seitendaten
 docker/      bestehende Server-/Container-Konfiguration
+docs/        Projektbezogene Betriebs- und Arbeitsreferenzen
 .github/     GitHub Actions
 ```
+
+Unter `docs/` liegen ergänzende Referenzen für Entwicklung und Betrieb, darunter die [Linux-Mint-Terminalreferenz](docs/linux-mint-terminal-reference.md).
 
 ## Benutzerbereich (Basis)
 
