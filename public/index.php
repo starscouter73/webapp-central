@@ -146,40 +146,6 @@ render_page(app_site_title(), 'Startseite', static function (): void {
       </article>
     </section>
 
-    <section class="grid split cloud-status-section" id="cloud-connector-status">
-      <article class="card cloud-status-panel">
-        <span class="card-label">Cloud Connector</span>
-        <h3>Safe-Mode Cloud-/Sync-System als sichtbarer Live-Baustein</h3>
-        <p>Der aktuelle Gesamtstand bleibt auf der oeffentlichen Seite als kompakte Statuskachel sichtbar, ohne als Overlay oder Admin-Komponente aufzutreten.</p>
-        <div class="cloud-status-badges">
-          <span class="cloud-status-badge is-safe">Safe-Mode</span>
-          <span class="cloud-status-badge is-runtime">Runtime validiert</span>
-          <span class="cloud-status-badge is-draft">Draft-PRs</span>
-        </div>
-        <p class="cloud-status-note">Alle Datei- und Cloud-Aktionen bleiben aktuell im Safe-Mode oder Readonly-Modus. Keine produktiven Uploads, Downloads, Moves oder Deletes aktiv.</p>
-        <div class="button-row">
-          <a class="btn btn-secondary" href="<?= app_h(app_url('workspace.php')) ?>">Cloud Connector ansehen</a>
-        </div>
-      </article>
-      <aside class="card cloud-status-card">
-        <span class="card-label">Live validiert / Safe-Mode aktiv</span>
-        <strong>Cloud Connector</strong>
-        <p class="cloud-status-subline">Safe-Mode Cloud-/Sync-System</p>
-        <ul class="cloud-status-list">
-          <li><span class="cloud-check" aria-hidden="true">&#10003;</span> Safe-Mode-Core</li>
-          <li><span class="cloud-check" aria-hidden="true">&#10003;</span> Provider-UI</li>
-          <li><span class="cloud-check" aria-hidden="true">&#10003;</span> Explorer</li>
-          <li><span class="cloud-check" aria-hidden="true">&#10003;</span> Sync Preview</li>
-          <li><span class="cloud-check" aria-hidden="true">&#10003;</span> Drag &amp; Drop</li>
-          <li><span class="cloud-check" aria-hidden="true">&#10003;</span> Readonly-Live vorbereitet</li>
-          <li><span class="cloud-check" aria-hidden="true">&#10003;</span> Netzwerk-/Transfermap</li>
-          <li><span class="cloud-check" aria-hidden="true">&#10003;</span> Architekturuebersicht</li>
-          <li><span class="cloud-check" aria-hidden="true">&#10003;</span> Runtime-Tests</li>
-          <li><span class="cloud-check" aria-hidden="true">&#10003;</span> Deploy-Checklist</li>
-        </ul>
-      </aside>
-    </section>
-
     <section class="grid three-up" id="kategorien">
       <?php foreach ($overviewCategories as $category): ?>
         <article class="card category-card">
